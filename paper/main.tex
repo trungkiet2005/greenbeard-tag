@@ -72,61 +72,27 @@
 
 \begin{abstract}
 \noindent
-Agents in a machine economy increasingly carry an identity: a provenance
-attestation, a certification mark, or simply a recognisable house style. Such a
-mark is a \emph{greenbeard} in the classical sense, a signal that lets its
-bearers treat one another differently from everyone else, with the classical
-vulnerability that it can be worn by an impostor. We make the mark a strategic
-variable in the reduced four-strategy AI race of Fern\'andez Domingos and Han,
-which we use unmodified so that every effect we report belongs to the identity
-layer. A design is a triple: a badge that is genuine, forged or absent, the
-conduct it runs towards partners whose badge passes its check, and the conduct
-it runs towards everyone else. A forged badge passes with probability $\sigma$,
-so $1 - \sigma$ is the detection power of the verification technology.
-Eight results follow. First, identity matters exactly where liability does not:
-below the reciprocity threshold $L_R = 0.551$ of this race, no unbadged
-population can hold safe play at all, because retaliation in kind cannot claw
-back a stolen opening move before the horizon. Second, a certified club that
-merely reciprocates inside its membership tolerates more than twice the forgery
-of a club that trusts unconditionally, $\sigma^{*} = 0.866$ against $0.400$:
-in-group conduct is not a matter of goodwill but of how much impersonation the
-mark can survive. Third, fines cannot substitute for detection. The protective
-fine diverges as $\sigma \to 1$, rising from $11.9$ at $\sigma = 0.90$ to
-$428.6$ at $\sigma = 0.99$, which is the Becker trade-off with the detection
-probability set by cryptography rather than by policing effort. Fourth, no
-badge nucleates a club on its own: at zero assortment a genuine badge is a pure
-cost, and clubs require $r > r^{*} = 0.063$ whatever the verification quality.
-Fifth, collapse is graceful in the wrong way. The behavioural mimic invades at
-$\sigma_m = 0.938$, below the exploiter's threshold, so attestation is hollowed
-out while conduct still looks fine: at $\sigma = 0.97$ forgers hold $55\%$ of
-the population and behave impeccably, the unsafe frequency has if anything
-improved to $0.058$, and the posterior that a passed badge is genuine has
-fallen to $0.05$. Worse, clustering makes this the only failure mode left. It
-raises the exploiter's threshold from $0.866$ to $1$ by $r = 0.134$ and moves
-the mimic's by $0.001$, so the instrument that makes clubs possible also
-concentrates all residual risk in the failure that conduct monitoring cannot
-see. Sixth, trust does not rebuild: at zero assortment
-a collapsed population admits no re-entry at any verification quality.
-Seventh, provider-scoped marks make the ecosystem unsafe frequency exactly
-$1 - \mathrm{HHI}$, so a fragmented market is an unsafe one unless marks are
-federated, and the
-exclusion rent falls from $30.4$ under a monopoly to $2.5$ across eight
-providers. Eighth, and the reason the first seven do not add up to an
-endorsement: what certification buys a settled market is an entry barrier, not
-safety. The replicator flow is bistable with no badge-mixed attractor, all
-$200$ interior starts reaching a regime that is either entirely badged ($44\%$)
-or entirely unbadged, and both are internally safe. The certified regime is
-therefore poorer than the uncertified one by exactly its dues, $57.0$ against
-$59.0$; certification lowers harm only in the small-mutation reading, where it
-protects a safe market from being knocked out of safety rather than making a
-settled one safer. The exclusion is paid at the boundary: a compliant unbadged
-outsider playing the club's own conduct earns $26.64$ against a member's
-$57.00$, a toll of $30.36$ for no conduct-related reason. A club charging no
-toll has spoof threshold zero and never survives, and fining forgery restores
-its threshold to $0.923$ but leaves its share below $0.032$. The exclusion is
-not a side effect of the mark; it is what holds the mark up. What the fine does
-buy is a meaningful credential, raising attestation integrity from $0.16$ to
-$0.98$, which is the instrument we end up recommending alongside federation.
+A greenbeard is a signal that lets its bearers treat one another differently
+from everyone else, and its classical vulnerability is that an impostor can wear
+it. Machine agents are beginning to carry exactly such signals: provenance
+attestations and certification marks, cheap to check and possible to forge. We
+make the mark a strategic variable in a reduced four-strategy model of a
+competitive development race, holding the underlying game fixed so that every
+effect belongs to the identity layer. A design is a triple: a badge that is
+genuine, forged or absent, the conduct it runs towards partners whose badge
+passes verification, and the conduct it runs towards everyone else. A forged
+badge passes with probability $\sigma$. Identity matters exactly where
+deterrence fails: below a reciprocity threshold no unbadged population sustains
+safe play. A club that merely reciprocates within its membership tolerates more
+than twice the forgery of one that trusts its members unconditionally, so
+in-group conduct, not goodwill, sets how much impersonation a mark survives.
+Fines cannot substitute for detection, because the protective fine diverges as
+forgery becomes undetectable. Collapse is graceful in the wrong way: a mimic
+that forges the badge and behaves well invades before the exploiter does,
+hollowing out the credential while conduct still looks sound, and assortment
+leaves this as the only failure mode. The flow is bistable with no badge-mixed
+attractor, so certification buys robustness rather than a lower level of harm,
+and what holds it up is the rent it charges outsiders.
 \end{abstract}
 
 \noindent\textbf{Keywords:} evolutionary game theory; tag-based cooperation;
