@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "gbtag: agent identity as a forgeable greenbeard in an evolutionary AI race"
+abstract: >-
+  Evolutionary dynamics of badge-conditioned trust in a reduced AI race.
+  A seat carries an identity badge that is verifiable but forgeable and
+  conditions its conduct on the badge its opponent presents.
+authors:
+  - family-names: One
+    given-names: Author
+version: 1.0.0
+date-released: 2026-08-19
+license: MIT
+type: software
+keywords:
+  - evolutionary game theory
+  - tag-based cooperation
+  - greenbeard
+  - agent identity
+  - attestation
+  - AI safety

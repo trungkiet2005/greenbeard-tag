@@ -1,0 +1,1021 @@
+"""Closed-form results and the structural quantities of the identity model.
+
+Four quantities organise everything.
+
+``L_R``
+    the *reciprocity threshold* of the race: the liability below which a
+    first-strike design profitably exploits the safe opening move of a
+    conditional cooperator.  Below it the uncertified world cannot hold any
+    safe population, however the designs reciprocate, because retaliation
+    in kind cannot claw back a stolen first-move lead before the horizon.
+
+``sigma*``
+    the *spoof threshold* of a club: the spoof success probability above
+    which a forged badge invades a monomorphic certified club.
+
+``r*``
+    the *nucleation threshold*: the assortment below which no certified
+    club can invade the anarchic equilibrium of the uncertified world, at
+    any verification quality whatsoever.
+
+``sigma_m``
+    the *mimicry threshold*: the spoof success above which a behaviourally
+    identical forger displaces the genuine club, hollowing out the
+    attestation while leaving conduct intact.
+
+Everything below is computed from the exact matrices of
+:mod:`gbtag.functionals`; nothing is estimated by simulation.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, replace
+
+import numpy as np
+
+from .dynamics import (
+    replicator_attractors,
+    replicator_mutator_equilibrium,
+    stationary_analysis_sml,
+)
+from .functionals import (
+    IdentityFunctionals,
+    aggregate_unsafe_frequency,
+    attestation_integrity,
+    mark_lift,
+    mean_social_payoff,
+    unsafe_split,
+)
+from .identity import IdentityParams, encounter_terms
+from .race import STRATEGIES, RaceTables
+
+_IDX = {s: i for i, s in enumerate(STRATEGIES)}
+
+
+# --------------------------------------------------------------------------
+# race-level primitives
+# --------------------------------------------------------------------------
+
+
+def race_private(tables: RaceTables, liability: float) -> np.ndarray:
+    """``P = A - L M``: the private race payoff at liability ``L``."""
+    return tables.payoff - liability * tables.unsafe_count
+
+
+def pair_payoff(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    focal: tuple[str, str, str],
+    partner: tuple[str, str, str],
+) -> float:
+    """Exact expected private payoff of ``focal`` against ``partner``.
+
+    The four-term handshake expectation of ``A - L M``, minus the focal
+    badge cost and expected fine.  This is the scalar the propositions
+    manipulate; it agrees entry by entry with the matrices of
+    :func:`gbtag.functionals.build_functionals`.
+    """
+    p = race_private(tables, liability)
+    value = sum(
+        w * p[_IDX[s_f], _IDX[s_p]]
+        for w, s_f, s_p in encounter_terms(focal, partner, params)
+    )
+    return float(
+        value - params.badge_cost(focal[0]) - params.expected_fine(focal[0])
+    )
+
+
+def fitness_against_resident(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    mutant: tuple[str, str, str],
+    resident: tuple[str, str, str],
+) -> float:
+    """Fitness of a rare mutant in a monomorphic resident population.
+
+    With assortment ``r`` the mutant meets its own design with probability
+    ``r`` and the resident otherwise; the resident meets the resident either
+    way.
+    """
+    own = pair_payoff(tables, params, liability, mutant, mutant)
+    cross = pair_payoff(tables, params, liability, mutant, resident)
+    return params.r * own + (1.0 - params.r) * cross
+
+
+def invades(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    mutant: tuple[str, str, str],
+    resident: tuple[str, str, str],
+    tol: float = 1e-9,
+) -> bool:
+    """Whether a rare ``mutant`` has a selective advantage in ``resident``."""
+    mutant_fitness = fitness_against_resident(tables, params, liability, mutant, resident)
+    resident_fitness = pair_payoff(tables, params, liability, resident, resident)
+    return bool(mutant_fitness > resident_fitness + tol)
+
+
+# --------------------------------------------------------------------------
+# Proposition 1: the reciprocity threshold of the race
+# --------------------------------------------------------------------------
+
+
+def reciprocity_threshold(tables: RaceTables) -> float:
+    r"""Liability below which the first-striker exploits the reciprocator.
+
+    ``CAS`` against a ``CS`` resident steals the opening round, converts the
+    half-step lead into the prize, and is punished only in kind, so its
+    advantage is affine in the liability and vanishes at
+
+    .. math:: L_R = \frac{A(\mathrm{CAS}, \mathrm{CS}) - A(\mathrm{CS},
+        \mathrm{CS})}{M(\mathrm{CAS}, \mathrm{CS}) - M(\mathrm{CS},
+        \mathrm{CS})} .
+
+    ``CS`` is the best unbadged safe resident (the corresponding threshold
+    for an ``AS`` resident is two orders of magnitude larger), so below
+    ``L_R`` *no* unbadged design holds a safe population:
+    :func:`uncertified_safety_is_impossible` checks the full statement.
+    """
+    a = tables.payoff
+    m = tables.unsafe_count
+    i, j = _IDX["CAS"], _IDX["CS"]
+    return float((a[i, j] - a[j, j]) / (m[i, j] - m[j, j]))
+
+
+def first_strike_threshold(tables: RaceTables, resident: str) -> float | None:
+    """Liability at which ``CAS`` stops invading a safe unbadged resident."""
+    a = tables.payoff
+    m = tables.unsafe_count
+    i, j = _IDX["CAS"], _IDX[resident]
+    gain_m = m[i, j] - m[j, j]
+    if abs(gain_m) < 1e-12:
+        return None
+    return float((a[i, j] - a[j, j]) / gain_m)
+
+
+def uncertified_safety_is_impossible(
+    tables: RaceTables, liability: float, tol: float = 1e-9
+) -> bool:
+    """Below ``L_R``, every safe unbadged population is invadable.
+
+    A safe unbadged resident plays a safe design in self-play, so its
+    ``s_out`` is ``AS`` or ``CS`` (badges are absent, every check fails, and
+    only ``s_out`` is ever executed).  The statement is that the plain
+    first-striker ``(N, CAS, CAS)`` invades every such resident.
+    """
+    params = IdentityParams(sigma=0.0, kappa_g=0.0, kappa_f=0.0, rho=0.0, r=0.0)
+    striker = ("N", "CAS", "CAS")
+    for s_in in STRATEGIES:
+        for s_out in ("AS", "CS"):
+            resident = ("N", s_in, s_out)
+            if not invades(tables, params, liability, striker, resident, tol):
+                return False
+    return True
+
+
+# --------------------------------------------------------------------------
+# Proposition 2: the spoof threshold of a certified club
+# --------------------------------------------------------------------------
+
+
+def spoof_threshold(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    club: tuple[str, str, str],
+    forger: tuple[str, str, str],
+) -> float | None:
+    """Spoof success above which ``forger`` invades a monomorphic ``club``.
+
+    The forger's fitness in the club is affine in ``sigma`` whenever the
+    forger is unconditional (``s_in == s_out``) and quadratic otherwise
+    (its assorted self-play mixes two independent checks).  Both cases are
+    solved exactly; the returned value is the smallest root in ``[0, 1]``
+    above which the invasion condition holds, ``None`` if the forger
+    invades nowhere in ``[0, 1]``, and ``0.0`` if it invades everywhere.
+    """
+    return _threshold_by_root(
+        lambda sigma: fitness_against_resident(
+            tables, replace(params, sigma=sigma), liability, forger, club
+        )
+        - pair_payoff(
+            tables, replace(params, sigma=sigma), liability, club, club
+        ),
+        increasing=True,
+    )
+
+
+def spoof_threshold_closed_form(
+    tables: RaceTables,
+    liability: float,
+    club_in: str,
+    club_out: str,
+    exploit: str,
+    kappa_g: float,
+    kappa_f: float,
+    rho: float,
+) -> float | None:
+    r"""The well-mixed spoof threshold in closed form.
+
+    For an unconditional forger ``(F, w, w)`` against a club ``(G, u, v)``
+    at ``r = 0`` the invasion condition is affine in ``sigma`` and the
+    threshold is
+
+    .. math:: \sigma^{*} = \frac{P(u,u) - P(w,v) - \kappa_g + \kappa_f +
+        \rho}{P(w,u) - P(w,v) + \rho} ,
+
+    where ``P = A - L M``.  ``None`` when the denominator vanishes.
+    """
+    p = race_private(tables, liability)
+    u, v, w = _IDX[club_in], _IDX[club_out], _IDX[exploit]
+    denominator = p[w, u] - p[w, v] + rho
+    if abs(denominator) < 1e-12:
+        return None
+    sigma = (p[u, u] - p[w, v] - kappa_g + kappa_f + rho) / denominator
+    return float(sigma)
+
+
+def _threshold_by_root(
+    advantage,
+    increasing: bool,
+    lo: float = 0.0,
+    hi: float = 1.0,
+    grid: int = 2001,
+) -> float | None:
+    """Smallest ``sigma`` in ``[lo, hi]`` at which ``advantage`` crosses zero.
+
+    The advantage functions of this model are polynomials of degree at most
+    two in ``sigma``, so a fine grid plus bisection recovers the crossing to
+    machine precision.  Returns ``None`` if the advantage never becomes
+    positive on the interval, ``lo`` if it is positive everywhere.
+    """
+    xs = np.linspace(lo, hi, grid)
+    values = np.array([advantage(x) for x in xs])
+    positive = values > 0.0
+    if not positive.any():
+        return None
+    if positive.all():
+        return float(lo)
+    k = int(np.argmax(positive)) if increasing else int(np.argmax(~positive))
+    if increasing:
+        if k == 0:
+            return float(lo)
+        a, b = xs[k - 1], xs[k]
+    else:
+        a, b = xs[k - 1], xs[k]
+    for _ in range(80):
+        mid = 0.5 * (a + b)
+        if (advantage(mid) > 0.0) == increasing:
+            b = mid
+        else:
+            a = mid
+    return float(0.5 * (a + b))
+
+
+# --------------------------------------------------------------------------
+# Proposition 3: fines, dues, and the Becker limit
+# --------------------------------------------------------------------------
+
+
+def required_fine(
+    tables: RaceTables,
+    liability: float,
+    sigma: float,
+    club_in: str,
+    club_out: str,
+    exploit: str,
+    kappa_g: float,
+    kappa_f: float,
+) -> float:
+    r"""Smallest fine that keeps the unconditional forger out, well-mixed.
+
+    Setting the invasion advantage to zero and solving for ``rho``:
+
+    .. math:: \rho^{*}(\sigma) = \frac{\sigma\,[P(w,u) - P(w,v)] -
+        [P(u,u) - P(w,v)] + \kappa_g - \kappa_f}{1 - \sigma} ,
+
+    which diverges as ``sigma`` approaches one whenever exploiting the club
+    at full pass beats club membership: no finite fine substitutes for
+    detection in the spoof-proof limit.  Negative values mean no fine is
+    needed at this ``sigma``; ``inf`` is returned at ``sigma = 1`` when the
+    exploit pays.
+    """
+    p = race_private(tables, liability)
+    u, v, w = _IDX[club_in], _IDX[club_out], _IDX[exploit]
+    numerator = sigma * (p[w, u] - p[w, v]) - (p[u, u] - p[w, v]) + kappa_g - kappa_f
+    if sigma >= 1.0:
+        exploit_pays = p[w, u] - kappa_f > p[u, u] - kappa_g
+        return float("inf") if exploit_pays else 0.0
+    return float(numerator / (1.0 - sigma))
+
+
+def dues_gradient(
+    tables: RaceTables,
+    liability: float,
+    club_in: str,
+    club_out: str,
+    exploit: str,
+    rho: float,
+) -> float:
+    r"""``d sigma* / d kappa_g``: what one unit of dues costs in tolerance.
+
+    From the closed form, ``-1 / [P(w,u) - P(w,v) + \rho]``: every unit of
+    certification cost lowers the spoof threshold of the club, because dues
+    burden the genuine member and never the forger.
+    """
+    p = race_private(tables, liability)
+    u, v, w = _IDX[club_in], _IDX[club_out], _IDX[exploit]
+    return float(-1.0 / (p[w, u] - p[w, v] + rho))
+
+
+# --------------------------------------------------------------------------
+# Propositions 4 and 5: nucleation, and the futility of the badge alone
+# --------------------------------------------------------------------------
+
+
+def nucleation_threshold(
+    tables: RaceTables,
+    liability: float,
+    club_in: str,
+    club_out: str,
+    resident: str,
+    kappa_g: float,
+) -> float:
+    r"""Assortment below which the club cannot invade the anarchic resident.
+
+    Against an unconditional unbadged resident ``(N, w, w)`` a club mutant
+    earns its dues back only in its assorted self-encounters, so it invades
+    exactly when
+
+    .. math:: r > r^{*} = \frac{P(w,w) - P(v,w) + \kappa_g}
+        {P(u,u) - P(v,w)} .
+    """
+    p = race_private(tables, liability)
+    u, v, w = _IDX[club_in], _IDX[club_out], _IDX[resident]
+    return float((p[w, w] - p[v, w] + kappa_g) / (p[u, u] - p[v, w]))
+
+
+def badge_is_futile_against_nonconditioners(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    tol: float = 1e-9,
+) -> bool:
+    """A genuine badge is a pure cost against non-conditioning residents.
+
+    For every resident with ``s_in == s_out`` and every conduct pair, the
+    badged design earns exactly the unbadged twin's payoff minus the dues,
+    at every ``sigma``.  Consequently, at ``r = 0`` and ``kappa_g > 0`` no
+    certified design can invade any unconditional resident that its
+    unbadged twin could not already invade: verification quality is
+    irrelevant to nucleation.
+    """
+    wm = replace(params, r=0.0)
+    for s_in in STRATEGIES:
+        for s_out in STRATEGIES:
+            for w in STRATEGIES:
+                resident = ("N", w, w)
+                badged = pair_payoff(tables, wm, liability, ("G", s_in, s_out), resident)
+                plain = pair_payoff(tables, wm, liability, ("N", s_in, s_out), resident)
+                if abs(badged - (plain - wm.kappa_g)) > tol:
+                    return False
+    return True
+
+
+# --------------------------------------------------------------------------
+# Proposition 6: mimicry and the two collapse modes
+# --------------------------------------------------------------------------
+
+
+def mimic_threshold_closed_form(
+    tables: RaceTables,
+    liability: float,
+    club_in: str,
+    club_out: str,
+    kappa_g: float,
+    kappa_f: float,
+    rho: float,
+) -> float:
+    r"""Spoof success above which the behavioural mimic displaces the club.
+
+    The mimic ``(F, u, v)`` plays exactly the club's conduct; its only
+    difference is the forged badge.  Well-mixed, it invades when the dues
+    saved exceed the expected cost of failing checks:
+
+    .. math:: \sigma_m = 1 - \frac{\kappa_g - \kappa_f}
+        {P(u,u) - P(u,v) + \rho} .
+
+    Above ``sigma_m`` the club is displaced by forgers with identical
+    conduct: the population still behaves, but a passed badge no longer
+    certifies provenance.  Attestation collapses before safety does.
+    """
+    p = race_private(tables, liability)
+    u, v = _IDX[club_in], _IDX[club_out]
+    return float(1.0 - (kappa_g - kappa_f) / (p[u, u] - p[u, v] + rho))
+
+
+def invader_ordering_flip(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    club: tuple[str, str, str],
+    exploiter: tuple[str, str, str],
+    mimic: tuple[str, str, str],
+    r_hi: float = 0.5,
+    iterations: int = 60,
+) -> float | None:
+    """Assortment at which the mimic overtakes the exploiter as first invader.
+
+    Assortment penalises the exploiter and not the mimic, because a mimic
+    plays the club's own conduct in its self-encounters while an exploiter
+    plays its aggressive conduct against itself.  The exploiter's threshold
+    therefore climbs steeply in ``r`` and the mimic's is nearly flat, and
+    they cross.  Below the crossing the club fails visibly, by being
+    exploited; above it the club fails invisibly, by being impersonated.
+
+    Returns the crossing assortment, or ``None`` if the mimic is never the
+    first invader on ``[0, r_hi]``.
+    """
+
+    def order(r: float) -> bool:
+        """Whether the mimic threshold is the lower of the two at ``r``."""
+        p = replace(params, r=r)
+        s_e = spoof_threshold(tables, p, liability, club, exploiter)
+        s_m = spoof_threshold(tables, p, liability, club, mimic)
+        if s_m is None:
+            return False
+        if s_e is None:
+            return True  # the exploiter cannot invade at all, so the mimic leads
+        return s_m < s_e
+
+    if order(0.0):
+        return 0.0
+    if not order(r_hi):
+        return None
+    lo, hi = 0.0, r_hi
+    for _ in range(iterations):
+        mid = 0.5 * (lo + hi)
+        if order(mid):
+            hi = mid
+        else:
+            lo = mid
+    return float(0.5 * (lo + hi))
+
+
+def exploiter_immunity(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    club: tuple[str, str, str],
+    exploiter: tuple[str, str, str],
+    r_hi: float = 0.5,
+    iterations: int = 60,
+) -> float | None:
+    """Assortment above which the exploiter cannot invade at any ``sigma``.
+
+    Beyond this level of clustering the club is immune to behavioural
+    exploitation even by a forgery that always passes, and the only invasion
+    route left is impersonation by a design that behaves.
+    """
+
+    def invadable(r: float) -> bool:
+        p = replace(params, r=r)
+        return spoof_threshold(tables, p, liability, club, exploiter) is not None
+
+    if not invadable(0.0):
+        return 0.0
+    if invadable(r_hi):
+        return None
+    lo, hi = 0.0, r_hi
+    for _ in range(iterations):
+        mid = 0.5 * (lo + hi)
+        if invadable(mid):
+            lo = mid
+        else:
+            hi = mid
+    return float(0.5 * (lo + hi))
+
+
+def reentry_threshold(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    club: tuple[str, str, str],
+    resident: tuple[str, str, str],
+) -> float | None:
+    """Smallest sigma at which the club re-invades a collapsed resident.
+
+    ``None`` when the club cannot re-enter at any verification quality --
+    the generic case at ``r = 0``, which is the hysteresis result: the
+    conditions for keeping a certified club are strictly weaker than the
+    conditions for rebuilding one.
+    """
+    return _threshold_by_root(
+        lambda sigma: fitness_against_resident(
+            tables, replace(params, sigma=sigma), liability, club, resident
+        )
+        - pair_payoff(
+            tables, replace(params, sigma=sigma), liability, resident, resident
+        ),
+        increasing=False,
+    )
+
+
+# --------------------------------------------------------------------------
+# Proposition 7: providers, concentration, and federation
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ProviderFrontier:
+    """The symmetric ``K``-provider world under provider-scoped marks."""
+
+    n_providers: int
+    hhi: float
+    unsafe_frequency: float
+    member_payoff: float
+    entrant_payoff: float
+    exclusion_rent: float
+    federated_unsafe_frequency: float
+
+
+def provider_frontier(
+    tables: RaceTables,
+    liability: float,
+    club_in: str,
+    club_out: str,
+    kappa_g: float,
+    n_providers: int,
+) -> ProviderFrontier:
+    r"""Exact outcome of ``K`` symmetric provider clubs with scoped marks.
+
+    Every provider runs the club design with its own mark; cross-provider
+    checks fail, so within-provider play is ``u`` and cross-provider play is
+    ``v``.  With symmetric shares the within-provider encounter probability
+    equals the Herfindahl index ``1/K`` and
+
+    .. math:: U = \mathrm{HHI}\,U(u,u) + (1 - \mathrm{HHI})\,U(v,v) .
+
+    The exclusion rent is the payoff gap between a member and a compliant
+    unbadged entrant that plays the club conduct ``u`` towards everyone and
+    is treated as an outsider by all ``K`` clubs.  Under federation (mutual
+    recognition of marks) every cross-provider check passes and the
+    ecosystem plays ``u`` throughout, at any concentration.
+    """
+    p = race_private(tables, liability)
+    uf = tables.unsafe_frequency
+    u, v = _IDX[club_in], _IDX[club_out]
+    hhi = 1.0 / n_providers
+    unsafe = hhi * uf[u, u] + (1.0 - hhi) * uf[v, v]
+    member = hhi * p[u, u] + (1.0 - hhi) * p[v, v] - kappa_g
+    entrant = p[u, v]  # every club treats it as an outsider, so it meets v throughout
+    rent = member - entrant
+    return ProviderFrontier(
+        n_providers=n_providers,
+        hhi=hhi,
+        unsafe_frequency=float(unsafe),
+        member_payoff=float(member),
+        entrant_payoff=float(entrant),
+        exclusion_rent=float(rent),
+        federated_unsafe_frequency=float(uf[u, u]),
+    )
+
+
+# --------------------------------------------------------------------------
+# Proposition 8: the exclusion dividend
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class HarmDecomposition:
+    """Where the harm of a mixed population actually happens.
+
+    Every ordered encounter is assigned to one of four blocks by the badge
+    status of the two seats, and the population unsafe frequency is split
+    across them exactly.  The blocks sum to the reported total by
+    construction, so the shares are an accounting identity rather than an
+    approximation.
+    """
+
+    mass: dict[str, float]
+    """Probability of each block under the encounter law."""
+
+    contribution: dict[str, float]
+    """Additive contribution of each block to the population unsafe frequency."""
+
+    conditional: dict[str, float]
+    """Unsafe frequency conditional on being in each block."""
+
+    total: float
+    interface_share: float
+    """Share of all harm produced at the badged/unbadged interface."""
+
+
+#: The four blocks of the harm decomposition.
+BLOCKS: tuple[str, ...] = (
+    "badged with badged",
+    "badged with unbadged",
+    "unbadged with badged",
+    "unbadged with unbadged",
+)
+
+
+def harm_decomposition(
+    x: np.ndarray, fun: IdentityFunctionals, monomorphic: bool = False
+) -> HarmDecomposition:
+    """Split the population unsafe frequency by the badge status of the pair.
+
+    A badge is *carried* if the design presents one at all, genuine or
+    forged; the split is by what an observer of the encounter would see,
+    not by what the check concluded.
+    """
+    from .functionals import _encounter_weights
+
+    x = np.asarray(x, dtype=float)
+    w = _encounter_weights(x, fun.params.r, monomorphic)
+    u = fun.unsafe_frequency
+    carries = np.array([b != "N" for b in fun.badge])
+    masks = {
+        "badged with badged": np.outer(carries, carries),
+        "badged with unbadged": np.outer(carries, ~carries),
+        "unbadged with badged": np.outer(~carries, carries),
+        "unbadged with unbadged": np.outer(~carries, ~carries),
+    }
+    mass = {k: float((w * m).sum()) for k, m in masks.items()}
+    contribution = {k: float((w * m * u).sum()) for k, m in masks.items()}
+    conditional = {
+        k: contribution[k] / mass[k] if mass[k] > 1e-15 else 0.0 for k in masks
+    }
+    total = float(sum(contribution.values()))
+    interface = contribution["badged with unbadged"] + contribution["unbadged with badged"]
+    return HarmDecomposition(
+        mass=mass,
+        contribution=contribution,
+        conditional=conditional,
+        total=total,
+        interface_share=interface / total if total > 1e-15 else 0.0,
+    )
+
+
+def entry_barrier(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    club_in: str,
+    club_out: str,
+) -> tuple[float, float]:
+    """What a compliant outsider forfeits at the boundary of a club.
+
+    The entrant carries no badge and plays the club's own in-group conduct
+    towards everybody, so it is behaviourally beyond reproach.  Every club
+    member's check of it nonetheless fails, so the member executes its
+    out-group conduct and the entrant meets ``club_out`` in every encounter.
+
+    Returns ``(penalty, boundary_unsafe)``: the payoff gap between a club
+    member in its own club and this entrant, and the entrant's unsafe
+    frequency at the boundary.  Both are exact closed forms with no dynamics
+    in them, which is what makes them the right place to measure the
+    exclusion: they do not depend on the two populations coexisting.
+    """
+    p = race_private(tables, liability)
+    u, v = _IDX[club_in], _IDX[club_out]
+    member = float(p[u, u] - params.kappa_g)
+    entrant = float(p[u, v])
+    return member - entrant, float(tables.unsafe_frequency[u, v])
+
+
+@dataclass(frozen=True)
+class OutGroupPolicy:
+    """What one out-group policy buys the club, and what it costs.
+
+    ``spoof_threshold`` is the forgery the policy lets the club survive;
+    ``entry_penalty`` is what it costs a behaviourally compliant outsider.
+    Proposition 8 is that the two cannot be separated: the policies with a
+    positive threshold are exactly the policies with a positive penalty.
+    """
+
+    s_out: str
+    spoof_threshold: float | None
+    mimic_threshold: float | None
+    nucleation_threshold: float
+    entry_penalty: float
+    boundary_unsafe: float
+    certified_basin_share: float
+    """Share of interior replicator starts that reach a badged regime."""
+
+    club_share_monomorphic: float
+    unsafe_basin_mean: float
+    """Unsafe frequency averaged over attractors, not evaluated at their mean."""
+
+    unsafe_monomorphic: float
+
+
+def out_group_policy_scan(
+    tables: RaceTables,
+    params: IdentityParams,
+    club_in: str = "CS",
+    liability: float = 0.0,
+    social_harm: float = 20.0,
+    population_size: int = 100,
+    beta: float = 0.05,
+    n_starts: int = 200,
+    seed: int = 20260819,
+) -> list[OutGroupPolicy]:
+    """Scan the club's out-group policy from unconditionally safe to harsh.
+
+    For each candidate ``s_out`` the design pool keeps that one certified
+    design plus every unbadged and forged design, so the club is scored
+    against exactly the invaders it would actually face.
+    """
+    from .functionals import build_functionals
+
+    fun_full = build_functionals(tables, params, liability, social_harm)
+    out = []
+    for s_out in STRATEGIES:
+        club = ("G", club_in, s_out)
+        keep = np.array(
+            [i for i, d in enumerate(fun_full.designs) if d[0] != "G" or d == club]
+        )
+        sub = fun_full.subspace(keep)
+        ci = sub.designs.index(club)
+        basins = equilibrium(sub, tables, "replicator", n_starts=n_starts, seed=seed)
+        mono = equilibrium(sub, tables, "sml", population_size, beta)
+        penalty, boundary = entry_barrier(
+            tables, params, liability, club_in, s_out
+        )
+        out.append(
+            OutGroupPolicy(
+                s_out=s_out,
+                spoof_threshold=spoof_threshold(
+                    tables, params, liability, club, ("F", "CAS", "CAS")
+                ),
+                mimic_threshold=spoof_threshold(
+                    tables, params, liability, club, ("F", club_in, s_out)
+                ),
+                nucleation_threshold=nucleation_threshold(
+                    tables, liability, club_in, s_out, "CAS", params.kappa_g
+                ),
+                entry_penalty=penalty,
+                boundary_unsafe=boundary,
+                certified_basin_share=basins.certified_basin_share,
+                club_share_monomorphic=float(mono.frequencies[ci]),
+                unsafe_basin_mean=basins.unsafe_frequency,
+                unsafe_monomorphic=mono.unsafe_frequency,
+            )
+        )
+    return out
+
+
+@dataclass(frozen=True)
+class GentleClubRescue:
+    """Whether a fine can make a club that is safe towards outsiders viable.
+
+    A fine on detected forgery restores the *barrier*: it charges an
+    impostor for the badge it wears, so the gentle club's spoof threshold
+    rises from zero.  It does not restore the club's *purpose*.  By
+    Proposition 4 a badge earns nothing against residents that do not
+    condition on badges, and a gentle club is behaviourally identical to the
+    unbadged cooperator, which delivers the same conduct without the dues.
+    Excludability against forgers and a reason to exist are different
+    requirements, and only out-group harshness supplies both.
+    """
+
+    rho: float
+    spoof_threshold: float | None
+    club_share_mixed: float
+    club_share_monomorphic: float
+    unsafe_mixed: float
+    unsafe_monomorphic: float
+    attestation_integrity: float
+
+
+def gentle_club_rescue(
+    tables: RaceTables,
+    params: IdentityParams,
+    rhos: tuple[float, ...],
+    club_in: str = "CS",
+    liability: float = 0.0,
+    social_harm: float = 20.0,
+    population_size: int = 100,
+    beta: float = 0.05,
+    n_starts: int = 200,
+    seed: int = 20260819,
+) -> list[GentleClubRescue]:
+    """Sweep the fine for a club whose out-group conduct equals its in-group.
+
+    The design pool keeps the gentle certified design plus every unbadged
+    and forged design, so the club is scored against the invaders it would
+    actually face, exactly as in :func:`out_group_policy_scan`.
+    """
+    from .functionals import build_functionals
+
+    club = ("G", club_in, club_in)
+    exploiter = ("F", "CAS", "CAS")
+    out = []
+    for rho in rhos:
+        p = replace(params, rho=float(rho))
+        fun = build_functionals(tables, p, liability, social_harm)
+        keep = np.array(
+            [i for i, d in enumerate(fun.designs) if d[0] != "G" or d == club]
+        )
+        sub = fun.subspace(keep)
+        ci = sub.designs.index(club)
+        mixed = equilibrium(sub, tables, "replicator", n_starts=n_starts, seed=seed)
+        mono = equilibrium(sub, tables, "sml", population_size, beta)
+        out.append(
+            GentleClubRescue(
+                rho=float(rho),
+                spoof_threshold=spoof_threshold(
+                    tables, replace(p, r=0.0), liability, club, exploiter
+                ),
+                club_share_mixed=float(mixed.frequencies[ci]),
+                club_share_monomorphic=float(mono.frequencies[ci]),
+                unsafe_mixed=mixed.unsafe_frequency,
+                unsafe_monomorphic=mono.unsafe_frequency,
+                attestation_integrity=mono.attestation_integrity,
+            )
+        )
+    return out
+
+
+# --------------------------------------------------------------------------
+# equilibrium summaries
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Equilibrium:
+    """Long-run outcome of one parameterisation.
+
+    Every scalar field is an average of the observable over whatever the
+    method's long-run object is, never the observable evaluated at an
+    average state.  The distinction is not pedantic: the replicator flow of
+    this game is multistable, its attractors are disjoint faces of the
+    simplex, and the arithmetic mean of two such faces is a state the flow
+    never occupies.  Scoring a bilinear observable there manufactures
+    cross-terms between designs that never actually meet.
+    """
+
+    frequencies: np.ndarray
+    """The long-run state, or the basin-weighted mean of the attractors.
+
+    For a multistable method this is a summary of *composition* only, and
+    the scalar fields below are not functions of it.
+    """
+
+    unsafe_frequency: float
+    class_distribution: dict[str, float]
+    badge_distribution: dict[str, float]
+    mark_lift: float
+    attestation_integrity: float
+    unsafe_verified: float
+    unsafe_unverified: float
+    social_payoff: float
+    method: str
+    harm_blocks: HarmDecomposition
+    n_attractors: int = 1
+    """Number of distinct attractors the basin sample reached."""
+
+    certified_basin_share: float = float("nan")
+    """Share of interior starts reaching a state in which badges are worn."""
+
+
+def _score_state(
+    x: np.ndarray,
+    fun: IdentityFunctionals,
+    tables: RaceTables,
+    monomorphic: bool,
+) -> dict[str, object]:
+    """Every observable evaluated at one population state."""
+    split = unsafe_split(x, fun, tables, monomorphic=monomorphic)
+    return {
+        "unsafe_frequency": aggregate_unsafe_frequency(x, fun, monomorphic=monomorphic),
+        "mark_lift": mark_lift(x, fun, monomorphic=monomorphic),
+        "attestation_integrity": attestation_integrity(
+            x, fun, monomorphic=monomorphic
+        ),
+        "unsafe_verified": split["verified"],
+        "unsafe_unverified": split["unverified"],
+        "social_payoff": mean_social_payoff(x, fun, monomorphic=monomorphic),
+        "harm_blocks": harm_decomposition(x, fun, monomorphic=monomorphic),
+    }
+
+
+def _average_harm_blocks(blocks: list[HarmDecomposition]) -> HarmDecomposition:
+    """Basin average of the harm decomposition, block by block."""
+    mass = {b: float(np.mean([d.mass[b] for d in blocks])) for b in BLOCKS}
+    contribution = {
+        b: float(np.mean([d.contribution[b] for d in blocks])) for b in BLOCKS
+    }
+    total = float(sum(contribution.values()))
+    conditional = {
+        b: contribution[b] / mass[b] if mass[b] > 1e-15 else 0.0 for b in BLOCKS
+    }
+    interface = contribution["badged with unbadged"] + contribution["unbadged with badged"]
+    return HarmDecomposition(
+        mass=mass,
+        contribution=contribution,
+        conditional=conditional,
+        total=total,
+        interface_share=interface / total if total > 1e-15 else 0.0,
+    )
+
+
+def equilibrium(
+    fun: IdentityFunctionals,
+    tables: RaceTables,
+    method: str = "sml",
+    population_size: int = 100,
+    beta: float = 0.05,
+    n_starts: int = 120,
+    seed: int = 20260819,
+    mu: float = 0.01,
+) -> Equilibrium:
+    """Long-run design distribution under the private functional.
+
+    Three methods, answering three different questions.
+
+    ``sml``
+        the small-mutation limit of the finite-population process: which
+        single design the market spends its time in.
+    ``replicator``
+        the basin distribution of the replicator flow: which pure regimes
+        are stable, and how large each basin is.  Observables are evaluated
+        at each attractor and averaged over basins, never at the mean state.
+    ``mutator``
+        the interior rest point of the replicator-mutator flow: a market in
+        which every design is continually reintroduced and therefore
+        genuinely coexists.  This is the only one of the three that produces
+        encounters across the badged/unbadged boundary.
+    """
+    if method == "sml":
+        x = stationary_analysis_sml(
+            fun.fitness, fun.unsafe_frequency, population_size, beta
+        ).strategy_frequencies
+        scored = _score_state(x, fun, tables, monomorphic=True)
+        return Equilibrium(
+            frequencies=x,
+            class_distribution=_class_masses_for(fun, x),
+            badge_distribution=_badge_masses_for(fun, x),
+            method=method,
+            **scored,
+        )
+
+    if method == "mutator":
+        x = replicator_mutator_equilibrium(fun.fitness, mu)
+        scored = _score_state(x, fun, tables, monomorphic=False)
+        return Equilibrium(
+            frequencies=x,
+            class_distribution=_class_masses_for(fun, x),
+            badge_distribution=_badge_masses_for(fun, x),
+            method=method,
+            **scored,
+        )
+
+    if method != "replicator":
+        raise ValueError(f"unknown method {method!r}")
+
+    ends = replicator_attractors(fun.fitness, n_starts=n_starts, seed=seed)
+    scored = [_score_state(e, fun, tables, monomorphic=False) for e in ends]
+    mean_state = ends.mean(axis=0)
+    carries = np.array([b != "N" for b in fun.badge], dtype=float)
+    unique = np.unique(np.round(ends, 6), axis=0)
+    return Equilibrium(
+        frequencies=mean_state,
+        unsafe_frequency=float(np.mean([s["unsafe_frequency"] for s in scored])),
+        class_distribution=_class_masses_for(fun, mean_state),
+        badge_distribution=_badge_masses_for(fun, mean_state),
+        mark_lift=float(np.mean([s["mark_lift"] for s in scored])),
+        attestation_integrity=float(
+            np.mean([s["attestation_integrity"] for s in scored])
+        ),
+        unsafe_verified=float(np.mean([s["unsafe_verified"] for s in scored])),
+        unsafe_unverified=float(np.mean([s["unsafe_unverified"] for s in scored])),
+        social_payoff=float(np.mean([s["social_payoff"] for s in scored])),
+        method=method,
+        harm_blocks=_average_harm_blocks([s["harm_blocks"] for s in scored]),
+        n_attractors=int(len(unique)),
+        certified_basin_share=float(np.mean(ends @ carries > 0.5)),
+    )
+
+
+def _class_masses_for(fun: IdentityFunctionals, x: np.ndarray) -> dict[str, float]:
+    """Class masses that work on subspaces as well as the full space."""
+    from .identity import CLASSES, classify
+
+    out = {c: 0.0 for c in CLASSES}
+    for k, design in enumerate(fun.designs):
+        out[classify(*design)] += float(x[k])
+    return out
+
+
+def _badge_masses_for(fun: IdentityFunctionals, x: np.ndarray) -> dict[str, float]:
+    from .identity import BADGES
+
+    return {
+        b: float(sum(x[k] for k, bb in enumerate(fun.badge) if bb == b))
+        for b in BADGES
+    }

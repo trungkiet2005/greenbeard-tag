@@ -1,0 +1,31 @@
+{
+  "mean_value_above_lr": 0.0024618740402476275,
+  "mean_value_below_lr": 0.0539343820393778,
+  "pool_unsafe": {
+    "full": 0.0899182888714175,
+    "honest": 0.0680858376752186,
+    "plain": 0.15851140814774356,
+    "uncertified": 0.15851140814774478
+  },
+  "process_unsafe_max": 0.33012882947378763,
+  "process_unsafe_min": 0.04434477314789847,
+  "replicator_integrity_correlation": 0.9651712096198984,
+  "setback_scope": {
+    "prize": {
+      "club": 0.03398653748378959,
+      "integrity": 0.12162913120094944,
+      "uncertified_unsafe": 0.9999999999996234,
+      "unsafe": 0.9325637583445521
+    },
+    "total": {
+      "club": 0.4158369744349806,
+      "integrity": 0.9199386286506469,
+      "uncertified_unsafe": 0.15851140814774478,
+      "unsafe": 0.0899182888714175
+    }
+  },
+  "threshold_max_abs_gap": 2.220446049250313e-16,
+  "value_plane_max": 0.10511191342130596,
+  "value_plane_min": -0.0058428229047179855,
+  "value_share_above_001": 0.15208034433285508
+}
