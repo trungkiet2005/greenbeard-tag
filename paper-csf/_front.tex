@@ -1,0 +1,156 @@
+%% ===================================================================
+%%  Certified clubs / forgeable greenbeards
+%%  SUBMISSION VERSION: Chaos, Solitons & Fractals (Elsevier)
+%%
+%%  Elsevier CAS bundle, cas-sc.cls = SINGLE COLUMN, which is what the
+%%  journal requires of LaTeX submissions.  cas-sc.cls and cas-common.sty
+%%  are shipped alongside this file so the source builds anywhere.
+%%
+%%  Numbered references: the CAS bundle ships only the author-year style
+%%  cas-model2-names.bst, so we use Elsevier's numbered-with-names style
+%%  elsarticle-num-names.bst, which is what cas-sc's own template points
+%%  at when it suggests model1-num-names.
+%%
+%%  Abstract <= 250 words, highlights 3 to 5 bullets of <= 85 characters,
+%%  both also supplied as separate files.
+%%
+%%    pdflatex main && bibtex main && pdflatex main && pdflatex main
+%% ===================================================================
+%% longmktitle: the front matter runs past one page, which is exactly
+%% what this option is for.
+\documentclass[a4paper,fleqn,longmktitle]{cas-sc}
+
+%% Compatibility shim.  cas-common.sty of CAS bundle 2.4 still calls
+%% \vbox_unpack_clear:N, which current expl3 releases have removed in favour of
+%% \vbox_unpack_drop:N.  Without this, \maketitle fails on an up-to-date TeX
+%% installation.  The guard makes it a no-op where the old name still exists.
+\ExplSyntaxOn
+\cs_if_exist:NF \vbox_unpack_clear:N
+  { \cs_new_eq:NN \vbox_unpack_clear:N \vbox_unpack_drop:N }
+\ExplSyntaxOff
+
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{amsthm}
+\usepackage[section]{placeins}
+\usepackage[expansion=false]{microtype}
+
+\hypersetup{allcolors=blue!55!black}
+
+% keep floats near the text that refers to them
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.80}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+% a little emergency stretch clears the handful of stubborn lines
+\setlength{\emergencystretch}{2em}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\AS}{\textsf{AS}}
+\newcommand{\CS}{\textsf{CS}}
+\newcommand{\CAS}{\textsf{CAS}}
+\newcommand{\AU}{\textsf{AU}}
+\newcommand{\piP}{\pi_{P}}
+\newcommand{\piS}{\pi_{S}}
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+\shorttitle{Forgeable greenbeards}
+\shortauthors{T.-K. Huynh et al.}
+
+\title[mode=title]{Forgeable greenbeards: bistability and hollow collapse in
+the evolutionary dynamics of certified agent populations}
+
+%% ------------------------------------------------------------------
+%% Chaos, Solitons & Fractals runs a single-anonymized review, so the
+%% authors ARE named on the submitted manuscript.  All three contributed
+%% equally; the shared first authorship is carried by the
+%% \fnmark[1]/\fntext[1] note below.
+%% ------------------------------------------------------------------
+\author[1]{Trung-Kiet Huynh}[orcid=0009-0000-5463-754X]
+\cormark[1]
+\fnmark[1]
+\ead{23122039@student.hcmus.edu.vn}
+\credit{Conceptualization, Methodology, Software, Formal analysis,
+Investigation, Validation, Visualization, Writing -- original draft,
+Writing -- review and editing}
+
+\author[1]{Minh Dao Sy Duy}[orcid=0009-0002-4501-2788]
+\fnmark[1]
+\ead{23122041@student.hcmus.edu.vn}
+\credit{Conceptualization, Methodology, Software, Formal analysis,
+Investigation, Validation, Visualization, Writing -- original draft,
+Writing -- review and editing}
+
+\author[1]{Chi-Nguyen Tran}[orcid=0009-0007-6716-7269]
+\fnmark[1]
+\ead{23122044@student.hcmus.edu.vn}
+\credit{Conceptualization, Methodology, Software, Formal analysis,
+Investigation, Validation, Visualization, Writing -- original draft,
+Writing -- review and editing}
+
+\affiliation[1]{organization={Faculty of Information Technology,
+            University of Science, Vietnam National University Ho Chi
+            Minh City},
+            addressline={227 Nguyen Van Cu Street, District 5},
+            city={Ho Chi Minh City},
+            postcode={700000},
+            country={Vietnam}}
+
+\cortext[1]{Corresponding author}
+\fntext[1]{These authors contributed equally to this work.}
+
+\begin{abstract}
+A greenbeard is a signal that lets its bearers treat one another differently
+from everyone else, with the classical vulnerability that impostors can wear it.
+Machine agents now carry such signals: provenance attestations
+and certification marks, cheap to check and forgeable. We make the mark
+a strategic variable in a four-strategy model of a competitive development race,
+holding the game fixed so that every effect belongs to the identity layer, and
+analyse the resulting 48-strategy replicator flow and its finite-population
+counterpart. A design is a triple: a badge that is genuine, forged or absent,
+plus the conduct it runs towards partners who pass verification and towards
+everyone else. A forged badge passes with probability $\sigma$. Every
+transition we report is a transversal eigenvalue crossing zero, so each critical
+value is exact. Identity earns its keep only below a
+reciprocity threshold, where deterrence fails. A club that merely reciprocates
+within its membership tolerates more than twice the forgery of one that trusts
+unconditionally, so in-group conduct is a security parameter. The protective
+fine diverges as forgery becomes undetectable, so penalties cannot substitute
+for detection. Collapse is graceful in the wrong way: a behavioural mimic
+invades before the exploiter, hollowing out the credential while conduct still
+looks sound, and better interaction structure leaves it the only failure mode.
+The flow is bistable with no badge-mixed attractor, so certification buys
+robustness rather than a lower level of harm, and what holds it up is the rent
+it charges outsiders.
+\end{abstract}
+
+\begin{highlights}
+\item A forgeable identity tag turns certification into a nonlinear population flow
+\item In-group conduct is a security parameter: forgery tolerance 0.866 versus 0.400
+\item The protective fine diverges as forgery becomes undetectable
+\item Behavioural mimics hollow out the tag before conduct ever degrades
+\item The flow is bistable, so certification buys robustness and not a safer level
+\end{highlights}
+
+\begin{keywords}
+evolutionary game theory \sep replicator dynamics \sep bistability \sep
+tag-based cooperation \sep greenbeard \sep certification \sep
+multi-agent systems
+\end{keywords}
+
+\maketitle
+

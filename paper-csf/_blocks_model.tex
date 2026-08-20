@@ -1,0 +1,38 @@
+
+\paragraph{The flow.}
+Write $\Delta$ for the simplex of population states over the $48$ designs and
+$x \in \Delta$ for a state. With assortment $r$, the expected private payoff of
+design $i$ is
+\begin{equation}
+\label{eq:fitness}
+f_i(x) \;=\; r\,\piP(i,i) \;+\; (1-r)\sum_{j} x_j\, \piP(i,j),
+\end{equation}
+and the replicator flow is
+\begin{equation}
+\label{eq:replicator}
+\dot{x}_i \;=\; x_i\big[\,f_i(x) - \bar{f}(x)\,\big],
+\qquad \bar{f}(x) \;=\; \sum_k x_k f_k(x).
+\end{equation}
+Every vertex $e_j$ of $\Delta$ is a rest point of
+Equation~\eqref{eq:replicator} at every parameter value, and the eigenvalue of
+the linearisation at $e_j$ transversal to that vertex in the direction of
+design $i$ is
+\begin{equation}
+\label{eq:eigen}
+\lambda_{i \mid j} \;=\; f_i(e_j) - f_j(e_j)
+  \;=\; r\,\piP(i,i) \;+\; (1-r)\,\piP(i,j) \;-\; \piP(j,j).
+\end{equation}
+Each $\lambda_{i \mid j}$ is affine in the spoof success $\sigma$, in the fine
+$\rho$, in the badge costs $\kappa_g$ and $\kappa_f$ and in the liability $L$,
+because the handshake of Equation~\eqref{eq:handshake} is affine in the pass
+rates and the functional of Equation~\eqref{eq:private} is affine in the rest.
+Every threshold reported in Section~\ref{sec:results} is therefore the unique
+simple root of one such eigenvalue in one parameter. The qualitative event each
+threshold marks is a transcritical bifurcation of the flow restricted to the
+edge $\{e_i, e_j\}$, on which Equation~\eqref{eq:replicator} reduces to
+$\dot{x} = x(1-x)\,[\,f_i - f_j\,]$ with the bracket affine in $x$: as the
+parameter crosses the threshold, the interior edge equilibrium passes through
+the vertex and exchanges stability with it. This is why the thresholds below
+are exact rather than estimated, and it is what the closed forms in
+Section~\ref{sec:results} are expressions for.
+

@@ -1,0 +1,63 @@
+
+Table~\ref{tab:bifurcations} is a map of what follows. Each row is one
+qualitative change in the flow of Equation~\eqref{eq:replicator}, together with
+the parameter that drives it, the closed form that locates it and its value at
+the baseline. The subsections then take them in order and say what each one
+means for a certification regime.
+
+\begin{table}[t]
+\centering
+\caption{The qualitative transitions of the identity layer. Rows one to four
+and row six are transcritical bifurcations of Equation~\eqref{eq:replicator}
+restricted to an edge of the simplex: a transversal eigenvalue
+$\lambda_{i \mid j}$ of Equation~\eqref{eq:eigen} passes through zero and the
+resident vertex exchanges stability with the invading direction. Row five is a
+codimension-two degeneracy at which two such eigenvalues vanish together, so
+that the ecosystem changes which of its two failure modes it meets first. Row
+seven is not a bifurcation of the flow but a divergence of the locus of one:
+the curve in the $(\sigma, \rho)$ plane along which the club is marginally
+protected has a vertical asymptote at $\sigma = 1$. Row eight is a global
+property that no local calculation reveals.}
+\label{tab:bifurcations}
+\small
+\vspace{2pt}
+\begin{tabular}{@{}p{5.6cm}p{2.2cm}lp{3.6cm}@{}}
+\toprule
+transition & parameter & location & value \\
+\midrule
+safe unbadged resident loses stability to a first striker
+  & liability $L$
+  & Eq.~\eqref{eq:LR}
+  & $L_R = 0.551$ \\[2pt]
+certified club loses stability to an unconditional forger
+  & spoof success $\sigma$
+  & Eq.~\eqref{eq:sigmastar}
+  & $\sigma^{*} = 0.866$ at $r = 0$, $0.962$ at $r = 0.1$ \\[2pt]
+certified club loses stability to a behavioural mimic
+  & spoof success $\sigma$
+  & Eq.~\eqref{eq:sigmam}
+  & $\sigma_m = 0.938$ \\[2pt]
+unbadged resident loses stability to a certified club
+  & assortment $r$
+  & Eq.~\eqref{eq:rstar}
+  & $r^{*} = 0.063$ \\[2pt]
+the two invading eigenvalues vanish together and the invaders exchange order
+  & $(r, \sigma)$ jointly
+  & Eq.~\eqref{eq:sigmastar}, \eqref{eq:sigmam}
+  & $r = 0.077$ \\[2pt]
+the forger's threshold leaves the admissible range of $\sigma$
+  & assortment $r$
+  & Eq.~\eqref{eq:sigmastar}
+  & $r = 0.134$ \\[2pt]
+the locus of marginal protection escapes to infinity
+  & $(\sigma, \rho)$ jointly
+  & Eq.~\eqref{eq:rhostar}
+  & pole at $\sigma \to 1$ \\[2pt]
+two attractors on disjoint faces of the simplex
+  & none
+  & Prop.~\ref{prop:bistable}
+  & basins $0.44$, $0.56$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+

@@ -28,9 +28,12 @@ from gbtag.identity import CLASSES
 from gbtag.plotting import (
     FS,
     PALETTE,
+    fit_headroom,
     fitted_legend,
+    legend_below,
     new_figure,
     panel_title,
+    readable_on,
     save,
     use_paper_style,
 )
@@ -55,7 +58,7 @@ def fig02(tables, results: Path, figdir: Path) -> None:
 
     ax = axes[0]
     ax.grid(False)
-    ax.imshow(p0, cmap="RdYlBu", vmin=0.0, vmax=105.0)
+    heat = ax.imshow(p0, cmap="RdYlBu", vmin=0.0, vmax=105.0)
     ax.set_xticks(range(4), STRATEGIES)
     ax.set_yticks(range(4), STRATEGIES)
     ax.set_xlabel("opponent design")
@@ -69,7 +72,11 @@ def fig02(tables, results: Path, figdir: Path) -> None:
                 ha="center",
                 va="center",
                 fontsize=FS["tiny"],
-                color="white" if 25 < p0[i, j] < 80 else "black",
+                # the colour has to come from the cell that was painted, not
+                # from the number in it: RdYlBu is lightest in the middle of
+                # its range and darkest at both ends, so a rule keyed to the
+                # value hides exactly the cells it means to show
+                color=readable_on(heat.cmap(heat.norm(p0[i, j]))),
             )
     # the two cells of the handshake exploit
     for (i, j) in ((2, 1), (1, 1)):
@@ -142,9 +149,12 @@ def fig03(tables, results: Path, figdir: Path) -> None:
         # a unit axis, so the crossing order is stated rather than left to the eye
         # the curves run bottom-left to top-right, so the bottom-right corner
         # is the only region of the panel with no ink in it
+        # the marks are full-height dotted lines, so the block of labels has
+        # to end to the left of the leftmost one rather than at the axis edge
+        x_label = min((s for s, _ in marks), default=0.99) - 0.02
         for k, (s_star, colour) in enumerate(sorted(marks)):
             ax.text(
-                0.97,
+                x_label,
                 -22.0 - 6.5 * k,
                 rf"$\sigma^{{*}} = {s_star:.3f}$",
                 fontsize=FS["tiny"],
@@ -235,15 +245,19 @@ def fig04(tables, results: Path, figdir: Path) -> None:
         tables, 0.0, "CS", "CAS", base.kappa_g, base.kappa_f, 0.0
     )
     ax_top.axvline(sig_m, color="black", linestyle="--", linewidth=1.0)
+    # the top band is flat and uninformative across the whole sweep, so the
+    # mark hides nothing there; at mid-height it lay across the moving bands
     ax_top.text(
-        sig_m - 0.015, 0.5, r"$\sigma_m = 0.938$", fontsize=FS["annot"],
+        sig_m - 0.015, 0.82, r"$\sigma_m = 0.938$", fontsize=FS["annot"],
         rotation=90, ha="right", va="center", color="black",
     )
     ax_top.set_xlim(0, 1)
     ax_top.set_ylim(0, 1)
     ax_top.set_xlabel(r"spoof success $\sigma$")
     ax_top.set_ylabel("share of the population")
-    fitted_legend(ax_top, loc="center left", ncol=1, fontsize=FS["annot"])
+    # a stackplot paints the whole panel, so any in-axes legend hides part of
+    # the composition, and the fastest-moving part of it at that
+    legend_below(ax_top, ncol=5, fontsize=FS["annot"])
     panel_title(ax_top, "A", "long-run composition at the baseline")
 
     ax_u.plot(x, df.unsafe, color=PALETTE["unsafe"], label="certified world")
@@ -340,7 +354,10 @@ def fig05(tables, results: Path, figdir: Path) -> None:
     ax.set_ylabel("selective advantage")
     ax.set_xlim(0, 0.3)
     ax.set_ylim(-3.0, 26.0)
-    fitted_legend(ax, loc="upper left", fontsize=FS["annot"])
+    # the nucleation threshold is drawn as a full-height line at r = 0.063,
+    # which runs through the upper left; both curves rise, so the free corner
+    # is the upper right
+    fitted_legend(ax, loc="upper right", fontsize=FS["annot"])
     panel_title(ax, "C", r"keep vs build ($\sigma = 0.5$)")
 
     save(fig, figdir / "fig05_nucleation")
@@ -406,7 +423,7 @@ def fig06(tables, results: Path, figdir: Path) -> None:
     ax2 = ax.twinx()
     ax2.plot(dues.setting, sigmas_of_dues, color=PALETTE["forger"], linestyle="--",
              label=r"spoof threshold $\sigma^{*}$")
-    ax2.set_ylabel(r"$\sigma^{*}$", fontsize=FS["label"])
+    ax2.set_ylabel(r"$\sigma^{*}$", fontsize=FS["label"], labelpad=6.0)
     ax2.tick_params(labelsize=FS["tick"])
     ax2.set_ylim(0.55, 1.0)
     ax2.grid(False)
@@ -426,9 +443,11 @@ def fig06(tables, results: Path, figdir: Path) -> None:
     ax.plot(forge.setting, forge.club, color=PALETTE["club"], label="club share")
     ax.set_xlabel(r"forgery cost $\kappa_f$")
     ax.set_ylabel("share")
-    # both curves stay below 0.56, so the headroom is the free region
     ax.set_ylim(-0.02, 0.92)
     fitted_legend(ax, loc="upper right", fontsize=FS["annot"])
+    # the headroom is whatever seats the legend and nothing more: a band of
+    # empty axis under a legend reads as badly as a legend on a curve
+    fit_headroom(ax)
     panel_title(ax, "D", r"forgery cost at $\sigma = 0.97$")
 
     save(fig, figdir / "fig06_instruments")
@@ -477,6 +496,7 @@ def fig07(tables, results: Path, figdir: Path) -> None:
     ax.set_xlim(0, 1)
     ax.set_ylim(-0.03, 1.42)
     fitted_legend(ax, loc="upper left", fontsize=FS["annot"], ncol=2)
+    fit_headroom(ax)
     panel_title(ax, "B", r"the channels along the sweep ($\rho = 20$)")
 
     save(fig, figdir / "fig07_channels")
@@ -527,11 +547,11 @@ def fig01(tables, results: Path, figdir: Path) -> None:
     # ---- B: what each regime is worth
     xs = np.arange(2)
     social = [faces.loc["uncertified", "social"], faces.loc["certified", "social"]]
-    ax_b.bar(xs, social, 0.5,
-             color=[PALETTE["unbadged cooperator"], PALETTE["club"]])
-    for x, v in zip(xs, social):
+    bar_colours = [PALETTE["unbadged cooperator"], PALETTE["club"]]
+    ax_b.bar(xs, social, 0.5, color=bar_colours)
+    for x, v, colour in zip(xs, social, bar_colours):
         ax_b.text(x, 51.0, f"{v:.1f}", ha="center", va="bottom",
-                  fontsize=FS["tiny"], color="white")
+                  fontsize=FS["tiny"], color=readable_on(colour))
     ax_b.annotate(
         "", xy=(1, social[1]), xytext=(1, social[0]),
         arrowprops=dict(arrowstyle="<->", color=PALETTE["unsafe"], lw=0.9),
@@ -557,7 +577,9 @@ def fig01(tables, results: Path, figdir: Path) -> None:
             label=r"forgery tolerated, $\sigma^{*}$")
     ax2.set_ylim(0, 2.05)
     ax2.set_yticks([0.0, 0.5, 1.0])
-    ax2.set_ylabel(r"$\sigma^{*}$", fontsize=FS["label"])
+    # the label sits in the same column as the tick labels, and at this ylim it
+    # lands level with the 1.0 tick, so it needs more than the default pad
+    ax2.set_ylabel(r"$\sigma^{*}$", fontsize=FS["label"], labelpad=6.0)
     ax2.tick_params(labelsize=FS["tick"])
     ax2.grid(False)
     ax_c.axhline(0.0, color=PALETTE["neutral"], linewidth=0.8)
@@ -618,11 +640,15 @@ def fig08(tables, results: Path, figdir: Path) -> None:
         prov.providers, prov.entrant_payoff, prov.member_payoff,
         color=PALETTE["scoped"], alpha=0.18,
     )
-    mid = 2
+    # the band closes as K grows, so the label goes in the widest gap that is
+    # not against the axis edge, centred in it rather than hung off a point
+    gap = (prov.member_payoff - prov.entrant_payoff).to_numpy()
+    mid = int(np.argmax(gap[1:-1])) + 1
     ax.text(
-        prov.providers.iloc[mid] + 0.4,
+        prov.providers.iloc[mid],
         0.5 * (prov.member_payoff.iloc[mid] + prov.entrant_payoff.iloc[mid]),
         "exclusion rent", fontsize=FS["annot"], color=PALETTE["neutral"],
+        ha="center", va="center",
     )
     ax.set_xlabel("number of providers $K$")
     ax.set_ylabel("payoff")
@@ -677,6 +703,7 @@ def fig09(tables, results: Path, figdir: Path) -> None:
     ax.set_ylabel("value")
     ax.set_ylim(-0.05, 1.95)
     fitted_legend(ax, loc="upper left", fontsize=FS["tiny"], ncol=1)
+    fit_headroom(ax)
     panel_title(ax, "B", "two dynamics, one collapse")
 
     ax = axes[1, 0]

@@ -22,3 +22,20 @@ paper/*.spl
 paper/*.run.xml
 
 results/figure_log*.txt
+
+# CSF build artefacts (paper-csf/ is assembled by paper-csf/assemble.py)
+paper-csf/*.aux
+paper-csf/*.bbl
+paper-csf/*.blg
+paper-csf/*.log
+paper-csf/*.out
+paper-csf/*.toc
+paper-csf/*.abs
+paper-csf/*.fls
+paper-csf/*.fdb_latexmk
+paper-csf/*.synctex.gz
+paper-csf/*.spl
+paper-csf/*.run.xml
+
+# Publisher template packages, downloaded not authored
+els-cas-templates.zip

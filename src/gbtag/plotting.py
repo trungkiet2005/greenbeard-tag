@@ -81,6 +81,59 @@ CLASS_LABEL = {
 }
 
 
+#: Relative luminance at which black and white text have equal WCAG contrast
+#: against the same background.  Below it white reads better, above it black
+#: does, and a rule keyed to the *value* of a cell rather than to the colour
+#: the value maps to gets this backwards on any diverging colormap.
+LUMINANCE_CROSSOVER = 0.1791
+
+#: Smallest WCAG contrast ratio accepted for text drawn over painted content.
+#: 4.5 is the AA requirement for body-sized text, which is what the in-axes
+#: annotations are once the figure is reduced onto the page.
+MIN_CONTRAST = 4.5
+
+#: Background luminance above which a text counts as sitting on bare paper
+#: rather than on ink.
+PAPER_LUMINANCE = 0.75
+
+#: Smallest contrast accepted for a text on bare paper.  Such a label is drawn
+#: in the colour of the curve it names, so it is a graphical object in the
+#: sense of WCAG 1.4.11 and 3:1 is the applicable ratio; the alternative is to
+#: force every keyed label to black and lose the key.
+PAPER_MIN_CONTRAST = 3.0
+
+
+def relative_luminance(colour) -> float:
+    """WCAG relative luminance of any matplotlib colour specification."""
+    red, green, blue = mpl.colors.to_rgb(colour)
+
+    def linear(channel: float) -> float:
+        return (
+            channel / 12.92
+            if channel <= 0.04045
+            else ((channel + 0.055) / 1.055) ** 2.4
+        )
+
+    return 0.2126 * linear(red) + 0.7152 * linear(green) + 0.0722 * linear(blue)
+
+
+def contrast_ratio(first, second) -> float:
+    """WCAG contrast ratio between two colours, from 1 (equal) to 21."""
+    lo, hi = sorted((relative_luminance(first), relative_luminance(second)))
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def readable_on(background) -> str:
+    """Black or white, whichever the eye can actually read on `background`.
+
+    Cell labels on a heatmap must be keyed to the colour the cell was painted,
+    not to the number it encodes: a diverging colormap is lightest in the
+    middle of its range and darkest at both ends, so a rule of the form "white
+    in the middle band" hides exactly the cells it means to show.
+    """
+    return "black" if relative_luminance(background) > LUMINANCE_CROSSOVER else "white"
+
+
 def badge_colour(badge: str):
     """Colour of a badge type."""
     return {"G": PALETTE["safe"], "F": PALETTE["unsafe"], "N": PALETTE["neutral"]}[badge]
@@ -168,6 +221,114 @@ def fitted_legend(ax: plt.Axes, **kwargs):
         warnings.warn(
             f"legend overhangs its axes by {overhang:.0f} px; "
             "reduce ncol, handlelength or columnspacing",
+            stacklevel=2,
+        )
+    return legend
+
+
+def _painted_top(ax: plt.Axes) -> float:
+    """Highest pixel of anything drawn inside `ax`, across its twins.
+
+    Bars, filled bands and curves all count, and a twin axis shares the box, so
+    its data is part of what the legend has to clear.
+    """
+    fig = ax.get_figure()
+    renderer = fig.canvas.get_renderer()
+    frame = ax.get_window_extent()
+    top = -float("inf")
+    for other in fig.get_axes():
+        if other.bbox.bounds != ax.bbox.bounds:
+            continue
+        for line in other.get_lines():
+            data = line.get_xydata()
+            if data is None or len(data) == 0:
+                continue
+            pixels = line.get_transform().transform(data)
+            inside = pixels[
+                (pixels[:, 0] >= frame.x0) & (pixels[:, 0] <= frame.x1)
+                & (pixels[:, 1] >= frame.y0) & (pixels[:, 1] <= frame.y1)
+            ]
+            if len(inside):
+                top = max(top, float(inside[:, 1].max()))
+        for artist in list(other.patches) + list(other.collections):
+            try:
+                box = artist.get_window_extent(renderer)
+            except (RuntimeError, ValueError):  # pragma: no cover
+                continue
+            if box.y1 <= frame.y1 + 1.0 and box.x1 >= frame.x0:
+                top = max(top, min(box.y1, frame.y1))
+    return top
+
+
+def fit_headroom(ax: plt.Axes, *, pad: float = 6.0, rounds: int = 8) -> None:
+    """Raise the top limit exactly enough to seat the legend, and no more.
+
+    A legend sitting on a curve and a band of empty axis under the legend are
+    the same mistake made in opposite directions.  The limit is solved for
+    rather than guessed: the panel is redrawn, the distance from the top of the
+    data to the bottom of the legend is measured, and the limit is corrected
+    until that distance is `pad` pixels.
+    """
+    legend = ax.get_legend()
+    if legend is None:
+        return
+    fig = ax.get_figure()
+    for _ in range(rounds):
+        fig.canvas.draw()
+        frame = ax.get_window_extent()
+        top = _painted_top(ax)
+        if top == -float("inf"):
+            return
+        gap = legend.get_window_extent().y0 - top
+        if abs(gap - pad) <= 1.0:
+            return
+        lo, hi = ax.get_ylim()
+        ax.set_ylim(lo, hi - (gap - pad) * (hi - lo) / frame.height)
+
+
+#: ``gid`` carried by a legend deliberately placed outside its own axes, so the
+#: layout audit checks it against the neighbouring panels and the canvas edge
+#: instead of reporting the intended overhang.
+OUTSIDE_LEGEND_GID = "gbtag-legend-below"
+
+
+def legend_below(ax: plt.Axes, *, ncol: int | None = None, pad: float = 0.05,
+                 **kwargs):
+    """Draw the legend under `ax` rather than over the data it describes.
+
+    A stackplot or a filled band paints the whole panel, so there is no empty
+    region for an in-axes legend to occupy and matplotlib's own placement rule
+    only avoids the *bulk* of the data.  The anchor is measured after a draw so
+    the legend clears the tick labels and the axis label whatever size they take.
+    """
+    kwargs.setdefault("fontsize", FS["legend"])
+    fig = ax.get_figure()
+    fig.canvas.draw()
+
+    frame = ax.get_window_extent()
+    lowest = frame.y0
+    for artist in (ax.xaxis.label, *ax.get_xticklabels()):
+        if artist.get_visible() and artist.get_text().strip():
+            lowest = min(lowest, artist.get_window_extent().y0)
+    anchor = (lowest - frame.y0) / frame.height - pad
+
+    handles, labels = ax.get_legend_handles_labels()
+    legend = ax.legend(
+        handles,
+        labels,
+        loc="upper center",
+        bbox_to_anchor=(0.5, anchor),
+        ncol=len(labels) if ncol is None else ncol,
+        borderaxespad=0.0,
+        **kwargs,
+    )
+    legend.set_gid(OUTSIDE_LEGEND_GID)
+    fig.canvas.draw()
+    box = legend.get_window_extent()
+    if box.width - frame.width > 1.0:
+        warnings.warn(
+            f"legend below the axes is {box.width - frame.width:.0f} px wider "
+            "than its panel; reduce ncol or fontsize",
             stacklevel=2,
         )
     return legend
