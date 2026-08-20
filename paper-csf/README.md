@@ -20,11 +20,21 @@ Current state: 26 pages, 0 errors, 0 undefined references, 1 overfull box of
 the page), 79 references printed.
 
 `assemble.py` is the single source of truth. It copies the body of
-`../paper/main.tex` verbatim and applies a short, asserted list of changes, so
+`../paper/main.tex` and applies a short, asserted list of changes, so
 any edit to the underlying study propagates here by re-running it. Every
 substitution is guarded by a uniqueness assertion, so the build fails loudly
 rather than silently skipping an edit. It also fails if an em-dash appears in
 non-comment text.
+
+One part of the body is not copied but replaced: Related work, which CSF gets
+at half length as a subsection of the Introduction (see below). Two assertions
+police that replacement. The first fails if the condensed text drops any
+reference the full-length section cited, which matters because 28 of those
+references are cited nowhere else in the paper and would leave the
+bibliography without any visible symptom. The second fails if the condensed
+text runs outside a 620 to 790 word budget, counted with citation and
+cross-reference arguments stripped, since counting those inflates a
+citation-dense section by about a hundred words.
 
 ## Template and class files
 
@@ -51,6 +61,8 @@ Two things about the CAS bundle are worth knowing:
 
 | | venue-neutral | CSF |
 |---|---|---|
+| sections | 7 top level: Introduction, Related work, Model, Results, Discussion, Limitations, Conclusion | 5 top level: Related work demoted to 1.1 and halved, Limitations folded into the Discussion as 4.1 |
+| back matter | references, then appendix | declarations, CRediT, appendix, then references, as elsarticle and the sibling AMC manuscript do |
 | class | `article`, 11pt, a4 | `cas-sc`, `a4paper,fleqn,longmktitle` (single column, as CSF requires of LaTeX submissions) |
 | references | `unsrtnat` | `elsarticle-num-names` (numbered, `\citet` still resolves to author names) |
 | abstract | 248 words, JTB framing | 246 words, nonlinear-dynamics framing |
@@ -68,7 +80,10 @@ Four blocks of new prose were written for this version, all in
   the rest concern the global basin structure.
 - `_blocks_related.tex` situates the model in evolutionary game dynamics and
   the statistical physics of cooperation, and says what distinguishes this
-  system from that literature.
+  system from that literature. It is no longer inserted into the manuscript:
+  its content is folded into `_related_csf.tex`, and the file is kept because
+  it is the record of what that framing paragraph cited, which is what the
+  no-dropped-reference assertion checks against.
 - `_blocks_model.tex` writes the replicator flow, the transversal eigenvalue
   `lambda_{i|j}`, and the observation that every threshold in the paper is a
   simple root of one such eigenvalue, hence a transcritical bifurcation of the
@@ -111,9 +126,11 @@ changed.
    what equal contribution means; correct them if that is not what happened.
 3. **Generative AI statement.** `_blocks_declarations.tex` carries a statement
    describing use of a language-model assistant for drafting, code scaffolding
-   and number checking. Confirm it matches your use, or edit it. Elsevier
-   requires this section immediately before the reference list, which is where
-   `assemble.py` puts it.
+   and number checking. Confirm it matches your use, or edit it. Elsevier asks
+   for it in a dedicated section at the end of the manuscript ahead of the
+   reference list; `assemble.py` puts it last among the declarations, followed
+   by the CRediT statement and the appendix, which is the order the published
+   Elsevier layout uses.
 4. **Data deposit.** CSF applies Option C of the Elsevier research data policy:
    data should live in a repository, be cited and be linked. The GitHub link is
    in the data availability statement; archiving the repository on Zenodo to
