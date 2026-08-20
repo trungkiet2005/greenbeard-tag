@@ -7,6 +7,7 @@ declaration one must be .doc/.docx.
 Run from paper-csf/:  python make_submission_files.py
 """
 
+import re
 from pathlib import Path
 
 from docx import Document
@@ -17,13 +18,28 @@ HERE = Path(__file__).resolve().parent
 TITLE = ("Forgeable greenbeards: bistability and hollow collapse in the "
          "evolutionary dynamics of certified agent populations")
 
-HIGHLIGHTS = [
-    "A forgeable identity tag turns certification into a nonlinear population flow",
-    "In-group conduct is a security parameter: forgery tolerance 0.866 versus 0.400",
-    "The protective fine diverges as forgery becomes undetectable",
-    "Behavioural mimics hollow out the tag before conduct ever degrades",
-    "The flow is bistable, so certification buys robustness and not a safer level",
-]
+def _highlights_from_front_matter():
+    r"""The highlights the typeset paper carries, read out of _front.tex.
+
+    They used to be a second copy kept here by hand, and the two drifted: the
+    manuscript said "Two disjoint attracting faces" where the uploaded .docx
+    still said "The flow is bistable", and one bullet had lost its "at r=0".
+    Editorial Manager takes the .docx and the reviewer reads the PDF, so the
+    two must be the same sentence.  Reading one from the other is the only way
+    that stays true.
+    """
+    front = (HERE / "_front.tex").read_text(encoding="utf-8")
+    body = re.search(r"\\begin\{highlights\}(.*?)\\end\{highlights\}",
+                     front, re.S)
+    assert body, "no highlights environment in _front.tex"
+    items = [line.strip()[len(r"\item"):].strip()
+             for line in body.group(1).split("\n")
+             if line.strip().startswith(r"\item")]
+    assert items, "highlights environment is empty"
+    return items
+
+
+HIGHLIGHTS = _highlights_from_front_matter()
 
 for h in HIGHLIGHTS:
     assert len(h) <= 85, f"highlight over 85 characters ({len(h)}): {h}"

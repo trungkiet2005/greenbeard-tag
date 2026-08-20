@@ -162,8 +162,9 @@ def test_dues_gradient_is_negative() -> None:
 
 
 def test_nucleation_threshold_value_and_boundary() -> None:
-    r_star = nucleation_threshold(TABLES, 0.0, "CS", "CAS", "CAS", 2.0)
+    r_star, direction = nucleation_threshold(TABLES, 0.0, "CS", "CAS", "CAS", 2.0)
     assert r_star == pytest.approx(0.0629, abs=2e-4)
+    assert direction == 1
     below = replace(WM, r=r_star - 0.005)
     above = replace(WM, r=r_star + 0.005)
     assert not invades(TABLES, below, 0.0, cfg.CLUB, cfg.ANARCHY)
@@ -547,3 +548,44 @@ def test_harm_decomposition_orientation_is_pinned() -> None:
     # and both interiors stay clean
     assert dec.conditional["badged with badged"] == pytest.approx(0.0, abs=1e-12)
     assert dec.conditional["unbadged with unbadged"] == pytest.approx(0.0, abs=1e-12)
+
+
+def test_nucleation_threshold_reports_the_sign_of_its_denominator() -> None:
+    """Against a *safe* unbadged resident the inequality runs the other way.
+
+    P(u,u) - P(v,w) is negative there, so a caller that reads the returned
+    number as a lower bound on assortment inverts the result.  This is the case
+    that separates nucleation from anarchy from nucleation from a safe
+    uncertified regime, so it is the one worth pinning.
+    """
+    r_star, direction = nucleation_threshold(TABLES, 0.0, "CS", "CAS", "CS", 2.0)
+    assert direction == -1
+    assert r_star == pytest.approx(0.2397, abs=5e-4)
+    below = replace(WM, r=r_star - 0.01)
+    above = replace(WM, r=r_star + 0.01)
+    safe_resident = ("N", "CS", "CS")
+    assert invades(TABLES, below, 0.0, cfg.CLUB, safe_resident)
+    assert not invades(TABLES, above, 0.0, cfg.CLUB, safe_resident)
+
+
+def test_nucleation_threshold_flags_the_degenerate_denominator() -> None:
+    """When P(u,u) equals P(v,w) no assortment lets the club in."""
+    import math
+
+    r_star, direction = nucleation_threshold(TABLES, 0.0, "CAS", "CAS", "CAS", 2.0)
+    assert direction == 0
+    assert math.isnan(r_star)
+
+
+def test_first_strike_assortment_bound_is_where_proposition_one_stops() -> None:
+    """Proposition 1 is false at the manuscript's own baseline assortment.
+
+    The uncertified attractor of the bistability result is a safe unbadged
+    population at L = 0, which is only consistent with Proposition 1 because
+    the baseline r = 0.1 sits above this bound.
+    """
+    r_dagger = th.first_strike_assortment_bound(TABLES)
+    assert r_dagger == pytest.approx(0.0764, abs=5e-4)
+    assert uncertified_safety_is_impossible(TABLES, 0.0, r_dagger - 0.005)
+    assert not uncertified_safety_is_impossible(TABLES, 0.0, r_dagger + 0.005)
+    assert not uncertified_safety_is_impossible(TABLES, 0.0, cfg.IDENTITY.r)

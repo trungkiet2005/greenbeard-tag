@@ -11,8 +11,13 @@ to survive forgery, and what it takes to rebuild trust once it collapses.
 
 The interaction layer (`src/gbtag/race.py`) is unmodified with respect to
 the sister studies (`deployment-layer-selection`, `delegation-cascade`), so
-every identity effect is attributable to the new layer alone.  Everything
-is evaluated exactly; there is no simulation anywhere in the results.
+every identity effect is attributable to the new layer alone.  The
+interaction and identity layers are evaluated exactly, with no simulation:
+the race is summed over the horizon law and the handshake is an exact
+four-term expectation.  The only sampled quantities are the replicator
+basin distributions, drawn uniformly from the simplex under a fixed seed
+(`config.SEED`); the headline split uses `config.BASIN_STARTS` draws and is
+reported with a Wilson interval.
 
 ## Layout
 
@@ -30,7 +35,9 @@ src/gbtag/          the model
 scripts/            run_analysis, run_robustness, make_figures, build_paper
 tests/              exactness, propositions, instruments, figure style
 results/            tables/*.csv, key_numbers.json, grids.npz, figures/
-paper/              the manuscript
+paper/              the venue-neutral manuscript, the single content source
+paper-csf/          the Chaos, Solitons & Fractals submission package,
+                    assembled from paper/main.tex by paper-csf/assemble.py
 ```
 
 ## Reproduce
@@ -47,7 +54,15 @@ python scripts/make_figures.py     # results/figures/fig*.{pdf,png}
 python scripts/check_numbers.py    # every scalar the paper quotes
 python scripts/build_paper.py      # requires pdflatex
 pytest                             # the full suite, including figure layout
+
+cd paper-csf && python assemble.py # regenerate the CSF main.tex
+latexmk -pdf main                  # build it
 ```
+
+`run_analysis.py` takes about fifteen minutes; the basin sample dominates
+it, and `config.BASIN_STARTS` is the knob.  Elsevier does not redistribute
+the CAS template bundle, so `els-cas-templates.zip` is not committed here;
+`paper-csf/` already carries the two class files it needs.
 
 Two safeguards are worth knowing about. `scripts/check_numbers.py` pairs each
 number quoted in the manuscript with the results entry it came from

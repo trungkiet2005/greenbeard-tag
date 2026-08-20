@@ -36,6 +36,19 @@ from gbtag.race import STRATEGIES, build_race_tables
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _wilson(successes: int, trials: int, z: float = 1.959963985) -> tuple[float, float]:
+    """Wilson score interval for a binomial proportion.
+
+    The normal approximation is not usable here: it is symmetric, and a basin
+    share near a boundary would get an interval running outside ``[0, 1]``.
+    """
+    p = successes / trials
+    den = 1.0 + z * z / trials
+    centre = (p + z * z / (2 * trials)) / den
+    half = z * np.sqrt(p * (1 - p) / trials + z * z / (4 * trials * trials)) / den
+    return float(centre - half), float(centre + half)
+
+
 def _frame(matrix: np.ndarray, labels) -> pd.DataFrame:
     return pd.DataFrame(matrix, index=list(labels), columns=list(labels))
 
@@ -79,6 +92,12 @@ def main(outdir: Path) -> None:
     key["first_strike_threshold_cs"] = th.first_strike_threshold(race, "CS")
     key["uncertified_safety_impossible_at_zero"] = th.uncertified_safety_is_impossible(
         race, 0.0
+    )
+    key["first_strike_assortment_bound"] = th.first_strike_assortment_bound(race)
+    # The same statement at the baseline assortment, where it is false: this is
+    # the hypothesis Proposition 1 now carries, recorded so it cannot drift.
+    key["uncertified_safety_impossible_at_baseline_r"] = (
+        th.uncertified_safety_is_impossible(race, 0.0, cfg.IDENTITY.r)
     )
     p0 = th.race_private(race, 0.0)
     idx = {s: i for i, s in enumerate(STRATEGIES)}
@@ -128,8 +147,13 @@ def main(outdir: Path) -> None:
     key["spoof_threshold_mimic_assorted"] = th.spoof_threshold(
         race, base, 0.0, cfg.CLUB, cfg.MIMIC
     )
-    key["nucleation_threshold"] = th.nucleation_threshold(
+    key["nucleation_threshold"], key["nucleation_direction"] = th.nucleation_threshold(
         race, 0.0, "CS", "CAS", "CAS", base.kappa_g
+    )
+    # The same club against a *safe* unbadged resident: the denominator changes
+    # sign, so assortment obstructs the club instead of enabling it.
+    key["nucleation_vs_safe_resident"], key["nucleation_vs_safe_direction"] = (
+        th.nucleation_threshold(race, 0.0, "CS", "CAS", "CS", base.kappa_g)
     )
     key["badge_futility"] = th.badge_is_futile_against_nonconditioners(race, wm, 0.0)
     key["reentry_forger_r0"] = th.reentry_threshold(
@@ -183,7 +207,7 @@ def main(outdir: Path) -> None:
                     "sigma_star_mimic": th.mimic_threshold_closed_form(
                         race, 0.0, "CS", "CAS", kg, 0.0, rho
                     ),
-                    "r_star": th.nucleation_threshold(race, 0.0, "CS", "CAS", "CAS", kg),
+                    "r_star": th.nucleation_threshold(race, 0.0, "CS", "CAS", "CAS", kg)[0],
                 }
             )
     pd.DataFrame(thr_rows).to_csv(tables_dir / "thresholds.csv", index=False)
@@ -370,12 +394,13 @@ def main(outdir: Path) -> None:
     pd.DataFrame(chan_rows).to_csv(tables_dir / "detection_channels.csv", index=False)
 
     # ------------------------------------- bistability and the entry barrier
-    rep = dict(n_starts=cfg.REPLICATOR_STARTS, seed=cfg.SEED)
-    basins = th.equilibrium(fun, race, "replicator", **rep)
-    mono = pools["full"]
-
-    # the two faces of the flow, scored separately
+    # The basin split is the one estimated quantity in the study, so it gets its
+    # own and much larger sample; everything else here is a mean over the same
+    # draws and converges far sooner.
+    rep = dict(n_starts=cfg.BASIN_STARTS, seed=cfg.SEED)
     ends = replicator_attractors(fun.fitness, **rep)
+    basins = th.equilibrium(fun, race, "replicator", ends=ends, **rep)
+    mono = pools["full"]
     carries = np.array([b != "N" for b in fun.badge], dtype=float)
     is_certified = ends @ carries > 0.5
     rows = []
@@ -395,6 +420,40 @@ def main(outdir: Path) -> None:
     faces = pd.DataFrame(rows)
     faces.to_csv(tables_dir / "bistability.csv", index=False)
     key["certified_basin_share"] = float(is_certified.mean())
+
+    # A basin share is a sample proportion, not a property of the flow, so it
+    # ships with the interval that says how much of its second digit is real.
+    lo, hi = _wilson(int(is_certified.sum()), len(ends))
+    key["basin_starts"] = int(len(ends))
+    key["certified_basin_wilson_lo"] = lo
+    key["certified_basin_wilson_hi"] = hi
+
+    # No draw has ever landed between the two faces, but "no badge-mixed
+    # attractor" is a claim about the sample and is recorded as one.
+    badged_mass = ends @ carries
+    key["badge_mixed_end_states"] = int(
+        ((badged_mass > 1e-6) & (badged_mass < 1 - 1e-6)).sum()
+    )
+
+    # The dominant design of each face is quoted in the text.  Its spread across
+    # the face is quoted too: the faces are continua of neutrally stable rest
+    # points, so a mean alone reads as if one composition were selected.
+    for tag, mask, design in (
+        ("certified", is_certified, ("G", "CS", "CAS")),
+        ("uncertified", ~is_certified, ("N", "CAS", "CS")),
+    ):
+        col = fun.designs.index(design)
+        share = ends[mask][:, col]
+        key[f"{tag}_face_dominant_mean"] = float(share.mean())
+        key[f"{tag}_face_dominant_min"] = float(share.min())
+        key[f"{tag}_face_dominant_max"] = float(share.max())
+
+    # The residual the data statement quotes as evidence that every end state is
+    # a rest point.  max_i (f_i - fbar) is the right statistic; the replicator
+    # field itself is automatically tiny wherever x_i is.
+    growth = ends @ fun.fitness.T
+    growth = growth - (ends * growth).sum(axis=1, keepdims=True)
+    key["attractor_max_growth"] = float(growth.max())
     key["basin_unsafe_max"] = float(
         max(aggregate_unsafe_frequency(e, fun) for e in ends)
     )

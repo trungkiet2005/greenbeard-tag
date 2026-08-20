@@ -94,7 +94,10 @@ def replicator_attractor(
 def replicator_attractors(
     payoff: np.ndarray,
     n_starts: int = 200,
-    seed: int = 20260818,
+    # The published run seeds from config.SEED.  A different default here would
+    # silently give a reader who calls this directly a different basin share
+    # from the one in the paper, with nothing to point at.
+    seed: int = 20260819,
     t_end: float = 3000.0,
 ) -> np.ndarray:
     """End states of the replicator flow from ``n_starts`` interior starts.

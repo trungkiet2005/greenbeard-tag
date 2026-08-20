@@ -14,19 +14,26 @@ from pathlib import Path
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-#: Width in inches of every saved figure.  The text block of the manuscript is
-#: 6.27 in, so figures are reduced by 0.91 uniformly.
+#: Width in inches of every saved figure.  Every figure is saved at this one
+#: width so the whole set is reduced by a single factor on the page: 0.943 in
+#: the Elsevier single-column layout the submission uses (\linewidth is
+#: 468.33 TeX pt against a 496.8 pt canvas), 0.912 in the venue-neutral one.
 FIG_WIDTH = 6.9
 
-#: The only font sizes used anywhere.  Values are points before the uniform
-#: 0.91 reduction, so the smallest text on the page is about 6.4 pt.
+#: The only font sizes used anywhere.  Values are points *before* the page
+#: reduction above, so the number that matters is the product.  Elsevier asks
+#: for at least 7 pt of printed text, and "tiny" at 7.0 printed at 6.6 pt in
+#: the submission layout, which is why it is 7.5 here: 7.5 x 0.943 = 7.07 pt.
+#: Raising FIG_WIDTH instead would have made the printed text smaller, not
+#: larger, and raising the whole dict would have changed the font-to-canvas
+#: ratio that the no-overlap audit exists to police.
 FS = {
     "title": 9.5,   # panel titles
     "label": 9.0,   # axis labels, simplex vertex labels
     "tick": 8.0,    # tick labels
     "legend": 8.0,  # legend entries
     "annot": 7.5,   # in-axes annotations
-    "tiny": 7.0,    # dense in-axes annotations (cell values, threshold marks)
+    "tiny": 7.5,    # dense in-axes annotations (cell values, threshold marks)
 }
 
 #: Colour-blind-safe qualitative palette (Okabe-Ito), with the race designs

@@ -73,6 +73,11 @@
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{remark}[theorem]{Remark}
+%% Two of the numbered statements are computations over sampled initial
+%% conditions rather than proofs.  Calling them propositions would promise a
+%% proof that the appendix does not contain, so they get their own environment
+%% on the shared counter.
+\newtheorem{observation}[theorem]{Observation}
 
 \newcommand{\AS}{\textsf{AS}}
 \newcommand{\CS}{\textsf{CS}}
@@ -135,35 +140,35 @@ Writing -- review and editing}
 
 \begin{abstract}
 A greenbeard is a signal that lets its bearers treat one another differently
-from everyone else, with the classical vulnerability that impostors can wear it.
-Machine agents now carry such signals: provenance attestations
-and certification marks, cheap to check and forgeable. We make the mark
-a strategic variable in a four-strategy model of a competitive development race,
-holding the game fixed so that every effect belongs to the identity layer, and
-analyse the resulting 48-strategy replicator flow and its finite-population
-counterpart. A design is a triple: a badge that is genuine, forged or absent,
-plus the conduct it runs towards partners who pass verification and towards
-everyone else. A forged badge passes with probability $\sigma$. Every
-transition we report is a transversal eigenvalue crossing zero, so each critical
-value is exact. Identity earns its keep only below a
-reciprocity threshold, where deterrence fails. A club that merely reciprocates
-within its membership tolerates more than twice the forgery of one that trusts
-unconditionally, so in-group conduct is a security parameter. The protective
-fine diverges as forgery becomes undetectable, so penalties cannot substitute
-for detection. Collapse is graceful in the wrong way: a behavioural mimic
-invades before the exploiter, hollowing out the credential while conduct still
-looks sound, and better interaction structure leaves it the only failure mode.
-The flow is bistable with no badge-mixed attractor, so certification buys
-robustness rather than a lower level of harm, and what holds it up is the rent
-it charges outsiders.
+from everyone else, and impostors can wear it. Machine agents now carry such
+signals: provenance attestations and certification marks, cheap to check and
+forgeable. We make the mark a strategic variable in a four-design race model,
+holding the game fixed so every effect belongs to the identity layer, and
+analyse the resulting 48-design replicator flow and its finite-population
+counterpart. A design pairs a badge, genuine, forged or absent, with in-group
+and out-group conduct; a forged badge passes with a fixed probability. Six of
+the eight transitions are transversal eigenvalues crossing zero, so those
+critical values are exact. Identity earns its keep only below a reciprocity
+threshold, and below an assortment at which reciprocity holds a safe population
+unaided. A club that reciprocates only within its membership tolerates more
+than twice the forgery of one that trusts unconditionally, so in-group conduct
+is a security parameter, and the protective fine diverges as forgery becomes
+undetectable, so penalties cannot substitute for detection. Collapse is
+graceful in the wrong way: above an assortment of about 0.08 a behavioural
+mimic invades before the exploiter, hollowing out the credential while conduct
+still looks sound, so better interaction structure leaves mimicry the only
+failure mode. The flow settles onto one of two disjoint faces, badged or
+unbadged, with nothing between them, so certification buys robustness rather
+than a lower level of harm, held up by the pressure it puts on unbadged
+conduct.
 \end{abstract}
 
 \begin{highlights}
 \item A forgeable identity tag turns certification into a nonlinear population flow
-\item In-group conduct is a security parameter: forgery tolerance 0.866 versus 0.400
+\item In-group conduct is a security parameter: forgery tolerance 0.866 vs 0.400 at r=0
 \item The protective fine diverges as forgery becomes undetectable
 \item Behavioural mimics hollow out the tag before conduct ever degrades
-\item The flow is bistable, so certification buys robustness and not a safer level
+\item Two disjoint attracting faces: certification buys robustness, not a safer level
 \end{highlights}
 
 \begin{keywords}

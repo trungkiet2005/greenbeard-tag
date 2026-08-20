@@ -22,17 +22,38 @@ design $i$ is
 \lambda_{i \mid j} \;=\; f_i(e_j) - f_j(e_j)
   \;=\; r\,\piP(i,i) \;+\; (1-r)\,\piP(i,j) \;-\; \piP(j,j).
 \end{equation}
-Each $\lambda_{i \mid j}$ is affine in the spoof success $\sigma$, in the fine
-$\rho$, in the badge costs $\kappa_g$ and $\kappa_f$ and in the liability $L$,
-because the handshake of Equation~\eqref{eq:handshake} is affine in the pass
-rates and the functional of Equation~\eqref{eq:private} is affine in the rest.
-Every threshold reported in Section~\ref{sec:results} is therefore the unique
-simple root of one such eigenvalue in one parameter. The qualitative event each
-threshold marks is a transcritical bifurcation of the flow restricted to the
+Each $\lambda_{i \mid j}$ is affine in the fine $\rho$, in the badge costs
+$\kappa_g$ and $\kappa_f$, in the liability $L$ and in the assortment $r$,
+because the functional of Equation~\eqref{eq:private} is affine in each of
+them. In the spoof success $\sigma$ it is affine only where the handshake is
+evaluated on at most one forged badge. Equation~\eqref{eq:handshake} is affine
+in each pass rate separately but \emph{bilinear} in the pair, so a term in
+which both seats carry forged badges contributes a $\sigma^{2}$, and
+Equation~\eqref{eq:eigen} contains such a term whenever the invader is a
+badge-conditional forger meeting itself under assortment, or invader and
+resident are both forgers. Of the thresholds reported below, exactly one is
+affected: at $r = 0.1$ the mimic's eigenvalue is
+$-0.2075\,\sigma^{2} + 32.5075\,\sigma - 30.300$, whose only root in $[0,1]$ is
+$\sigma_m = 0.9377$, the other lying at $155.7$. Every threshold reported in
+Section~\ref{sec:results} is therefore the unique root in $[0,1]$ of one such
+eigenvalue in one parameter, and is available in closed form either way.
+
+The qualitative event each threshold marks is a transcritical
+bifurcation~\citep{strogatz2018nonlinear} of the flow restricted to the
 edge $\{e_i, e_j\}$, on which Equation~\eqref{eq:replicator} reduces to
-$\dot{x} = x(1-x)\,[\,f_i - f_j\,]$ with the bracket affine in $x$: as the
-parameter crosses the threshold, the interior edge equilibrium passes through
-the vertex and exchanges stability with it. This is why the thresholds below
-are exact rather than estimated, and it is what the closed forms in
-Section~\ref{sec:results} are expressions for.
+$\dot{x} = x(1-x)\,[\,f_i(x) - f_j(x)\,]$ with the bracket affine in $x$ at
+fixed parameters: writing it as $\alpha + \beta x$, the interior edge
+equilibrium sits at $-\alpha/\beta$ with $\alpha = \lambda_{i \mid j}$, so it
+passes through the vertex exactly as the eigenvalue changes sign and exchanges
+stability with it. The two conditions this needs hold at every threshold we
+report. Transversality is the requirement that the eigenvalue cross with
+non-zero speed in its parameter, which the closed forms below exhibit
+directly; non-degeneracy is the requirement $\beta \neq 0$, and the values are
+$2.48$ and $-0.70$ on the exploiter edge at $r = 0$ and $r = 0.1$, $-0.0079$
+and $-0.0072$ on the mimic edge, $-2.08$ on the reciprocity edge and $29.80$
+on the nucleation edge. On the mimic edge $\beta$ is small, so the interior
+equilibrium traverses the edge within a $\sigma$ window of order
+$10^{-4}$ and the exchange is sharp in practice as well as in principle. This
+is why the thresholds below are exact rather than estimated, and it is what the
+closed forms in Section~\ref{sec:results} are expressions for.
 

@@ -156,17 +156,44 @@ def first_strike_threshold(tables: RaceTables, resident: str) -> float | None:
     return float((a[i, j] - a[j, j]) / gain_m)
 
 
+def first_strike_assortment_bound(tables: RaceTables) -> float:
+    r"""Assortment above which reciprocity alone holds a safe unbadged population.
+
+    The first-striker's transversal eigenvalue at a ``(N, *, CS)`` resident is
+    ``A(CAS,CS) - A(CS,CS) - r [A(CAS,CS) - A(CAS,CAS)]``, which is affine and
+    decreasing in ``r``.  Above its root the striker meets enough of its own
+    aggression in self-encounters to give back the half-step it steals, and the
+    safe unbadged residents survive.  The ``(N, *, AS)`` residents have the
+    larger root (0.574), so this one binds.
+
+    This is why the uncertified regime of the bistability result is safe at
+    ``L = 0``: the baseline ``r = 0.1`` is above it.
+    """
+    p = tables.payoff
+    i = _IDX
+    return float(
+        (p[i["CAS"], i["CS"]] - p[i["CS"], i["CS"]])
+        / (p[i["CAS"], i["CS"]] - p[i["CAS"], i["CAS"]])
+    )
+
+
 def uncertified_safety_is_impossible(
-    tables: RaceTables, liability: float, tol: float = 1e-9
+    tables: RaceTables, liability: float, r: float = 0.0, tol: float = 1e-9
 ) -> bool:
-    """Below ``L_R``, every safe unbadged population is invadable.
+    """Below ``L_R`` *and* below ``r_dagger``, every safe unbadged population is
+    invadable.
 
     A safe unbadged resident plays a safe design in self-play, so its
     ``s_out`` is ``AS`` or ``CS`` (badges are absent, every check fails, and
     only ``s_out`` is ever executed).  The statement is that the plain
     first-striker ``(N, CAS, CAS)`` invades every such resident.
+
+    Both bounds are needed.  The assortment default is ``0.0`` because that is
+    the case the closed form ``L_R`` describes; at the manuscript's baseline
+    ``r = 0.1`` the four ``(N, *, CS)`` residents resist and this returns
+    ``False``, which is the honest answer and not a bug.
     """
-    params = IdentityParams(sigma=0.0, kappa_g=0.0, kappa_f=0.0, rho=0.0, r=0.0)
+    params = IdentityParams(sigma=0.0, kappa_g=0.0, kappa_f=0.0, rho=0.0, r=r)
     striker = ("N", "CAS", "CAS")
     for s_in in STRATEGIES:
         for s_out in ("AS", "CS"):
@@ -352,10 +379,27 @@ def nucleation_threshold(
 
     .. math:: r > r^{*} = \frac{P(w,w) - P(v,w) + \kappa_g}
         {P(u,u) - P(v,w)} .
+
+    The direction of that inequality is the sign of the denominator, and the
+    sign is not always positive: 36 of the 64 ``(u, v, w)`` triples make it
+    non-positive.  For ``(CS, CAS, CS)`` -- the baseline club against a *safe*
+    unbadged resident, which is the transition between the two regimes of the
+    bistability result -- it is ``-2.631``, so the club invades *below*
+    ``r = 0.240`` and assortment obstructs it rather than enabling it.  Reading
+    the returned number as a lower bound in that case inverts the result, so
+    the sign is returned with it rather than left for the caller to rediscover.
+
+    Returns ``(r_star, direction)`` where ``direction`` is ``+1`` when the club
+    invades above ``r_star``, ``-1`` when it invades below, and ``0`` when the
+    denominator vanishes and no assortment lets the club in.
     """
     p = race_private(tables, liability)
     u, v, w = _IDX[club_in], _IDX[club_out], _IDX[resident]
-    return float((p[w, w] - p[v, w] + kappa_g) / (p[u, u] - p[v, w]))
+    denominator = p[u, u] - p[v, w]
+    if abs(denominator) < 1e-12:
+        return float("nan"), 0
+    r_star = float((p[w, w] - p[v, w] + kappa_g) / denominator)
+    return r_star, 1 if denominator > 0 else -1
 
 
 def badge_is_futile_against_nonconditioners(
@@ -372,16 +416,25 @@ def badge_is_futile_against_nonconditioners(
     certified design can invade any unconditional resident that its
     unbadged twin could not already invade: verification quality is
     irrelevant to nucleation.
+
+    The proposition is stated for *any* resident whose conduct does not
+    condition on badges, which includes badged and forged non-conditioners as
+    well as unbadged ones, so all three resident badge types are checked here.
     """
     wm = replace(params, r=0.0)
-    for s_in in STRATEGIES:
-        for s_out in STRATEGIES:
-            for w in STRATEGIES:
-                resident = ("N", w, w)
-                badged = pair_payoff(tables, wm, liability, ("G", s_in, s_out), resident)
-                plain = pair_payoff(tables, wm, liability, ("N", s_in, s_out), resident)
-                if abs(badged - (plain - wm.kappa_g)) > tol:
-                    return False
+    for resident_badge in ("N", "G", "F"):
+        for s_in in STRATEGIES:
+            for s_out in STRATEGIES:
+                for w in STRATEGIES:
+                    resident = (resident_badge, w, w)
+                    badged = pair_payoff(
+                        tables, wm, liability, ("G", s_in, s_out), resident
+                    )
+                    plain = pair_payoff(
+                        tables, wm, liability, ("N", s_in, s_out), resident
+                    )
+                    if abs(badged - (plain - wm.kappa_g)) > tol:
+                        return False
     return True
 
 
@@ -757,7 +810,7 @@ def out_group_policy_scan(
                 ),
                 nucleation_threshold=nucleation_threshold(
                     tables, liability, club_in, s_out, "CAS", params.kappa_g
-                ),
+                )[0],
                 entry_penalty=penalty,
                 boundary_unsafe=boundary,
                 certified_basin_share=basins.certified_basin_share,
@@ -930,9 +983,12 @@ def equilibrium(
     method: str = "sml",
     population_size: int = 100,
     beta: float = 0.05,
-    n_starts: int = 120,
+    # 200 is what every script passes and what the paper reports; a lower
+    # default here only produces basin shares that match nothing published.
+    n_starts: int = 200,
     seed: int = 20260819,
     mu: float = 0.01,
+    ends: np.ndarray | None = None,
 ) -> Equilibrium:
     """Long-run design distribution under the private functional.
 
@@ -978,7 +1034,11 @@ def equilibrium(
     if method != "replicator":
         raise ValueError(f"unknown method {method!r}")
 
-    ends = replicator_attractors(fun.fitness, n_starts=n_starts, seed=seed)
+    # A caller that also needs the raw end states can pass them in rather than
+    # pay for the integration twice.  At the basin sample size that is the
+    # difference between eight minutes and sixteen.
+    if ends is None:
+        ends = replicator_attractors(fun.fitness, n_starts=n_starts, seed=seed)
     scored = [_score_state(e, fun, tables, monomorphic=False) for e in ends]
     mean_state = ends.mean(axis=0)
     carries = np.array([b != "N" for b in fun.badge], dtype=float)

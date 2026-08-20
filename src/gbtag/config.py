@@ -59,7 +59,20 @@ POPULATION = 100
 BETA = 0.05
 
 #: Number of interior starts for the basin-averaged replicator attractor.
+#: This is a *sweep* budget: it is spent once per point of a sweep and once per
+#: marker of the bistability scatter, so raising it is quadratically expensive
+#: and buys nothing, because a sweep reports a mean and not a proportion.
 REPLICATOR_STARTS = 200
+
+#: Number of interior starts for the *basin proportion* itself.  That number is
+#: a sample proportion with a real standard error, and at 200 draws the error is
+#: about 0.035, which is larger than the two significant figures the manuscript
+#: used to quote: ten different seeds at 200 draws give shares from 0.365 to
+#: 0.440.  The estimate is quoted with a Wilson interval, so the sample size has
+#: to be large enough for that interval to be worth printing.  20000 draws take
+#: about fourteen minutes here and give a half-width below 0.007.  That is the
+#: dominant cost of ``run_analysis.py``; lower it if you only need one digit.
+BASIN_STARTS = 20000
 SEED = 20260819
 
 #: Grids shared by every sweep, so cross-sections always agree.

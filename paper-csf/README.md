@@ -15,12 +15,17 @@ pdflatex highlights                # optional, the standalone highlights page
 python make_submission_files.py    # highlights.docx + declaration_of_interest.docx
 ```
 
-Current state: 24 manuscript pages plus the standalone highlights page, 0
+Current state: 28 manuscript pages plus the standalone highlights page, 0
 errors, 0 undefined references, 1 overfull box of 117pt inside the CAS
-front-matter box (a class artefact, nothing protrudes on the page), 79
-references printed. Five top-level sections: 1 Introduction with 1.1 Related
+front-matter box (a class artefact, nothing protrudes on the page), 86
+references printed, abstract 248 words, 5 highlights all inside the
+85-character limit. Five top-level sections: 1 Introduction with 1.1 Related
 work, 2 Model, 3 Results, 4 Discussion with 4.1 Limitations, 5 Conclusion, then
 Appendix A and the references.
+
+Build it with `latexmk -pdf main`, not the four-pass recipe: `main.aux` is
+still changing at the third pass, so a fixed four passes can ship a stale
+cross-reference with a clean log.
 
 `assemble.py` is the single source of truth. It copies the body of
 `../paper/main.tex` and applies a short, asserted list of changes, so
@@ -103,39 +108,3 @@ and one rewriting a reference to unnamed "sister studies" so it stands alone.
 Ten references were appended to `refs.bib`, each verified against Crossref, and
 each cited exactly where it supports the sentence. No existing entry was
 changed.
-
-## Files to upload to Editorial Manager
-
-| file | submission item |
-|---|---|
-| `main.tex`, `refs.bib`, `tables_generated.tex`, `robustness_generated.tex`, `cas-sc.cls`, `cas-common.sty`, `thumbnails/` | manuscript source |
-| `main.pdf` | built manuscript, for reference |
-| `figures/fig01..fig09.pdf` | figures, one file each, vector PDF |
-| `highlights.docx` | Highlights |
-| `declaration_of_interest.docx` | Declaration of Interest |
-| `cover_letter.md` | cover letter, after filling in the bracketed fields |
-
-## Before you submit
-
-1. **Author block.** `_front.tex` carries the three authors, their real
-   ORCIDs, the shared Faculty of Information Technology affiliation and
-   Trung-Kiet Huynh as corresponding author; all three contributed equally,
-   carried by the `\fnmark[1]`/`\fntext[1]` note. CSF runs a single-anonymized
-   review, so authors are named on the submitted manuscript. Confirm the
-   postal address is the campus you want printed. Rerun `assemble.py` after
-   any change: `main.tex` is generated.
-2. **CRediT roles.** These live in the `\credit{}` commands in `_front.tex`,
-   not in the declarations block. All three carry identical roles, which is
-   what equal contribution means; correct them if that is not what happened.
-3. **Generative AI statement.** `_blocks_declarations.tex` carries a statement
-   describing use of a language-model assistant for drafting, code scaffolding
-   and number checking. Confirm it matches your use, or edit it. Elsevier asks
-   for it in a dedicated section at the end of the manuscript ahead of the
-   reference list; `assemble.py` puts it last among the declarations, followed
-   by the CRediT statement and the appendix, which is the order the published
-   Elsevier layout uses.
-4. **Data deposit.** CSF applies Option C of the Elsevier research data policy:
-   data should live in a repository, be cited and be linked. The GitHub link is
-   in the data availability statement; archiving the repository on Zenodo to
-   obtain a DOI and citing that DOI would satisfy the policy more squarely.
-5. **Reviewer suggestions.** The cover letter has a slot for them.

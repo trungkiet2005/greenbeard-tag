@@ -18,6 +18,7 @@ Run from paper-csf/:  python assemble.py
 """
 
 import re
+import shutil
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -167,7 +168,7 @@ assert 620 <= _rw <= 790, (
 
 model = insert_before(
     model,
-    "The distinction between the two is not a robustness check",
+    "The distinction between the two dynamics is not a robustness check",
     block("model"),
     "model",
 )
@@ -182,11 +183,21 @@ results = sub(
 results = sub(
     results,
     "They cross at $r = 0.077$\n(Figure~\\ref{fig:invasion}C).",
-    "They cross at $r = 0.077$\n(Figure~\\ref{fig:invasion}C). At that point both transversal eigenvalues of\n"
-    "Equation~\\eqref{eq:eigen} at the club vertex vanish together, which makes\n"
-    "$(r, \\sigma) = (0.077, 0.938)$ a codimension-two organising centre for the\n"
-    "identity layer: it is the parameter pair at which the ecosystem switches which\n"
-    "of its two failure modes it meets first.",
+    "They cross at $r = 0.077$\n(Figure~\\ref{fig:invasion}C), where the two codimension-one bifurcation\n"
+    "curves meet transversally in the $(r, \\sigma)$ plane. Both transversal\n"
+    "eigenvalues of Equation~\\eqref{eq:eigen} at the club vertex vanish there, and\n"
+    "because the transversal block of the Jacobian at a vertex is diagonal those\n"
+    "zeros are semisimple: $(r, \\sigma) = (0.077, 0.938)$ is a codimension-two\n"
+    "point at which two independent transcritical events coincide, not a degenerate\n"
+    "singularity with a normal form of its own. What changes as the point is\n"
+    "crossed is only which of the two the ecosystem meets first. The club vertex is\n"
+    "in any case never hyperbolic: inside a monomorphic club every check passes,\n"
+    "$s_{\\mathrm{out}}$ is never executed, and the seven other designs\n"
+    "$(\\mathsf{G}, u, v)$ with $u \\in \\{\\AS, \\CS\\}$ are payoff-equivalent to\n"
+    "it, so seven transversal eigenvalues vanish identically at every parameter\n"
+    "value. The\n"
+    "exchange of stability is therefore a statement about the invading edge and not\n"
+    "about the vertex as a whole.",
     "codim-two",
 )
 
@@ -231,13 +242,9 @@ limitations = sub(
     "sister-studies",
 )
 
-limitations = sub(
-    limitations,
-    "reputation carried between encounters. It may also face adaptive forgers",
-    "reputation carried between encounters in the manner of indirect\n"
-    "reciprocity~\\citep{santos2018social}. It may also face adaptive forgers",
-    "reputation-cite",
-)
+# The indirect-reciprocity citation this block used to insert now lives in the
+# venue-neutral master, alongside the reputation-threshold reference the CSF
+# revision added, so there is nothing venue-specific left to patch here.
 
 # -------------------------------------------------- back matter and appendix
 # Order follows the elsarticle convention and the sibling AMC manuscript:
@@ -256,6 +263,15 @@ bibliography = "\n\\bibliographystyle{elsarticle-num-names}\n\\bibliography{refs
 END = "\\end{document}"
 assert appendix.rstrip().endswith(END), "master no longer ends with \\end{document}"
 appendix = appendix.rstrip()[:-len(END)].rstrip() + "\n\n"
+
+# Elsevier house style prints "Appendix A", not "A".  Neither cas-sc.cls nor
+# cas-common.sty carries any appendix code, so LaTeX's bare \Alph numbering
+# stands and the heading reads "A. Proofs" unless the prefix is put back.
+appendix = appendix.replace(
+    "\\appendix\n",
+    "\\appendix\n\\renewcommand{\\thesection}{Appendix~\\Alph{section}}\n",
+    1,
+)
 
 out = "".join([
     front,
@@ -289,5 +305,20 @@ for name in ("tables_generated", "robustness_generated"):
     text = (SRC.parent / f"{name}.tex").read_text(encoding="utf-8")
     (HERE / f"{name}.tex").write_text(cas_floats(text), encoding="utf-8")
 
+# The figures were copied here once, by hand, and nothing refreshed them: a
+# re-rendered figure left the package silently showing the old one, with a
+# caption describing the new. Restage them from results/ on every assembly,
+# and fail loudly rather than build against a figure that is not there.
+figdir = HERE / "figures"
+figdir.mkdir(exist_ok=True)
+rendered = sorted((SRC.parents[1] / "results" / "figures").glob("fig*.pdf"))
+assert rendered, "no rendered figures: run scripts/make_figures.py first"
+for pdf in rendered:
+    shutil.copy2(pdf, figdir / pdf.name)
+stale = sorted(p.name for p in figdir.glob("fig*.pdf")
+               if p.name not in {q.name for q in rendered})
+assert not stale, f"figures in the package that results/ no longer renders: {stale}"
+
 print(f"wrote main.tex: {out.count(chr(10))} lines, "
-      f"tables_generated.tex and robustness_generated.tex refreshed")
+      f"tables_generated.tex and robustness_generated.tex refreshed, "
+      f"{len(rendered)} figures restaged")

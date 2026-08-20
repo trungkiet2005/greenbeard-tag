@@ -126,14 +126,17 @@ def fig03(tables, results: Path, figdir: Path) -> None:
     sigmas = np.linspace(0.0, 1.0, 201)
     base = cfg.IDENTITY
 
-    fig, axes = new_figure(2.55, ncols=3)
+    fig, axes = new_figure(4.6, nrows=2, ncols=2)
+    axes = axes.ravel()
 
     for ax, r, letter in ((axes[0], 0.0, "A"), (axes[1], base.r, "B")):
         params = replace(base, r=r)
         marks = []
-        for invader, colour, label in (
-            (cfg.FALSEBEARD, PALETTE["forger"], "exploiter F:CAS/CAS"),
-            (cfg.MIMIC, PALETTE["mimic"], "mimic F:CS/CAS"),
+        for invader, colour, label, symbol in (
+            (cfg.FALSEBEARD, PALETTE["forger"], "exploiter F:CAS/CAS",
+             r"\sigma^{*}"),
+            (cfg.MIMIC, PALETTE["mimic"], "mimic F:CS/CAS",
+             r"\sigma_{m}"),
         ):
             adv = [
                 _advantage(tables, replace(params, sigma=float(s)), invader, cfg.CLUB)
@@ -143,7 +146,7 @@ def fig03(tables, results: Path, figdir: Path) -> None:
             s_star = th.spoof_threshold(tables, params, 0.0, cfg.CLUB, invader)
             if s_star is not None and 0.0 < s_star < 1.0:
                 ax.axvline(s_star, color=colour, linestyle=":", linewidth=0.9)
-                marks.append((s_star, colour))
+                marks.append((s_star, colour, symbol))
         ax.axhline(0.0, color=PALETTE["neutral"], linewidth=0.8)
         # the thresholds differ by 0.024 at the baseline, which is invisible on
         # a unit axis, so the crossing order is stated rather than left to the eye
@@ -151,19 +154,22 @@ def fig03(tables, results: Path, figdir: Path) -> None:
         # is the only region of the panel with no ink in it
         # the marks are full-height dotted lines, so the block of labels has
         # to end to the left of the leftmost one rather than at the axis edge
-        x_label = min((s for s, _ in marks), default=0.99) - 0.02
-        for k, (s_star, colour) in enumerate(sorted(marks)):
+        x_label = min((s for s, _, _ in marks), default=0.99) - 0.02
+        for k, (s_star, colour, symbol) in enumerate(sorted(marks)):
             ax.text(
                 x_label,
                 -22.0 - 6.5 * k,
-                rf"$\sigma^{{*}} = {s_star:.3f}$",
+                rf"${symbol} = {s_star:.3f}$",
                 fontsize=FS["tiny"],
                 color=colour,
                 ha="right",
                 va="center",
             )
         ax.set_xlabel(r"spoof success $\sigma$")
-        ax.set_ylim(-35, 45)
+        # the curves span [-30.4, +4.6]; the old (-35, 45) left the top four
+        # tenths of both panels empty.  The upper-left legend of panel A sets
+        # the ceiling, and panel B shares it so the two stay comparable.
+        ax.set_ylim(-33, 14)
         title = "well mixed ($r = 0$)" if r == 0.0 else f"clustered ($r = {r}$)"
         panel_title(ax, letter, title)
     axes[0].set_ylabel("invader advantage in the club")
@@ -194,11 +200,58 @@ def fig03(tables, results: Path, figdir: Path) -> None:
             color=PALETTE["forger"], ha="center", va="center",
         )
     ax.set_xlabel("assortment $r$")
-    ax.set_ylabel(r"spoof threshold $\sigma^{*}$")
+    ax.set_ylabel(r"invasion threshold in $\sigma$")
     ax.set_xlim(0, float(order.r.max()))
     ax.set_ylim(0.65, 1.03)
     fitted_legend(ax, loc="lower right", fontsize=FS["tiny"])
     panel_title(ax, "C", "clustering flips it")
+
+    # panel D: the bifurcation itself.  Every threshold in the paper is a
+    # transcritical bifurcation of the edge flow, and the paper asserted that
+    # without ever drawing one.  On the {club, exploiter} edge the flow is
+    # xdot = x(1-x)(alpha + beta x) with alpha the transversal eigenvalue, so
+    # the interior branch sits at -alpha/beta and crosses the vertex exactly
+    # where alpha changes sign.
+    ax = axes[3]
+    for r, colour, label in ((0.0, PALETTE["forger"], "$r = 0$"),
+                             (base.r, PALETTE["club"], f"$r = {base.r}$")):
+        params = replace(base, r=r)
+        branch_s, branch_x, stable = [], [], []
+        for s in sigmas:
+            p = replace(params, sigma=float(s))
+            fun = build_functionals(tables, p)
+            i, j = fun.index(*cfg.FALSEBEARD), fun.index(*cfg.CLUB)
+            P = fun.pi_P
+            alpha = r * P[i, i] + (1 - r) * P[i, j] - P[j, j]
+            beta = (1 - r) * (P[i, i] - P[i, j] - P[j, i] + P[j, j])
+            if abs(beta) < 1e-12:
+                continue
+            x = -alpha / beta
+            if 0.0 <= x <= 1.0:
+                branch_s.append(s)
+                branch_x.append(x)
+                stable.append(beta < 0.0)
+        # the vertex branch x = 0 is the club; solid where it resists invasion
+        s_star = th.spoof_threshold(tables, params, 0.0, cfg.CLUB, cfg.FALSEBEARD)
+        if s_star is None or not (0.0 < s_star < 1.0):
+            s_star = 1.0
+        ax.plot([0.0, s_star], [0.0, 0.0], color=colour, linewidth=1.6, label=label)
+        ax.plot([s_star, 1.0], [0.0, 0.0], color=colour, linewidth=1.2,
+                linestyle=":")
+        if branch_s:
+            ax.plot(branch_s, branch_x, color=colour, linewidth=1.2,
+                    linestyle=(0, (5, 2)))
+        ax.plot([s_star], [0.0], marker="o", markersize=3.4, color=colour,
+                zorder=5)
+    ax.set_xlabel(r"spoof success $\sigma$")
+    ax.set_ylabel("forger share on the edge")
+    ax.set_xlim(0.75, 1.0)
+    ax.set_ylim(-0.055, 0.70)
+    ax.text(0.912, 0.42, "solid: club stable\ndotted: club invaded\ndashed: interior branch",
+            fontsize=FS["tiny"], color=PALETTE["neutral"], ha="center",
+            va="top", linespacing=1.35)
+    fitted_legend(ax, loc="upper center", fontsize=FS["tiny"], ncol=2)
+    panel_title(ax, "D", "the transcritical bifurcation")
 
     save(fig, figdir / "fig03_invasion")
 
@@ -299,7 +352,7 @@ def fig05(tables, results: Path, figdir: Path) -> None:
     aso = pd.read_csv(results / "tables" / "assortment_sweep.csv")
     grids = np.load(results / "grids.npz")
     base = cfg.IDENTITY
-    r_star = th.nucleation_threshold(tables, 0.0, "CS", "CAS", "CAS", base.kappa_g)
+    r_star, _ = th.nucleation_threshold(tables, 0.0, "CS", "CAS", "CAS", base.kappa_g)
 
     fig, axes = new_figure(2.55, ncols=3)
 
@@ -466,7 +519,7 @@ def fig07(tables, results: Path, figdir: Path) -> None:
 
     cells = ["neither", "fines_only", "screening_only", "both"]
     cell_labels = ["neither", "fines\nonly", "screening\nonly", "both"]
-    colours = [PALETTE["anarchy"], PALETTE["CAS"], PALETTE["safe"], PALETTE["club"]]
+    colours = [PALETTE["anarchy"], PALETTE["CAS"], PALETTE["safe"], PALETTE["accent"]]
 
     ax = axes[0]
     values = [dec.loc[c, "integrity"] for c in cells]
@@ -484,13 +537,22 @@ def fig07(tables, results: Path, figdir: Path) -> None:
     panel_title(ax, "A", r"one detection, two channels ($\sigma = 0.9$)")
 
     ax = axes[1]
-    for cell, colour, label in (
-        ("neither", PALETTE["anarchy"], "neither"),
-        ("fines_only", PALETTE["CAS"], "fines only (audit)"),
-        ("screening_only", PALETTE["safe"], "screening only"),
-        ("both", PALETTE["club"], "both"),
+    # PALETTE["safe"] and PALETTE["club"] are #2166AC and #0072B2: a contrast
+    # ratio of 1.14, which is no contrast at all.  These are the two curves the
+    # panel exists to separate, so "both" gets its own hue and a dash as well.
+    for cell, colour, style, label in (
+        ("neither", PALETTE["anarchy"], "-", "neither"),
+        ("fines_only", PALETTE["CAS"], "-", "fines only (audit)"),
+        ("screening_only", PALETTE["safe"], "-", "screening only"),
+        ("both", PALETTE["accent"], (0, (4, 2)), "both"),
     ):
-        ax.plot(chan.sigma, chan[f"{cell}_integrity"], color=colour, label=label)
+        ax.plot(
+            chan.sigma,
+            chan[f"{cell}_integrity"],
+            color=colour,
+            linestyle=style,
+            label=label,
+        )
     ax.set_xlabel(r"spoof success $\sigma$")
     ax.set_ylabel("attestation integrity")
     ax.set_xlim(0, 1)

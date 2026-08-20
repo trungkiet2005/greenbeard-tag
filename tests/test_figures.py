@@ -62,10 +62,19 @@ def test_every_figure_has_the_standard_width(pdf: Path | None) -> None:
 
 
 def test_font_scale_is_ordered_and_legible() -> None:
-    # the smallest text must stay above 6 pt once reduced onto the page
-    text_width = 6.268  # inches, article a4paper with 1 in margins
-    reduction = text_width / FIG_WIDTH
-    assert min(FS.values()) * reduction > 6.0
+    """Elsevier asks for 7 pt of printed text; the reduction decides that.
+
+    The submission layout is the one that has to clear the floor, so it is
+    the one asserted here.  The venue-neutral layout reduces harder and is
+    checked only against the older 6 pt bar it was built to.
+    """
+    csf_linewidth_pt = 468.3324           # cas-sc single column, a4paper
+    canvas_pt = FIG_WIDTH * 72.0          # matplotlib writes PostScript pt
+    assert min(FS.values()) * csf_linewidth_pt / canvas_pt >= 7.0
+
+    venue_neutral = 6.268 / FIG_WIDTH     # inches, article a4paper, 1 in margins
+    assert min(FS.values()) * venue_neutral > 6.0
+
     assert FS["tiny"] <= FS["annot"] <= FS["legend"] <= FS["title"]
     assert FS["tick"] <= FS["label"]
 
