@@ -34,6 +34,24 @@
 \usepackage[section]{placeins}
 \usepackage[expansion=false]{microtype}
 
+%% cas-common.sty selects T1 cmss and cmtt for captions, table bodies and
+%% \texttt, and no distribution ships those as outlines, so pdflatex embeds
+%% six unnamed Type 3 METAFONT bitmaps instead.  A bitmap font carries no
+%% usable ToUnicode map, so the ff ligature extracts as U+001B: "payoff"
+%% leaves the text layer as "payo" and "first" as "rst".  Latin Modern is the
+%% same design with real outlines, so the submitted PDF stays searchable and
+%% readable to a screen reader.
+\renewcommand{\sfdefault}{lmss}
+\renewcommand{\ttdefault}{lmtt}
+
+%% Editorial Manager flattens the upload: the nine figure PDFs arrive next to
+%% main.tex with no figures/ directory, while the repository keeps them in
+%% one.  Searching both places builds either way.  Deliberately no
+%% {thumbnails/} entry: cas-common.sty already asks for
+%% thumbnails/cas-email.jpeg, which would then be sought in
+%% thumbnails/thumbnails/.
+\graphicspath{{figures/}{./}}
+
 \hypersetup{allcolors=blue!55!black}
 
 % keep floats near the text that refers to them

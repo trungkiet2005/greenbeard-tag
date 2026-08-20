@@ -33,12 +33,29 @@ FLOAT_RE = re.compile(r"(\\begin\{(?:figure|table)\*?\})\[([tbphH!]+)\]")
 def cas_floats(text):
     return FLOAT_RE.sub(lambda m: f"{m.group(1)}[pos={m.group(2)}]", text)
 
-lines = SRC.read_text(encoding="utf-8").splitlines(keepends=True)
+SOURCE = SRC.read_text(encoding="utf-8")
 
+# The manuscript is cut into sections by the section commands themselves rather
+# than by line numbers.  An earlier version indexed ../paper/main.tex by
+# hard-coded 1-indexed ranges, which made every edit to the master a two-file
+# edit: add a sentence anywhere and eight boundaries move.  The asserts caught
+# it, but only after the fact.  Markers cost nothing and cannot drift.
+def seg(start, end=None):
+    """Body from the line beginning ``start`` up to the line beginning ``end``.
 
-def seg(a, b):
-    """1-indexed inclusive line range of the source manuscript."""
-    return "".join(lines[a - 1:b])
+    ``end=None`` runs to the end of the file.  Both markers must occur exactly
+    once at the beginning of a line, so a phrase that also appears in prose is
+    not a valid marker.
+    """
+    i = SOURCE.find(start)
+    assert i != -1, f"segment marker not found: {start!r}"
+    assert SOURCE.count("\n" + start) + SOURCE.startswith(start) == 1, \
+        f"segment marker is not unique at line start: {start!r}"
+    if end is None:
+        return SOURCE[i:]
+    j = SOURCE.find(end, i)
+    assert j != -1, f"segment end marker not found after {start!r}: {end!r}"
+    return SOURCE[i:j]
 
 
 def block(name):
@@ -81,23 +98,31 @@ def prose_words(text):
 
 # ---------------------------------------------------------------- segments
 front = (HERE / "_front.tex").read_text(encoding="utf-8")
-intro = seg(101, 274)        # Introduction
-related = seg(275, 398)      # Related work
-model = seg(399, 544)        # Model, including \input{tables_generated}
-results = seg(545, 1206)     # Results, including \input{robustness_generated}
-discussion = seg(1207, 1270)
-limitations = seg(1271, 1318)
-conclusion = seg(1319, 1350)
-appendix = seg(1369, len(lines))
+INTRO = "\\section{Introduction}"
+RELATED = "\\section{Related work}"
+MODEL = "\\section{Model}"
+RESULTS = "\\section{Results}"
+DISCUSSION = "\\section{Discussion}"
+LIMITATIONS = "\\section{Limitations}"
+CONCLUSION = "\\section{Conclusion}"
+AVAILABILITY = "\\section*{Data and code availability}"
+APPENDIX = "\\appendix"
 
-assert intro.startswith(r"\section{Introduction}")
-assert related.startswith(r"\section{Related work}")
-assert model.startswith(r"\section{Model}")
-assert results.startswith(r"\section{Results}")
-assert discussion.startswith(r"\section{Discussion}")
-assert limitations.startswith(r"\section{Limitations}")
-assert conclusion.startswith(r"\section{Conclusion}")
-assert appendix.startswith(r"\appendix")
+intro = seg(INTRO, RELATED)
+related = seg(RELATED, MODEL)
+model = seg(MODEL, RESULTS)              # includes \input{tables_generated}
+results = seg(RESULTS, DISCUSSION)       # includes \input{robustness_generated}
+discussion = seg(DISCUSSION, LIMITATIONS)
+limitations = seg(LIMITATIONS, CONCLUSION)
+conclusion = seg(CONCLUSION, AVAILABILITY)
+appendix = seg(APPENDIX)
+
+# The venue-neutral data statement and its \bibliography sit between the
+# conclusion and the appendix and are both replaced here, so nothing from that
+# stretch is carried over.  Assert that it holds no section we meant to keep.
+_skipped = seg(AVAILABILITY, APPENDIX)
+assert "\\section{" not in _skipped, \
+    "a numbered section has appeared between the conclusion and the appendix"
 
 # ------------------------------------------------------------------- edits
 intro = insert_before(intro, "\\paragraph{Results.}", block("intro"), "intro")
@@ -208,9 +233,9 @@ limitations = sub(
 
 limitations = sub(
     limitations,
-    "reputation carried between encounters, and forgers who invest in better",
+    "reputation carried between encounters. It may also face adaptive forgers",
     "reputation carried between encounters in the manner of indirect\n"
-    "reciprocity~\\citep{santos2018social}, and forgers who invest in better",
+    "reciprocity~\\citep{santos2018social}. It may also face adaptive forgers",
     "reputation-cite",
 )
 

@@ -34,6 +34,24 @@
 \usepackage[section]{placeins}
 \usepackage[expansion=false]{microtype}
 
+%% cas-common.sty selects T1 cmss and cmtt for captions, table bodies and
+%% \texttt, and no distribution ships those as outlines, so pdflatex embeds
+%% six unnamed Type 3 METAFONT bitmaps instead.  A bitmap font carries no
+%% usable ToUnicode map, so the ff ligature extracts as U+001B: "payoff"
+%% leaves the text layer as "payo" and "first" as "rst".  Latin Modern is the
+%% same design with real outlines, so the submitted PDF stays searchable and
+%% readable to a screen reader.
+\renewcommand{\sfdefault}{lmss}
+\renewcommand{\ttdefault}{lmtt}
+
+%% Editorial Manager flattens the upload: the nine figure PDFs arrive next to
+%% main.tex with no figures/ directory, while the repository keeps them in
+%% one.  Searching both places builds either way.  Deliberately no
+%% {thumbnails/} entry: cas-common.sty already asks for
+%% thumbnails/cas-email.jpeg, which would then be sought in
+%% thumbnails/thumbnails/.
+\graphicspath{{figures/}{./}}
+
 \hypersetup{allcolors=blue!55!black}
 
 % keep floats near the text that refers to them
@@ -160,15 +178,15 @@ multi-agent systems
 \label{sec:intro}
 
 Machine agents are beginning to carry identity. Agent-to-agent protocols
-exchange provenance metadata before they exchange work, procurement rules ask
-which model is behind a service~\citep{euaiact2024}, and proposals for agent
-attestation
+publish identity and capability metadata before agents exchange
+work~\citep{a2a2026spec}; regulatory technical-documentation duties require
+providers to identify an AI system or general-purpose model and its
+version~\citep{euaiact2024}; and proposals for agent attestation
 infrastructure are being drafted while the systems they would govern are being
 deployed~\citep{chan2024visibility,chan2025infrastructure,shavit2023practices}.
-Even where nothing is formally attested, agents can often tell: language models
-recognise their own outputs and treat a counterpart differently once they
-believe it is a machine, or the same machine as
-themselves~\citep{panickssery2024llm,laurito2025aiai}.
+Even where nothing is formally attested, model evaluators can recognise and
+favour their own generations, while language models in general favour
+machine-generated communications~\citep{panickssery2024llm,laurito2025aiai}.
 
 An identity signal that changes how its bearers treat one another is a
 \emph{greenbeard}, and evolutionary biology has known for fifty years both what
@@ -189,11 +207,13 @@ money on.
 
 The question this paper answers is what a population of agent operators does
 with that choice. The question is not rhetorical, because two forces pull
-against each other. A certification mark is a private cost: it must be
-obtained, maintained and audited, and every unit of that cost burdens the
-compliant operator and never the impostor~\citep{dranove2010quality}. A certification mark is also a
-private benefit: it buys access to partners who will behave well towards
-whoever carries it. Which force wins is not a matter of taste, and neither is
+against each other. Certification and third-party quality disclosure are
+established mechanisms for addressing information problems~\citep{dranove2010quality}.
+Here the certification mark is also a private cost: it must be obtained,
+maintained and audited, and by assumption every unit of that cost burdens the
+compliant operator and never the impostor. A certification mark is also a
+private benefit: it buys access to partners who will behave well towards whoever
+carries it. Which force wins is not a matter of taste, and neither is
 the policy question that follows, namely whether an authority does better to
 spend on harder attestation, on penalties for forgery, on cheaper compliance,
 or on the interaction structure that decides who meets whom.
@@ -239,26 +259,29 @@ has fallen out of the certified regime does not climb back into it.
 \paragraph{Results.}
 We show, first, that identity is the instrument of last resort rather than of
 first choice. The race has a reciprocity threshold $L_R = 0.551$
-(Proposition~\ref{prop:reciprocity}): below it a first-striker profitably
-exploits any safe unbadged resident, because the half-step lead it steals in
-the opening round converts into the prize and reciprocity punishes it only in
-kind. Where liability is enforceable above $L_R$ the identity layer is close to
-worthless, and the certification value we measure falls from $0.054$ on average
-below $L_R$ to $0.002$ above it. Identity earns its keep precisely in the
+(Proposition~\ref{prop:reciprocity}): below it, and below an assortment
+$r^{\dagger} = 0.076$, a first-striker profitably exploits any safe unbadged
+resident, because the half-step lead it steals in the opening round converts
+into the prize and reciprocity punishes it only in kind. Where liability is
+enforceable, so that $L$ lies above $L_R$, the identity layer is close to
+worthless, and the certification value we measure falls from an average of
+$0.054$ below $L_R$ to $0.0025$ above it. Identity earns its keep precisely in the
 regime where harm cannot be traced to the seat that caused
-it~\citep{dulleck2006doctors}.
+it~\citep{chan2024visibility,kolt2025governing}.
 
-Second, in-group conduct is a defensive parameter, not an ethical one. A club
-that reciprocates inside its membership tolerates $\sigma^{*} = 0.866$ spoof
-success before an exploiter invades; one that trusts verified partners
-unconditionally tolerates only $0.400$ (Proposition~\ref{prop:spoof}). The
-ratio is $2.17$. A club is safest when its members are conditional
+Second, in-group conduct is a defensive parameter, not an ethical one. In a
+well-mixed population a club that reciprocates inside its membership tolerates
+$\sigma^{*} = 0.866$ spoof success before an exploiter invades; one that trusts
+verified partners unconditionally tolerates only $0.400$
+(Proposition~\ref{prop:spoof}). At the baseline assortment the pair is $0.962$
+against $0.444$. The
+ratio is $2.17$ either way. A club is safest when its members are conditional
 cooperators, not when they are saints, because unconditional trust is what an
 impostor is buying access to.
 
 Third, fines cannot buy what detection does not deliver. Setting the invasion
 condition to zero and solving for the penalty gives a protective fine that
-diverges as $\sigma \to 1$ (Proposition~\ref{prop:fines}): $11.9$ at
+diverges as $\sigma \to 1$ (Proposition~\ref{prop:fines}): well mixed, $11.9$ at
 $\sigma = 0.90$, $58.2$ at $0.95$, $428.6$ at $0.99$. This divergence is the
 Becker trade-off between penalty size and detection
 probability~\citep{becker1968crime}. Its novel feature here is that in an agent
@@ -286,7 +309,7 @@ conduct would see nothing wrong, and would in fact record an improvement.
 Which of the two invaders arrives first is decided by the interaction
 structure, and in a direction that undercuts the instrument of the fourth
 result. Clustering penalises an exploiter, which meets its own aggression in a
-self-encounter~\citep{grafen1979hawk}, and not a mimic, which meets the club's
+self-encounter, and not a mimic, which meets the club's
 own conduct. The
 exploiter's threshold therefore rises from $0.866$ to $1$ by $r = 0.134$ while
 the mimic's moves by $0.001$, and the two cross at $r = 0.077$. Above
@@ -345,9 +368,10 @@ different from accountability. It delivers a club, and clubs are safe inside
 and hostile at the edge. The policy question is therefore not whether to build
 attestation but what to require of the conduct it gates, and our answer is
 uncomfortable: the requirement that would remove the harm also removes the
-club. What survives instead is federation, which converts the boundary into an
-interior without asking any club to be gentle to
-strangers~\citep{nicolaidis2005transnational,scottmorton2023equitable}.
+club. Managed mutual recognition and equitable interoperability are established
+institutional proposals~\citep{nicolaidis2005transnational,scottmorton2023equitable}.
+In our model, such federation converts the boundary into an interior without
+asking any club to be gentle to strangers.
 
 \subsection{Related work}\label{sec:related}
 
@@ -414,8 +438,9 @@ conflict, carries the result.
 In the handicap tradition signals are honest because they are differentially
 costly to fake~\citep{zahavi1975mate,grafen1990biological}, and market
 signalling separates types for the same reason~\citep{spence1973job}. Our
-forger pays less than the compliant member, not more, so honesty cannot come
-from cost; it comes from detection~\citep{szamado2011cost}. The setting is
+forger pays less than the compliant member, not more. Signal honesty need not
+rest on a realised equilibrium cost~\citep{szamado2011cost}; in our model it
+rests instead on detection. The setting is
 nearer a market degraded by failed quality
 signalling~\citep{akerlof1970market} and certification
 intermediaries~\citep{lizzeri1999information,dranove2010quality}; the attribute
@@ -439,13 +464,14 @@ regime where the payoff levers have no purchase. Applied work on agent
 governance treats visibility and provenance as
 prerequisites~\citep{chan2024visibility,chan2025infrastructure,shavit2023practices,kolt2025governing},
 and~\citet{hammond2025multiagent} name selection pressure and mis-identification
-among multi-agent risks without formalising either. Work on self-recognition
-documents that models treat a counterpart differently once they identify it as
-a machine, or as
-themselves~\citep{panickssery2024llm,long2025mirror,wang2026outgroup}, which
-motivates treating recognition as cheap and imperfect rather than free and
-reliable~\citep{sun2025idiosyncrasies,davidson2024self}. What that strand
-lacks, and we supply, is the population-level consequence: what an ecosystem
+among multi-agent risks without formalising either. Work on model-origin and
+counterpart cues documents self-favouring evaluation and identity-conditioned
+interaction~\citep{panickssery2024llm,long2025mirror,wang2026outgroup}. Model
+outputs carry detectable idiosyncratic signatures~\citep{sun2025idiosyncrasies},
+but models show no general, consistent
+self-recognition~\citep{davidson2024self}. We therefore treat recognition as
+available but imperfect rather than free and reliable. What that strand lacks,
+and we supply, is the population-level consequence: what an ecosystem
 converges to when recognition is available, imperfect and worth faking.
 \section{Model}
 \label{sec:model}
@@ -480,11 +506,12 @@ $(b, s_{\mathrm{in}}, s_{\mathrm{out}})$ with $b \in \{\mathsf{G}, \mathsf{F},
 \mathsf{N}\}$ and $s_{\mathrm{in}}, s_{\mathrm{out}}$ reduced race designs, so
 the design space has $3 \times 4 \times 4 = 48$ elements.
 
-A badge either passes a verification check or does not. A genuine badge always
-passes and an absent badge never does. A forged badge passes with probability
-$\sigma$, the \emph{spoof success probability}, so $1 - \sigma$ is the
-detection power of the attestation
-technology~\citep{anbiaee2026threatmodeling}. Verification happens once, at
+A badge either passes a verification check or does not. Missing mandatory
+validation or attestation is a documented security risk in agent
+protocols~\citep{anbiaee2026threatmodeling}. We represent that risk by letting a
+genuine badge always pass, an absent badge never pass, and a forged badge pass
+with probability $\sigma$, the \emph{spoof success probability}; $1 - \sigma$
+is the detection power of the attestation technology. Verification happens once, at
 the start of a race, and holds for its duration. That matches the interaction
 layer, in which the executed design of a seat is fixed before the first round.
 The two checks of an encounter concern two different badges, so they are
@@ -716,16 +743,33 @@ The advantage of the first-striker is affine in the liability and vanishes at
 L_R \;=\; \frac{A(\CAS, \CS) - A(\CS, \CS)}{M(\CAS, \CS) - M(\CS, \CS)}
       \;=\; 0.551 .
 \end{equation}
-For every $L < L_R$, the unbadged first-striker $(\mathsf{N}, \CAS, \CAS)$
-invades every unbadged resident that plays safe conduct in self-play. Below
-$L_R$ no unbadged population sustains safe play, whatever its conduct rule.
+For every $L < L_R$ and every assortment $r < r^{\dagger}$, the unbadged
+first-striker $(\mathsf{N}, \CAS, \CAS)$ invades every unbadged resident that
+plays safe conduct in self-play, where
+\begin{equation}
+\label{eq:rdagger}
+r^{\dagger} \;=\; \frac{A(\CAS, \CS) - A(\CS, \CS)}{A(\CAS, \CS) - A(\CAS, \CAS)}
+      \;=\; 0.076 .
+\end{equation}
+In that region no unbadged population sustains safe play, whatever its conduct
+rule.
 \end{proposition}
 
-The proposition is checked exhaustively over the eight safe unbadged residents
-rather than argued. Its content is that within-race reciprocity is not enough
-here: the race rewards the opening move, and a mirror cannot undo an opening
-move. Something outside the race must distinguish partners before the first
-round, and that is what a badge does.
+Both bounds are needed, and the second is as informative as the first. The
+first-striker's transversal eigenvalue at a safe unbadged resident is
+$A(\CAS, \CS) - A(\CS, \CS) - r\,[A(\CAS, \CS) - A(\CAS, \CAS)]
+ = 2.631 - 34.431\,r$: clustering makes a first-striker meet its own aggression,
+and by $r^{\dagger} = 0.076$ that self-encounter has eaten the whole stolen
+half-step. Above $r^{\dagger}$ the four residents $(\mathsf{N}, \cdot, \CS)$
+resist it, which is why the uncertified regime of
+Proposition~\ref{prop:bistable} is a safe one even at $L = 0$. The proposition
+is checked exhaustively over the eight safe unbadged residents rather than
+argued. Its content is that within-race reciprocity is not enough on its own:
+the race rewards the opening move, a mirror cannot undo an opening move, and
+what rescues a safe unbadged population is the very assortment that
+Section~\ref{sec:nucleation} shows a club also needs. Something outside the
+race must distinguish partners before the first round, and that is what a badge
+does.
 
 Figure~\ref{fig:handshake}B shows the consequence. At $L = 0$ and no
 assortment, the uncertified world runs at unsafe frequency $1.000$: it is
@@ -744,9 +788,10 @@ The boxed cells are the handshake exploit: a \CAS{} first-striker earns $61.63$
 against a \CS{} resident that earns $59.00$ against itself. \textbf{(B)}
 Long-run unsafe frequency of the uncertified world (badge $\mathsf{N}$ only) as
 liability rises. The shaded region is $L < L_R = 0.551$, where
-Proposition~\ref{prop:reciprocity} rules out any safe unbadged population.
-Without clustering the world is fully unsafe there; the clustered baseline is
-better but still far from safe.}
+Proposition~\ref{prop:reciprocity} rules out any safe unbadged population in a
+well-mixed one. Without clustering the world is fully unsafe there; the
+clustered baseline sits above $r^{\dagger} = 0.076$, so some safe unbadged
+residents survive, and it is better but still far from safe.}
 \label{fig:handshake}
 \end{figure}
 
@@ -770,21 +815,32 @@ affine in $\sigma$ and the threshold is
        {P(w,u) - P(w,v) + \rho},
 \qquad P = A - L M .
 \end{equation}
-The club resists forgery for all $\sigma < \sigma^{*}$.
+Provided $P(w,u) - P(w,v) + \rho > 0$, the club resists forgery for all
+$\sigma < \sigma^{*}$. When that denominator is negative the invasion advantage
+decreases in $\sigma$ and the inequality reverses, so the club resists only
+above $\sigma^{*}$; when it vanishes, which happens exactly when $u = v$ and
+$\rho = 0$, the forger's advantage is the constant
+$P(w,u) - P(u,u) + \kappa_g - \kappa_f$, independent of $\sigma$ altogether.
 \end{proposition}
 
 Equation~\eqref{eq:sigmastar} says something that is not obvious in advance:
 the club's in-group conduct enters the threshold twice, once through what
 members earn among themselves, $P(u,u)$, and once through what an impostor
 extracts from them, $P(w,u)$. A club whose members trust unconditionally
-maximises the second term, and so minimises its own tolerance for forgery. At
-the baseline the reciprocating club $(\mathsf{G}, \CS, \CAS)$ survives up to
-$\sigma^{*} = 0.866$; the unconditionally trusting club
-$(\mathsf{G}, \AS, \CAS)$ survives only to $0.400$. The ratio is $2.17$.
+maximises the second term, and so minimises its own tolerance for forgery. In a
+well-mixed population the reciprocating club $(\mathsf{G}, \CS, \CAS)$ survives
+up to $\sigma^{*} = 0.866$; the unconditionally trusting club
+$(\mathsf{G}, \AS, \CAS)$ survives only to $0.400$. At the baseline assortment
+$r = 0.1$ the pair is $0.962$ against $0.444$, because a forger's
+self-encounters are worth much less to it than a member's are. The ratio is
+$2.17$ at both, so it is the conduct and not the structure that sets it.
 Membership conduct is a security parameter.
 
-Assortment raises the threshold further, to $0.962$ at $r = 0.1$, because a
-forger's self-encounters are worth much less to it than a member's are.
+The sign condition of Proposition~\ref{prop:spoof} is not a technicality, and
+Section~\ref{sec:exclusion} is where it does its work: the denominator
+$P(w,u) - P(w,v) + \rho$ is positive for a club that treats outsiders harshly
+and non-positive for one that does not, so the two gentle out-group policies
+have no threshold to report rather than a low one.
 Figure~\ref{fig:invasion} shows the invasion advantage as a function of
 $\sigma$ in both structures, and the fixation probabilities that the
 finite-population process assigns to the same invasions.
@@ -813,7 +869,8 @@ to zero and solving for the fine gives the smallest protective penalty.
 
 \begin{proposition}[Becker limit of attestation]
 \label{prop:fines}
-The smallest fine that keeps the unconditional forger out is
+In a well-mixed population, the smallest fine that keeps the unconditional
+forger out is
 \begin{equation}
 \label{eq:rhostar}
 \rho^{*}(\sigma) \;=\;
@@ -821,16 +878,23 @@ The smallest fine that keeps the unconditional forger out is
        {1 - \sigma},
 \end{equation}
 which diverges as $\sigma \to 1$ whenever exploiting the club at full pass
-beats club membership.
+beats club membership. Where the club already resists unaided, that is for
+$\sigma < \sigma^{*}$, the expression is negative and no fine is required.
 \end{proposition}
 
 The expected penalty a forger faces is $(1 - \sigma)\rho$, so as detection power
 vanishes the fine required to maintain a fixed expected penalty grows without
 bound. The divergence is the Becker trade-off between penalty size and
 detection probability~\citep{becker1968crime,polinsky2000economic}, and the
-numbers are stark: $\rho^{*} = 11.9$ at $\sigma = 0.90$, $58.2$ at $0.95$ and $428.6$ at
-$0.99$, against a club payoff of $57.0$. Beyond about $\sigma = 0.95$ the fine
-needed exceeds everything the club is worth.
+numbers are stark: well mixed, $\rho^{*} = 11.9$ at $\sigma = 0.90$, $58.2$ at
+$0.95$ and $428.6$ at $0.99$, against a club payoff of $57.0$. Beyond about
+$\sigma = 0.95$ the fine needed exceeds everything the club is worth. Assortment
+does not remove the pole, it only moves where it starts to bite: at the
+baseline $r = 0.1$ the club resists the exploiter unaided up to
+$\sigma^{*} = 0.962$, so nothing is required below that, and the requirement is
+then $8.6$ at $\sigma = 0.97$ and $87.8$ at $\sigma = 0.99$. What the model
+determines robustly is the divergence; where a given regime sits on the curve
+depends on its interaction structure.
 
 The novelty is not the trade-off but which of its terms is available. In
 conventional enforcement the detection probability is bought with inspectors,
@@ -851,9 +915,10 @@ Differentiating Equation~\eqref{eq:sigmastar},
   \;=\; \frac{-1}{P(w,u) - P(w,v) + \rho} \;=\; -0.029
 \end{equation}
 at the baseline, so every unit of certification cost lowers the club's forgery
-tolerance. Compliance cost burdens the compliant and never the impostor, which
-is the exact opposite of what a certification regime is usually assumed to
-do~\citep{dranove2010quality}.
+tolerance. Compliance cost burdens the compliant and never the impostor by
+construction, so every unit lowers forgery tolerance. This cost allocation is a
+modelling assumption, distinct from the information and intermediary-incentive
+problems studied in the certification literature~\citep{dranove2010quality}.
 The remedy is not cheaper dues but dearer forgery: raising $\kappa_f$ moves
 $\sigma^{*}$ up one for one, and Figure~\ref{fig:instruments}D shows it working
 at a spoof rate where nothing else does.
@@ -1021,7 +1086,7 @@ negative at $\sigma = 0.57$.}
 \label{sec:channels}
 
 One detection has two consequences, and governance regimes choose between them
-without always noticing~\citep{euaiact2024}. Real-time verification lets the counterparty act on a
+without always noticing. Real-time verification lets the counterparty act on a
 failed check; retrospective auditing levies a fine after the fact. The 2x2 of Figure~\ref{fig:channels} switches each off in turn at $\sigma = 0.9$ and $\rho = 20$.
 
 The placebo cell, in which badges are checked but nothing follows from a failed
@@ -1053,9 +1118,10 @@ moves. \textbf{(B)} The same four regimes along the spoof sweep.}
 \subsection{Provider-scoped marks make concentration a safety variable}
 \label{sec:providers}
 
-Marks in an agent economy will plausibly be issued per
-provider~\citep{otsuka2026aiidentity}, and a mark issued by one provider need not
-be recognised by another. Consider $K$
+Current agent-identity approaches use incompatible credential formats, trust
+roots and delegation semantics~\citep{otsuka2026aiidentity}. We model one
+plausible consequence: marks issued per provider need not be recognised by
+another provider. Consider $K$
 symmetric provider clubs, each running the club design with its own mark, with
 cross-provider checks failing by construction.
 
@@ -1085,10 +1151,11 @@ club member and a compliant unbadged entrant that plays club conduct towards
 everyone and is treated as an outsider by every club. The rent is $30.4$ under
 a single club and $2.5$ across eight. A dominant provider therefore has the
 most to lose from mutual recognition~\citep{katz1985network}, and a fragmented
-market has the least to gain from it while needing it most. The exclusion rent is
-also a competition concern in its own right: a compliant entrant is penalised
-$30.4$ under a monopoly mark for no reason connected to its
-conduct~\citep{scottmorton2023equitable}.
+market has the least to gain from it while needing it most. The exclusion rent
+is also a competition concern in its own right: in the model, a compliant
+entrant is penalised $30.4$ under a monopoly mark for no reason connected to
+its conduct. This is the kind of entry barrier that equitable-interoperability
+proposals seek to reduce~\citep{scottmorton2023equitable}.
 
 \begin{figure}[pos=t]
 \centering
@@ -1251,9 +1318,10 @@ way to carry the badge is to forge it. Equation~\eqref{eq:sigmastar} shows this
 directly: when $u = v$ the denominator $P(w,u) - P(w,v) + \rho$ collapses to
 $\rho$, so at $\rho = 0$ the forger's advantage does not depend on $\sigma$ at
 all and is positive because the forger saves the dues. Out-group harshness is
-the only thing that makes the in-group benefit excludable, and excludability is
-what a costly signal needs in order to be worth buying rather than
-counterfeiting~\citep{szamado2011cost}.
+the only thing that makes the in-group benefit excludable. In this model it
+raises the potential cost of cheating relative to honest acquisition, the kind
+of off-equilibrium cost that can maintain honesty without a realised
+equilibrium signal cost~\citep{szamado2011cost}.
 
 \paragraph{A note on how not to compute this.}
 An earlier version of this analysis averaged the replicator attractors into a
@@ -1299,12 +1367,15 @@ $0.002$ above it, a factor of $22$. Only $15\%$ of the $(\sigma, L)$ grid shows
 a value above one percentage point, and that region is concentrated at low
 liability and low spoof success.
 
-The practical reading is that attestation infrastructure is worth building
-where attribution is impossible~\citep{chan2025infrastructure}: cross-border
-deployments, open-weight models with no traceable operator, agent marketplaces
-with pseudonymous sellers.
-Where an operator can be identified and sued, the same money is better spent
-on the liability regime~\citep{kolt2025governing}, which does not carry the
+The practical reading from our model is that attestation infrastructure is worth
+building where attribution is impossible. Agent-infrastructure work identifies
+traceability and accountability as central governance
+needs~\citep{chan2025infrastructure}; relevant settings include cross-border
+deployments, open-weight models with no traceable operator, and agent
+marketplaces with pseudonymous sellers.
+Where an operator can be identified and a liability regime applied
+~\citep{kolt2025governing}, our model says the same money is better spent on
+that regime, which does not carry the
 exclusion cost of
 Section~\ref{sec:exclusion}.
 
@@ -1385,7 +1456,7 @@ shows a regime whose unsafe frequency is stable at about $0.06$ across
 configurations whose attestation integrity ranges from $0.05$ to $0.94$.
 Conduct monitoring cannot distinguish a certification system that works from
 one that has been completely hollowed out by mimics, because a mimic
-behaves~\citep{darby1973free}.
+behaves.
 The quantity to instrument is the posterior that a passed credential is
 genuine, which requires sampling and independently re-verifying credentials
 rather than observing outcomes. Section~\ref{sec:mimicry} makes the point
@@ -1443,11 +1514,11 @@ frontier. We expect the direction of the trade to survive, since it follows
 from Equation~\eqref{eq:sigmastar}, but not the exact numbers.
 
 Verification is a single Bernoulli draw with a fixed $\sigma$, identical across
-agents. A real attestation system has heterogeneous verifiers, revocation,
+agents. A real attestation system has heterogeneous verifiers, revocation and
 reputation carried between encounters in the manner of indirect
-reciprocity~\citep{santos2018social}, and forgers who invest in better
-forgeries in response to better
-detection~\citep{jovanovic2024watermarkstealing}. The last of these is the most
+reciprocity~\citep{santos2018social}. It may also face adaptive forgers who
+improve their forgeries as detection improves, as demonstrated for watermark
+stealing~\citep{jovanovic2024watermarkstealing}. The last of these is the most
 consequential omission: our $\sigma$ is exogenous, and an arms race in which
 $\sigma$ responds to enforcement would change the comparative statics of
 Section~\ref{sec:fines}.
@@ -1582,9 +1653,19 @@ $-[M(\CAS,\CS) - M(\CS,\CS)] < 0$, so it is positive exactly below the ratio
 in Equation~\eqref{eq:LR}. For the general statement, a safe unbadged resident
 plays a safe design in self-play; since badges are absent, every check fails
 and only $s_{\mathrm{out}}$ is ever executed, so the resident is behaviourally
-one of $(\mathsf{N}, \cdot, \AS)$ or $(\mathsf{N}, \cdot, \CS)$. The invasion
-of $(\mathsf{N}, \CAS, \CAS)$ against each of the eight such residents is
-verified directly on the exact matrices.
+one of $(\mathsf{N}, \cdot, \AS)$ or $(\mathsf{N}, \cdot, \CS)$. With
+assortment $r$, the mutant meets itself with probability $r$, so
+Equation~\eqref{eq:eigen} gives its advantage over a $(\mathsf{N},\cdot,\CS)$
+resident at $L = 0$ as
+$r\,A(\CAS,\CAS) + (1-r)\,A(\CAS,\CS) - A(\CS,\CS)$, which is affine and
+decreasing in $r$ and vanishes at Equation~\eqref{eq:rdagger}. The same
+calculation against a $(\mathsf{N},\cdot,\AS)$ resident gives
+$42.77 - 74.57\,r$, which vanishes only at $r = 0.574$, so the
+$(\mathsf{N},\cdot,\CS)$ residents are the binding ones and $r^{\dagger}$ is
+the smaller of the two roots. The invasion of $(\mathsf{N}, \CAS, \CAS)$ against
+each of the eight such residents is verified directly on the exact matrices at
+$r = 0$, and the four $(\mathsf{N}, \cdot, \CS)$ residents are verified to
+resist at the baseline $r = 0.1$.
 \end{proof}
 
 \begin{proof}[Proof of Proposition~\ref{prop:spoof}]
