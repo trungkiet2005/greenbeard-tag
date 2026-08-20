@@ -116,10 +116,16 @@ intro = insert_before(intro, "\\paragraph{Results.}", block("intro"), "intro")
 related_full = related
 related = (HERE / "_related_csf.tex").read_text(encoding="utf-8")
 
-assert related.startswith("\\subsection{Related work}"), \
+_first = next(l for l in related.splitlines()
+              if l.strip() and not l.lstrip().startswith("%"))
+assert _first.startswith("\\subsection{Related work}"), \
     "_related_csf.tex must open as a subsection, not a section"
 assert "\\label{sec:related}" in related, "_related_csf.tex lost \\label{sec:related}"
 
+# _blocks_related.tex is no longer inserted into the manuscript: its content is
+# folded into the condensed subsection.  It is kept because it is the record of
+# what the CSF-specific framing paragraph cited, and the two assertions below
+# hold the condensed text to that record.
 dropped = sorted((cite_keys(related_full) | cite_keys(block("related")))
                  - cite_keys(related))
 assert not dropped, (
