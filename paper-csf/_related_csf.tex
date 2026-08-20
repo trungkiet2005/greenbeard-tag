@@ -1,0 +1,98 @@
+\subsection{Related work}\label{sec:related}
+
+\paragraph{Evolutionary dynamics as a nonlinear system.}
+The formal setting is evolutionary game
+dynamics~\citep{taylor1978ess,hofbauer1998evolutionary,hofbauer2003evolutionary}:
+a population of competing designs is a nonlinear flow on a simplex, qualitative
+changes of behaviour are bifurcations of that flow, and the objects of interest
+are collective rather than
+individual~\citep{perc2010coevolutionary,perc2017statphys}. That programme has
+established that transitions between cooperative and defecting phases are sharp
+and often reducible to a universal
+form~\citep{perc2016phase,wang2015universal}, and that much of the outcome is
+decided by who meets whom, through networks, layers or
+conformity~\citep{santos2005scale,ohtsuki2006simple,wang2015multilayer,szolnoki2015conformity}.
+Tags have been studied there as generators of assortment without memory, as
+phenotypic similarity in well-mixed populations~\citep{antal2009phenotypic}
+and as a mutating tag space in finite
+ones~\citep{traulsen2007chromodynamics}. Two features separate this
+system from that body of work. First, the tag is forgeable at a rate the
+modeller sets, so the bifurcation parameter is a property of a verification
+technology rather than of the players, and the comparative statics are with
+respect to an engineering budget. Second, the flow carries two attractors
+differing in whether the tag exists at all rather than in how much cooperation
+it supports, so what matters is basin structure and not equilibrium level.
+Whether either regime can arise at all turns on a classical condition: altruism
+invades only under positive
+assortment~\citep{eshel1982assortment,fletcher2009simple}, supplied here by one
+provider's agents sharing a platform. By Proposition~\ref{prop:futility} the
+badge contributes nothing to nucleation, so assortment is not one route among
+several but the only one.
+
+\paragraph{Greenbeards, forgeable tags and parochial conduct.}
+Kin selection~\citep{hamilton1964genetical1,hamilton1964genetical2} explains
+why a gene favours copies of itself in others, and a green beard is a gene
+carrying both marker and
+behaviour~\citep{dawkins1976selfish}. \citet{riolo2001evolution} showed that tag
+similarity alone sustains cooperation without reciprocity,
+and~\citet{roberts2002does} that this turns on cost, since a cheap tag is cheap
+to fake, which the original authors disputed~\citep{riolo2002similarity}.
+\citet{jansen2006altruism} showed that a continuously mutating tag space
+outruns impostors, and~\citet{gardner2010greenbeards} reviewed the empirical
+cases, which are real but
+rare~\citep{keller1998selfish,queller2003single}. In biology, forgeability is a
+fact about the organism; in an agent economy it is a fact about the
+verification
+infrastructure~\citep{jovanovic2024watermarkstealing,anbiaee2026threatmodeling},
+so $\sigma$ is a policy variable. The closest structural ancestor
+is~\citet{hammond2006ethnocentrism}, whose agents carry a tag and two
+conditional strategies, our design triple minus the badge type. Their tags are
+inherited faithfully and cannot be faked, so our question does not arise:
+their result explains why differential treatment emerges, ours why it cannot
+be removed from a certification regime without removing the regime.
+\citet{choi2007parochial} pair in-group generosity with out-group hostility
+too, but need group selection and explicit intergroup warfare,
+while~\citet{masuda2015ingroup} give the standard condition that tag and
+strategy be inherited as one unit, satisfied here by construction. We need
+neither: one well-mixed pool with assortment, and nothing won by fighting.
+Out-group harshness is favoured here because it is the only thing that makes a
+costly membership signal worth acquiring honestly, so excludability, not
+conflict, carries the result.
+
+\paragraph{Signalling, certification and enforcement.}
+In the handicap tradition signals are honest because they are differentially
+costly to fake~\citep{zahavi1975mate,grafen1990biological}, and market
+signalling separates types for the same reason~\citep{spence1973job}. Our
+forger pays less than the compliant member, not more, so honesty cannot come
+from cost; it comes from detection~\citep{szamado2011cost}. The setting is
+nearer a market degraded by failed quality
+signalling~\citep{akerlof1970market} and certification
+intermediaries~\citep{lizzeri1999information,dranove2010quality}; the attribute
+our badge certifies is never learned even after the encounter, which makes the
+badge a credence rather than an experience
+good~\citep{darby1973free,dulleck2006doctors}. Penalty and detection are
+classically substitutes~\citep{becker1968crime};
+Proposition~\ref{prop:fines} states the limits of that substitution when
+detection is technological rather than budgetary.
+
+\paragraph{AI races and agent identity.}
+The interaction layer is the reduced race of~\citet{domingos2026falling},
+descended from the development race of~\citet{armstrong2016racing} and
+formalised evolutionarily by~\citet{han2020regulate}, whose programme covers
+voluntary commitments, heterogeneity, auditing and
+trust~\citep{han2022voluntary,cimpeanu2022heterogeneous,bova2024vigilant,bashir2026trust}.
+Those instruments act on the race's payoffs or on an external monitor; ours
+acts on who is recognised as an insider, which
+Proposition~\ref{prop:reciprocity} shows is the only lever available in the
+regime where the payoff levers have no purchase. Applied work on agent
+governance treats visibility and provenance as
+prerequisites~\citep{chan2024visibility,chan2025infrastructure,shavit2023practices,kolt2025governing},
+and~\citet{hammond2025multiagent} name selection pressure and mis-identification
+among multi-agent risks without formalising either. Work on self-recognition
+documents that models treat a counterpart differently once they identify it as
+a machine, or as
+themselves~\citep{panickssery2024llm,long2025mirror,wang2026outgroup}, which
+motivates treating recognition as cheap and imperfect rather than free and
+reliable~\citep{sun2025idiosyncrasies,davidson2024self}. What that strand
+lacks, and we supply, is the population-level consequence: what an ecosystem
+converges to when recognition is available, imperfect and worth faking.

@@ -15,9 +15,12 @@ pdflatex highlights                # optional, the standalone highlights page
 python make_submission_files.py    # highlights.docx + declaration_of_interest.docx
 ```
 
-Current state: 26 pages, 0 errors, 0 undefined references, 1 overfull box of
-117pt inside the CAS front-matter box (a class artefact, nothing protrudes on
-the page), 79 references printed.
+Current state: 24 manuscript pages plus the standalone highlights page, 0
+errors, 0 undefined references, 1 overfull box of 117pt inside the CAS
+front-matter box (a class artefact, nothing protrudes on the page), 79
+references printed. Five top-level sections: 1 Introduction with 1.1 Related
+work, 2 Model, 3 Results, 4 Discussion with 4.1 Limitations, 5 Conclusion, then
+Appendix A and the references.
 
 `assemble.py` is the single source of truth. It copies the body of
 `../paper/main.tex` and applies a short, asserted list of changes, so
