@@ -123,9 +123,10 @@ def emit_tables() -> None:
         r"\midrule",
     ]
     for _, row in pools.iterrows():
+        integrity = "N/A" if row.pool in {"uncertified", "plain"} else _fmt(row.integrity, 2)
         lines.append(
             rf"{pool_label[row.pool]} & {_fmt(row.unsafe)} & {_fmt(row.club, 2)} & "
-            rf"{_fmt(row.falsebeard, 2)} & {_fmt(row.integrity, 2)} & {row.social:.1f} \\"
+            rf"{_fmt(row.falsebeard, 2)} & {integrity} & {row.social:.1f} \\"
         )
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
 

@@ -64,7 +64,7 @@
 \newcommand{\piS}{\pi_{S}}
 \newcommand{\R}{\mathbb{R}}
 
-\title{\bfseries Certified clubs: agent identity is a forgeable\\ greenbeard, and exclusion is what holds it up}
+\title{\bfseries Forgeable greenbeards: multistability and hollow collapse in certified agent populations}
 
 \author[1,2]{Trung-Kiet Huynh$^{\dagger}$}
 \author[1,2]{Dao Sy Duy Minh$^{\dagger}$}
@@ -95,9 +95,11 @@ Fines cannot substitute for detection, because the protective fine diverges as
 forgery becomes undetectable. Collapse is graceful in the wrong way: a mimic
 that forges the badge and behaves well invades before the exploiter does,
 hollowing out the credential while conduct still looks sound, and assortment
-leaves this as the only failure mode. The flow is bistable with no badge-mixed
-attractor, so certification buys robustness rather than a lower level of harm,
-and what holds it up is the rent it charges outsiders.
+leaves this as the only failure mode. The flow is multistable: two
+measure-dominant safe faces account for the uniform-start basin split, while a
+rare unsafe badge-mixed attractor is also reachable from targeted starts. Thus
+certification buys robustness rather than a lower level of harm, and what
+holds it up is the rent it charges outsiders.
 \end{abstract}
 
 \noindent\textbf{Keywords:} evolutionary game theory; tag-based cooperation;
@@ -241,13 +243,13 @@ federate is weakest exactly where federation would help
 most~\citep{katz1985network}.
 
 Eighth, and the result that reframes the other seven: what certification buys a
-settled market is not safety but an entry barrier. From an arbitrary starting
-composition the replicator flow settles onto one of two disjoint faces of the
-simplex, one entirely badged and one entirely unbadged, with nothing between
-them (Observation~\ref{prop:bistable}). Of $20\,000$ interior starts drawn
-uniformly, $38.8\%$ reached the badged face and none reached a badge-mixed
-state, and both faces are internally safe. Since both are safe, the certified
-regime's social payoff is
+settled market is not safety but an entry barrier. The replicator flow is
+multistable. Under the uniform Dirichlet start measure, two measure-dominant
+faces account for the observed split: $38.8\%$ of $20\,000$ starts reached the
+badged face and $61.2\%$ the unbadged face. Targeted starts also reveal a rare
+unsafe badge-mixed attractor, so this is not an exhaustive two-attractor
+classification. Since the two dominant faces are safe, the certified regime's
+social payoff is
 lower than the uncertified one by exactly the dues, $57.0$ against $59.0$
 (Corollary~\ref{cor:dues}). The small-mutation result is not contradicted:
 certification does lower harm there, from $0.159$ to $0.090$, but what it lowers
@@ -614,22 +616,32 @@ cost of $4.78$ extra unsafe actions.
 
 \begin{proposition}[Reciprocity threshold]
 \label{prop:reciprocity}
-The advantage of the first-striker is affine in the liability and vanishes at
+At zero assortment, the advantage of the first-striker is affine in liability
+and vanishes at
 \begin{equation}
 \label{eq:LR}
 L_R \;=\; \frac{A(\CAS, \CS) - A(\CS, \CS)}{M(\CAS, \CS) - M(\CS, \CS)}
       \;=\; 0.551 .
 \end{equation}
-For every $L < L_R$ and every assortment $r < r^{\dagger}$, the unbadged
-first-striker $(\mathsf{N}, \CAS, \CAS)$ invades every unbadged resident that
-plays safe conduct in self-play, where
+For the canonical safe unbadged resident whose out-group conduct is \CS{}, the
+joint invasion advantage is
+\begin{equation}
+\label{eq:jointfirststrike}
+\Delta(L,r) = 2.631 - 34.431r - (4.78 + 4.22r)L .
+\end{equation}
+The first-striker invades precisely when $\Delta(L,r)>0$. Thus
+$L_R=0.551$ and $r^{\dagger}=0.076$ are the intercepts $L_R(0)$ and
+$r^{\dagger}(0)$, not independent bounds defining a rectangle. At $L=0$,
+the unbadged first-striker $(\mathsf{N}, \CAS, \CAS)$ invades every unbadged
+resident that plays safe conduct in self-play, where
 \begin{equation}
 \label{eq:rdagger}
 r^{\dagger} \;=\; \frac{A(\CAS, \CS) - A(\CS, \CS)}{A(\CAS, \CS) - A(\CAS, \CAS)}
       \;=\; 0.076 .
 \end{equation}
-In that region no unbadged population sustains safe play, whatever its conduct
-rule.
+At $r=0$, no unbadged population sustains safe play for $L<L_R$, whatever its
+conduct rule; at other $(L,r)$ values this conclusion must be checked against
+the joint boundary in Equation~\eqref{eq:jointfirststrike}.
 \end{proposition}
 
 Both bounds are needed, and the second is as informative as the first. The
@@ -802,8 +814,9 @@ modelling assumption, distinct from the information and intermediary-incentive
 problems studied in the certification literature~\citep{dranove2010quality}.
 Table~\ref{tab:thresholds} sweeps the dues against the fine and shows the
 two moving in opposite directions across the whole grid.
-The remedy is not cheaper dues but dearer forgery: raising $\kappa_f$ moves
-$\sigma^{*}$ up one for one, and Figure~\ref{fig:instruments}D shows it working
+The remedy is not cheaper dues but dearer forgery: raising $\kappa_f$ increases
+$\sigma^{*}$ with slope $1/[P(w,u)-P(w,v)+\rho]$, which is $+0.029$ at the
+baseline, and Figure~\ref{fig:instruments}D shows it working
 at a spoof rate where nothing else does.
 
 \begin{figure}[t]
@@ -906,14 +919,15 @@ carrying a forged badge. It free-rides on the dues, not on the behaviour.
 
 \begin{proposition}[Mimicry threshold]
 \label{prop:mimicry}
-The behavioural mimic invades the club when
+In the well-mixed limit $r=0$, the behavioural mimic invades the club when
 \begin{equation}
 \label{eq:sigmam}
 \sigma \;>\; \sigma_m \;=\; 1 - \frac{\kappa_g - \kappa_f}{P(u,u) - P(u,v) + \rho}
   \;=\; 0.938 ,
 \end{equation}
-and at the baseline assortment $\sigma_m = 0.938$ lies below the exploiter's
-threshold $0.962$.
+At the baseline assortment $r=0.1$, the exact invasion advantage is instead
+quadratic in $\sigma$ and its relevant root is $\sigma_m=0.9377$; it still lies
+below the exploiter's threshold $0.9617$.
 \end{proposition}
 
 The ordering of the two thresholds is not fixed, and what moves it is the one
@@ -928,8 +942,9 @@ $0.001$ across the entire range. They cross at $r = 0.077$
 
 The consequence is uncomfortable for the instrument of
 Section~\ref{sec:nucleation}. Clustering is what makes clubs possible at all,
-and it is also what removes the only failure mode that conduct monitoring can
-see. Past $r = 0.134$ the sole remaining route into the club is impersonation
+and it is also what removes the visible failure mode that conduct monitoring
+can see among the sampled invaders. Past $r = 0.134$ the remaining route
+identified in this analysis is impersonation
 by an agent that behaves correctly, so the better the interaction structure,
 the more completely the residual risk is concentrated in the failure that looks
 like success.
@@ -1065,7 +1080,7 @@ so the provider best placed to federate is the one least willing to.}
 \label{fig:providers}
 \end{figure}
 
-\subsection{Bistability, and where the exclusion is actually paid}
+\subsection{Multistability, and where the exclusion is actually paid}
 \label{sec:exclusion}
 
 The results so far read as a qualified endorsement of certification: it works,
@@ -1078,17 +1093,21 @@ and fixation. The replicator flow asks a different question: from an arbitrary
 starting composition, what does the market settle into? The answer is not one
 thing.
 
-\begin{observation}[Bistability, numerical]
+\begin{observation}[Dominant two-face basin split, numerical]
 \label{prop:bistable}
-At the baseline, no interior start drawn uniformly from the simplex reached a
+At the baseline, no interior start in the uniform Dirichlet sample reached a
 badge-mixed rest point. Of $20\,000$ such starts, $38.8\%$ converged to a state
 that is entirely badged and $61.2\%$ to one that is entirely unbadged (Wilson
 $95\%$ interval $[38.2, 39.5]$ on the first), and no design has positive growth
 at any end state reached. Both regimes are internally safe: the largest unsafe
 frequency over all end states is below $10^{-13}$.
+Targeted initialization at $70\%$ unconditional-forger mass instead reaches an
+unsafe badge-mixed attractor with $U=1$; its basin is small under the uniform
+measure but has positive volume. The reported two-face split is therefore
+measure-specific and does not establish global bistability.
 \end{observation}
 
-Figure~\ref{fig:exclusion}A plots a readable subsample of the starts, every one
+Figure~\ref{fig:exclusion}A plots a readable subsample of the uniform starts,
 of them landing on one of the two pure regimes.
 
 The limit sets deserve their proper names, because the flow is more degenerate
@@ -1141,12 +1160,13 @@ replicator reading was introduced to answer.
 The coincidence of the two safe regimes has an immediate and unflattering
 consequence for certification.
 
-\begin{corollary}[No safety dividend in a settled market]
+\begin{corollary}[No safety dividend on the dominant safe faces]
 \label{cor:dues}
-Since both regimes are safe, the social payoff of the certified regime differs
+Since both dominant faces are safe, the social payoff of the certified regime differs
 from the uncertified one only by the certification cost: $57.0$ against
-$59.0$, a gap of $2.0 = \kappa_g$ to machine precision. In a market that has
-settled, the identity layer buys no safety and costs exactly its dues.
+$59.0$, a gap of $2.0 = \kappa_g$ to machine precision. Conditional on
+convergence to either dominant safe face, the identity layer buys no safety
+and costs exactly its dues.
 \end{corollary}
 
 The small-mutation result of Section~\ref{sec:results} is not contradicted by
@@ -1489,15 +1509,19 @@ rather than on a scalar.
 Finally, the two dynamics we report answer two questions and neither is a
 description of a running market. Actual agent ecosystems are neither
 monomorphic nor sitting at a replicator rest point, and they are not, in
-general, in either of the two pure regimes of
+general, in either of the two dominant regimes of
 Observation~\ref{prop:bistable}. Which of our two readings is the better guide
 depends on how often the ecosystem is perturbed: the small-mutation reading
 governs a market that is repeatedly knocked off its equilibrium, and the
 replicator reading a market left alone. A model with an explicit perturbation
 rate would interpolate between them and would be the natural next step.
 
-One consequence of the bistability is worth naming as a limitation rather
-than a result. Because no attractor mixes badged and unbadged designs, the
+One consequence of the multistability is worth naming as a limitation rather
+than a result. The uniform-start sample does not estimate the basin of the
+targeted mixed attractor, so the realised share of cross-boundary states is
+unknown. The boundary conduct we identify as the cost of certification is
+therefore still measured off the dominant equilibrium path, as the payoff a
+compliant entrant would receive. Because the mixed attractor itself is unsafe,
 boundary conduct we identify as the cost of certification is never exercised
 in equilibrium, and Proposition~\ref{prop:exclusion} measures it off the
 equilibrium path, as the payoff a compliant entrant would receive. Measuring
@@ -1524,8 +1548,9 @@ exploiters degrade the conduct, so a monitoring regime that watches behaviour
 sees nothing wrong while the mark stops meaning anything.
 
 The result that reframes the rest concerns what certification is worth once a
-market has settled. The replicator flow is bistable, with a certified and an
-uncertified regime and nothing in between, and both are internally safe. A
+market has settled. The replicator flow is multistable: two measure-dominant
+safe faces coexist with a rare unsafe badge-mixed attractor revealed by
+targeted initialization. A
 settled certified market is therefore no safer than an uncertified one and
 poorer by exactly its dues; what certification buys is robustness, the
 protection of a safe market against being knocked out of safety, which is why
@@ -1563,11 +1588,13 @@ the share of the simplex draining to each of the two regimes.
 \label{app:proofs}
 
 \begin{proof}[Proof of Proposition~\ref{prop:reciprocity}]
-Against a \CS{} resident, the private payoff of a rare \CAS{} mutant is
+Against a \CS{} resident at $r=0$, the private payoff of a rare \CAS{} mutant is
 $P(\CAS, \CS) = A(\CAS, \CS) - L\,M(\CAS, \CS)$ and the resident earns
 $P(\CS,\CS)$. The difference is affine in $L$ with slope
 $-[M(\CAS,\CS) - M(\CS,\CS)] < 0$, so it is positive exactly below the ratio
-in Equation~\eqref{eq:LR}. For the general statement, a safe unbadged resident
+in Equation~\eqref{eq:LR}. With assortment, the exact difference against the
+canonical safe resident is the joint expression in Equation~\eqref{eq:jointfirststrike};
+the two intercepts cannot be combined into a rectangle. For the general statement, a safe unbadged resident
 plays a safe design in self-play; since badges are absent, every check fails
 and only $s_{\mathrm{out}}$ is ever executed, so the resident is behaviourally
 one of $(\mathsf{N}, \cdot, \AS)$ or $(\mathsf{N}, \cdot, \CS)$. With
