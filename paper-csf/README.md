@@ -14,6 +14,7 @@ formally published and is not a version of record.
 python assemble.py
 python make_submission_files.py
 latexmk -pdf main.tex
+latexmk -pdf supplementary.tex
 latexmk -pdf highlights.tex
 python package_source.py
 ```
@@ -26,25 +27,30 @@ required core citation is lost.
 
 ## Verified state (24 August 2026)
 
-`CITATION.cff` records release metadata for version 1.0.0 dated 24 August
-2026. The `v1.0.0` tag and GitHub release identify the exact tested submission
-snapshot. They provide immutable source archives but do not mint a DOI.
+`CITATION.cff` records planned release metadata for version 1.0.0 dated
+24 August 2026. Before submission, create and publish the `v1.0.0` tag from the
+exact tested revision, as required by `SUBMISSION_CHECKLIST.md`. A Git tag does
+not itself mint a DOI.
 
-All three authors confirmed the final spelling and order, equal-contribution
-note, CRediT roles, corresponding-author address, funding and competing-interest
-statements, generative-AI declaration, companion-paper disclosure, and final
-manuscript on 24 August 2026.
+All three authors confirmed the spelling and order, equal-contribution note,
+CRediT roles, corresponding-author address, funding and competing-interest
+statements, generative-AI declaration and companion-paper disclosure on
+24 August 2026. The shortened manuscript still requires a final author read.
 
-- 26 PDF pages: one unnumbered CAS highlights sheet and 25 numbered manuscript
-  pages.
-- 0 LaTeX errors, 0 undefined references/citations and 59 printed references.
+- 16 PDF pages: one unnumbered CAS highlights sheet and 15 numbered manuscript
+  pages; the separate Supplementary Material is 7 pages.
+- 0 LaTeX errors, 0 undefined references/citations and 55 printed main-text
+  references.
 - One 117 pt overfull-box report generated inside the CAS front-matter macro;
   visual inspection confirms that no content protrudes from the page.
-- Abstract: 227 words. Highlights: five items, 65--73 characters each.
-- Introduction plus Related work: 994 words.
-- Five top-level sections, followed by declarations, Appendix A and references.
-- Nine manuscript figures are vector PDFs with embedded fonts; no Type 3 fonts
-  occur in `main.pdf`.
+- Main text: 5,409 words by TeXcount, plus 89 heading words and 279 caption/table
+  words. Abstract: 199 words. Highlights: five items, 65--73 characters each.
+- Introduction plus Related work: 993 words.
+- Five top-level sections, followed by declarations and references. Analytical
+  derivations and secondary sweeps are in the Supplementary Material.
+- The main manuscript has six figures and three tables; the Supplement has three
+  figures and four tables. All figures are vector PDFs with embedded fonts; no
+  Type 3 fonts occur in `main.pdf`.
 
 ## Submission files
 
@@ -52,11 +58,13 @@ Use either the deterministic ZIP or the corresponding individual LaTeX source
 files, depending on what Editorial Manager accepts; do not upload both source
 routes blindly. The ZIP already contains the manuscript figures.
 
-- `main.tex`, `refs.bib`, the CAS class/style files and `figures/`: editable
-  LaTeX source package.
+- `main.tex`, `refs.bib`, `table_race_generated.tex`, the CAS class/style files
+  and `figures/fig01`--`fig06`: editable main-manuscript source package.
 - `CSF_manuscript_source.zip`: deterministic allowlisted source archive with an
   internal SHA-256 manifest; it excludes the graphical-abstract artifacts.
 - `main.pdf`: compiled manuscript for final visual review.
+- `supplementary.pdf`: final-form Supplementary Material, uploaded as a separate
+  supplementary file rather than inserted into the main manuscript.
 - `highlights.docx`: the highlights upload. The generated
   `highlights.tex`/`highlights.pdf` pair is retained only as a local visual-QA
   rendering; do not upload it instead of the DOCX.
@@ -72,20 +80,19 @@ routes blindly. The ZIP already contains the manuscript figures.
 ## Journal-specific editorial changes
 
 The CSF version uses the title *Forgeable greenbeards: multistability and
-hollow collapse in certified agent populations*. The abstract, introduction
-and related-work section foreground nonlinear population flow, local stability,
+hollow collapse in certified agent populations*. The abstract, introduction,
+related work and results foreground nonlinear population flow, local stability,
 transcritical edge bifurcations, separatrices and basin structure. The compact
 introduction is in `_intro_csf.tex`; the compact literature synthesis is in
 `_related_csf.tex`.
 
 `_blocks_model.tex` makes the replicator flow and transversal eigenvalue
-explicit. `_blocks_results.tex` provides a single inventory of the qualitative
-transitions and distinguishes local edge bifurcations from global basin
-statistics. `_blocks_declarations.tex` contains competing-interest, funding,
-data-availability and generative-AI disclosures. The latter records assistance
-with manuscript, scientific-code, validation, visualization, build, packaging
-and reproducibility work while distinguishing deterministic scientific outputs
-from generative imagery. CRediT roles are in `_front.tex`.
+explicit. `_results_csf.tex`, `_discussion_csf.tex` and `_conclusion_csf.tex`
+carry the shortened CSF narrative. `_blocks_results.tex` supplies the compact
+bifurcation inventory. `supplementary.tex` is generated from the extended
+sweeps and analytical derivations. `_blocks_declarations.tex` contains
+competing-interest, funding, data-availability and generative-AI disclosures.
+CRediT roles are in `_front.tex`.
 
 The revision also removes repeated previews of every result, corrects the
 uniform-initialisation basin shares to 0.388 and 0.612, reports the targeted

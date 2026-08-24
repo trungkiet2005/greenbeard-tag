@@ -1,0 +1,80 @@
+\section{Discussion}
+\label{sec:discussion}
+
+The nonlinear analysis changes how certification should be evaluated. Local
+edge bifurcations determine when a resident loses resistance, but they do not
+select a unique global outcome: the same parameters support disjoint safe rest
+faces and an unsafe mixed face reached from targeted starts. The
+finite-population and replicator dynamics are therefore complementary rather
+than competing descriptions. One measures resilience under recurrent
+displacement; the other reveals what remains after a composition is left to
+settle.
+
+The first design implication is that an attestation standard cannot specify
+verification independently of conduct. Current agent-identity proposals focus
+on binding, checking and revoking credentials
+~\citep{a2a2026spec,xu2026agentdid,grogan2025agentfacts,otsuka2026aiidentity}.
+Equation~\eqref{eq:sigmastar} shows that in-group conduct sets forgery
+tolerance, while Proposition~\ref{prop:exclusion} shows that out-group conduct
+sets the cost imposed on an unverified but compliant entrant. Leaving conduct
+to the market leaves the mechanism that sustains the credential unspecified
+~\citep{hadfieldmenell2019incomplete}.
+
+The second implication concerns measurement. Around the mimicry threshold,
+unsafe frequency remains low while the posterior probability that a passed
+badge is genuine collapses. Outcome monitoring therefore cannot distinguish a
+working credential from a hollow one. A deployed regime must sample and
+independently re-verify passed credentials; stronger interaction structure
+makes this more important because assortment removes the observable exploiter
+before the behavioural mimic. The supplementary provider experiment adds that
+mutual recognition should be designed early: issuer-scoped marks convert
+market concentration into a safety parameter, whereas federation removes the
+category of cross-provider outsider.
+
+These results are not a general argument against certification. Below the
+reciprocity threshold, it is the only modelled instrument that protects safe
+play, and under rare mutation it nearly halves unsafe frequency. The result is
+more specific: its benefit is resilience rather than a lower settled harm
+level, and its stabilising rent is an entry barrier rather than realised
+equilibrium harm~\citep{leland1979quacks}. Asking a club to treat outsiders
+gently removes that barrier but also makes honest membership dominated by an
+unbadged or forged twin. A fine can restore resistance at fixed detection, but
+cannot create a reason for the gentle club to exist.
+
+The basin calculation also gives a methodological warning. Multistability is
+common in evolutionary dynamics
+~\citep{hofbauer1998evolutionary,hofbauer2003evolutionary,sandholm2010population}.
+For any observable bilinear in population shares, scoring a basin-weighted
+mean state creates cross-regime encounters absent from every trajectory. Basin
+weights may average already evaluated observables; they must not be averaged
+into a synthetic population first.
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+The interaction layer is a deliberately unchanged, two-player race with four
+conduct rules. This isolates the identity mechanism but makes the conduct
+space coarse; intermediate out-group policies could smooth the sharp frontier
+in Table~\ref{tab:outgroup}. The directions implied by the invasion thresholds
+should survive, but their numerical values need not.
+
+Verification is represented by one exogenous Bernoulli pass rate shared by all
+agents. Real systems include heterogeneous verifiers, revocation and
+reputation carried across encounters~\citep{santos2018social,yue2025reputation}.
+Adaptive forgers may also improve as detection improves
+~\citep{jovanovic2024watermarkstealing}; endogenising $\sigma$ would turn the
+static enforcement comparison into an arms race.
+
+Assortment is a scalar self-encounter probability and therefore conflates
+meeting the same design with meeting the same provider. A network of provider
+communities would make the nucleation boundary depend on topology. Likewise,
+neither rare mutation nor an undisturbed replicator rest point is a complete
+model of a running market. An explicit perturbation rate would interpolate
+between the two readings.
+
+Finally, the uniform-start sample does not estimate the basin of the targeted
+unsafe face. Its 64 perturbations establish only local numerical robustness,
+so neither its global basin share nor the realised volume of cross-boundary
+harm is known. The entry penalty is consequently an off-path invasion
+quantity, not a prediction that mixed-boundary encounters occur with a
+particular frequency.

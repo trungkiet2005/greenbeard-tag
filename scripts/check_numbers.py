@@ -189,13 +189,23 @@ def _manuscript_sources() -> dict:
     import re
 
     out = {}
-    for rel in ("paper/main.tex", "paper-csf/main.tex"):
-        path = ROOT / rel
-        if not path.exists():
+    source_sets = {
+        "paper/main.tex": ("paper/main.tex",),
+        "paper-csf/main.tex + supplementary.tex": (
+            "paper-csf/main.tex",
+            "paper-csf/supplementary.tex",
+        ),
+    }
+    for label, rels in source_sets.items():
+        chunks = []
+        for rel in rels:
+            path = ROOT / rel
+            if path.exists():
+                chunks.append(path.read_text(encoding="utf-8"))
+        if not chunks:
             continue
-        text = path.read_text(encoding="utf-8").replace("\r\n", "\n")
-        text = re.sub(r"(?<!\\\\)%.*$", "", text, flags=re.M)
-        out[rel] = text
+        text = "\n".join(chunks).replace("\r\n", "\n")
+        out[label] = re.sub(r"(?<!\\\\)%.*$", "", text, flags=re.M)
     return out
 
 

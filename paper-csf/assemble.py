@@ -7,7 +7,7 @@ Reads the venue-neutral ../paper/main.tex, keeps most of its body verbatim, and
   * replaces Related work with a half-length subsection of the Introduction,
   * folds Limitations into the Discussion as a subsection,
   * swaps the venue-neutral data statement for the Elsevier declarations,
-  * emits the appendix ahead of the reference list,
+  * moves proofs and secondary experiments into a separate supplement,
   * switches the bibliography to the numbered Elsevier style.
 
 The three structural changes take the manuscript from seven top-level sections
@@ -112,11 +112,19 @@ APPENDIX = "\\appendix"
 intro_full = seg(INTRO, RELATED)
 related = seg(RELATED, MODEL)
 model = seg(MODEL, RESULTS)              # includes \input{tables_generated}
-results = seg(RESULTS, DISCUSSION)       # includes \input{robustness_generated}
-discussion = seg(DISCUSSION, LIMITATIONS)
-limitations = seg(LIMITATIONS, CONCLUSION)
-conclusion = seg(CONCLUSION, AVAILABILITY)
+results_full = seg(RESULTS, DISCUSSION)  # source for supplementary extensions
+discussion_full = seg(DISCUSSION, LIMITATIONS)
+limitations_full = seg(LIMITATIONS, CONCLUSION)
+conclusion_full = seg(CONCLUSION, AVAILABILITY)
 appendix = seg(APPENDIX)
+
+CHANNELS = "\\subsection{Screening and fining are different instruments}"
+PROVIDERS = "\\subsection{Provider-scoped marks make concentration a safety variable}"
+MULTISTABILITY = "\\subsection{Multistability, and where the exclusion is actually paid}"
+LIABILITY = "\\subsection{What identity is worth as liability varies}"
+channels = seg(CHANNELS, PROVIDERS)
+providers = seg(PROVIDERS, MULTISTABILITY)
+extensions = seg(LIABILITY, DISCUSSION)
 
 # The venue-neutral data statement and its \bibliography sit between the
 # conclusion and the appendix and are both replaced here, so nothing from that
@@ -184,89 +192,52 @@ model = insert_before(
     block("model"),
     "model",
 )
-
-results = sub(
-    results,
-    "\\section{Results}\n\\label{sec:results}\n\n",
-    "\\section{Results}\n\\label{sec:results}\n\n" + block("results"),
-    "results",
+model = sub(
+    model,
+    "\\input{tables_generated}",
+    "\\input{table_race_generated}",
+    "main-table-split",
+)
+model = sub(
+    model,
+    "Section~\\ref{sec:channels}\nseparates the two.",
+    "Supplementary Section S2 separates the two.",
+    "supplement-channels-reference",
+)
+model = sub(
+    model,
+    "Section~\\ref{sec:liability} reopens it and measures what\nidentity is worth as a function of $L$.",
+    "Supplementary Section S4 reopens it and measures what identity is worth\n"
+    "as a function of $L$.",
+    "supplement-liability-reference",
 )
 
-results = sub(
-    results,
-    "They cross at $r = 0.077$\n(Figure~\\ref{fig:invasion}C).",
-    "They cross at $r = 0.077$\n(Figure~\\ref{fig:invasion}C), where the two codimension-one bifurcation\n"
-    "curves meet transversally in the $(r, \\sigma)$ plane. Both transversal\n"
-    "eigenvalues of Equation~\\eqref{eq:eigen} at the club vertex vanish there, and\n"
-    "because the transversal block of the Jacobian at a vertex is diagonal those\n"
-    "zeros are semisimple: $(r, \\sigma) = (0.077, 0.938)$ is a codimension-two\n"
-    "point at which two independent transcritical events coincide, not a degenerate\n"
-    "singularity with a normal form of its own. What changes as the point is\n"
-    "crossed is only which of the two the ecosystem meets first. The club vertex is\n"
-    "in any case never hyperbolic: inside a monomorphic club every check passes,\n"
-    "$s_{\\mathrm{out}}$ is never executed, and the seven other designs\n"
-    "$(\\mathsf{G}, u, v)$ with $u \\in \\{\\AS, \\CS\\}$ are payoff-equivalent to\n"
-    "it, so seven transversal eigenvalues vanish identically at every parameter\n"
-    "value. The\n"
-    "exchange of stability is therefore a statement about the invading edge and not\n"
-    "about the vertex as a whole.",
-    "codim-two",
-)
+# The CSF main paper now has a dedicated results narrative.  It preserves the
+# exact equations and reported values but gives priority to the six nonlinear
+# mechanisms promised by the title.  Secondary policy experiments and all
+# derivations remain available in supplementary.tex.
+results = (HERE / "_results_csf.tex").read_text(encoding="utf-8")
+assert results.count("% BIFURCATION_TABLE") == 1
+results = results.replace("% BIFURCATION_TABLE", block("results"))
+assert 2000 <= prose_words(results) <= 3200, (
+    f"compact Results is {prose_words(results)} prose words")
+for required in (
+    "prop:reciprocity", "prop:spoof", "prop:fines", "prop:nucleation",
+    "prop:mimicry", "prop:bistable", "prop:exclusion", "cor:rescue",
+):
+    assert f"\\label{{{required}}}" in results, f"Results lost {required}"
 
-results = sub(
-    results,
-    "buy its way out with penalties. Figure~\\ref{fig:instruments}B shows the\ndivergence.",
-    "buy its way out with penalties. The fine here is levied by an authority rather\n"
-    "than by peers, so it escapes the second-order free-rider problem that\n"
-    "constrains punishment in evolutionary settings where the punishing itself is\n"
-    "costly and voluntary~\\citep{szolnoki2017second}; what constrains it instead is\n"
-    "detection alone. Figure~\\ref{fig:instruments}B shows the divergence.",
-    "peer-punishment-contrast",
-)
+discussion = (HERE / "_discussion_csf.tex").read_text(encoding="utf-8")
+conclusion = (HERE / "_conclusion_csf.tex").read_text(encoding="utf-8")
+assert 550 <= prose_words(discussion) <= 1000, (
+    f"compact Discussion is {prose_words(discussion)} prose words")
+assert 120 <= prose_words(conclusion) <= 250, (
+    f"compact Conclusion is {prose_words(conclusion)} prose words")
 
-discussion = sub(
-    discussion,
-    "Multistable evolutionary dynamics are\ncommon~\\citep{hofbauer1998evolutionary,sandholm2010population}",
-    "Multistable evolutionary dynamics are\n"
-    "common~\\citep{hofbauer1998evolutionary,hofbauer2003evolutionary,sandholm2010population},"
-    "\nand so is the practice of summarising a population by a single averaged\n"
-    "state~\\citep{perc2017statphys}",
-    "multistability-cites",
-)
-
-# A standalone Limitations section is a convention of the AI and social-science
-# venues, not of a nonlinear-dynamics journal, where it belongs inside the
-# discussion.  Demoting it also takes the manuscript from seven top-level
-# sections to five.  It stays a subsection rather than a run-in \paragraph so
-# that it keeps its own entry in the table of contents and the PDF bookmarks:
-# at four hundred words a referee should be able to find it.
-limitations = sub(
-    limitations,
-    "\\section{Limitations}\n\\label{sec:limitations}",
-    "\\subsection{Limitations}\n\\label{sec:limitations}",
-    "limitations-demote",
-)
-
-limitations = sub(
-    limitations,
-    "inherited\ndeliberately so that our results are comparable with the sister studies, and it\nis not a model of any particular deployment.",
-    "inherited\ndeliberately and without modification, so that every effect we report is\nattributable to the identity layer rather than to a change in the underlying\ngame, and it is not a model of any particular deployment.",
-    "sister-studies",
-)
-
-# The indirect-reciprocity citation this block used to insert now lives in the
-# venue-neutral master, alongside the reputation-threshold reference the CSF
-# revision added, so there is nothing venue-specific left to patch here.
-
-# -------------------------------------------------- back matter and appendix
-# Order follows the elsarticle convention and the sibling AMC manuscript:
-# declarations, then the CRediT statement that cas-sc builds from the
-# \credit{} commands in the front matter, then the appendix, then the
-# references.  The appendix used to be emitted after \bibliography, which put
-# the proofs behind the reference list; every Elsevier template puts \appendix
-# ahead of it.  Elsevier asks for the generative-AI declaration in a dedicated
-# section at the end of the manuscript ahead of the references, which this
-# order still satisfies.
+# -------------------------------------------------- back matter and supplement
+# Elsevier asks for the generative-AI declaration in a dedicated section at
+# the end of the manuscript ahead of the references.  Proofs and secondary
+# experiments are delivered as a separately compiled supplementary PDF.
 declarations = block("declarations") + "\n\\printcredits\n\n"
 bibliography = "\n\\bibliographystyle{elsarticle-num-names}\n\\bibliography{refs}\n\n"
 
@@ -276,15 +247,6 @@ END = "\\end{document}"
 assert appendix.rstrip().endswith(END), "master no longer ends with \\end{document}"
 appendix = appendix.rstrip()[:-len(END)].rstrip() + "\n\n"
 
-# Elsevier house style prints "Appendix A", not "A".  Neither cas-sc.cls nor
-# cas-common.sty carries any appendix code, so LaTeX's bare \Alph numbering
-# stands and the heading reads "A. Proofs" unless the prefix is put back.
-appendix = appendix.replace(
-    "\\appendix\n",
-    "\\appendix\n\\renewcommand{\\thesection}{Appendix~\\Alph{section}}\n",
-    1,
-)
-
 out = "".join([
     front,
     intro,
@@ -292,10 +254,8 @@ out = "".join([
     model,
     results,
     discussion,
-    limitations,
     conclusion,
     declarations,
-    appendix,
     bibliography,
     END + "\n",
 ])
@@ -311,11 +271,90 @@ assert not stray, f"bare float specifier left in main.tex: {stray[:3]}"
 
 (HERE / "main.tex").write_text(out, encoding="utf-8")
 
-# the generated tables come from the same build as the results, so refresh
-# them from ../paper/ every time rather than letting a stale copy drift
-for name in ("tables_generated", "robustness_generated"):
-    text = (SRC.parent / f"{name}.tex").read_text(encoding="utf-8")
-    (HERE / f"{name}.tex").write_text(cas_floats(text), encoding="utf-8")
+# Split deterministic generated tables by destination.  This keeps one model
+# table in the main paper and puts the parameter grids in the supplement while
+# retaining the build pipeline as their single source of truth.
+def generated_table(text, label):
+    matches = [m.group(0) for m in re.finditer(
+        r"\\begin\{table\}(?:\[[^]]*\])?.*?\\end\{table\}", text, re.S)
+        if f"\\label{{{label}}}" in m.group(0)]
+    assert len(matches) == 1, f"expected one generated table {label}"
+    return matches[0] + "\n"
+
+
+tables_text = (SRC.parent / "tables_generated.tex").read_text(encoding="utf-8")
+robustness_text = (SRC.parent / "robustness_generated.tex").read_text(encoding="utf-8")
+table_files = {
+    "table_race_generated.tex": cas_floats(
+        generated_table(tables_text, "tab:race")),
+    "table_thresholds_generated.tex": generated_table(tables_text, "tab:thresholds"),
+    "table_pools_generated.tex": generated_table(tables_text, "tab:pools"),
+    "table_providers_generated.tex": generated_table(tables_text, "tab:providers"),
+    "table_robustness_generated.tex": generated_table(robustness_text, "tab:robustness"),
+}
+
+# The main-table caption identifies the matrix and points to the threshold;
+# the Results section, rather than the caption, carries the interpretation.
+table_files["table_race_generated.tex"] = re.sub(
+    r"\\caption\{.*?\}\s*\\label\{tab:race\}",
+    lambda _: "\\caption{Exact interaction layer: expected race payoff $A$ "
+    "(left) and expected unsafe actions $M$ (right) for row against column "
+    "conduct.}\n\\label{tab:race}",
+    table_files["table_race_generated.tex"],
+    count=1,
+    flags=re.S,
+)
+for name, text in table_files.items():
+    (HERE / name).write_text(text, encoding="utf-8")
+
+# Assemble a self-contained supplementary document.  Cross-references to the
+# main paper are resolved through main.aux at build time; the submitted PDF is
+# final-form supplementary material and does not depend on that file at read
+# time.
+channels_supp = channels.replace(CHANNELS, "\\section{Screening and fining channels}", 1)
+providers_supp = providers.replace(PROVIDERS, "\\section{Provider-scoped credentials}", 1)
+providers_supp = insert_before(
+    providers_supp,
+    "\\begin{figure}[t]",
+    "\\input{table_providers_generated}\n\n",
+    "supplement-provider-table",
+)
+extensions_supp = extensions.replace(
+    LIABILITY, "\\section{Liability and robustness}", 1)
+extensions_supp = extensions_supp.replace(
+    "\\label{sec:robustness}", "\\label{sec:supp-robustness}", 1)
+extensions_supp = sub(
+    extensions_supp,
+    "\\paragraph{Design pools.}",
+    "\\input{table_pools_generated}\n\n\\paragraph{Design pools.}",
+    "supplement-pools-table",
+)
+extensions_supp = sub(
+    extensions_supp,
+    "\\input{robustness_generated}",
+    "\\input{table_robustness_generated}",
+    "supplement-robustness-table",
+)
+proofs = sub(
+    appendix,
+    "\\appendix\n\n\\section{Proofs}\n\\label{app:proofs}",
+    "\\section{Analytical derivations}\n\\label{app:proofs}",
+    "supplement-proof-heading",
+)
+supplement = "".join([
+    (HERE / "_supplement_front.tex").read_text(encoding="utf-8"),
+    "\\section{Threshold sweeps}\n"
+    "Supplementary Table~\\ref{tab:thresholds} reports how dues and fines move "
+    "the closed-form invasion and nucleation boundaries.\n\n"
+    "\\input{table_thresholds_generated}\n\n",
+    channels_supp,
+    providers_supp,
+    extensions_supp,
+    proofs,
+    "\\bibliographystyle{unsrtnat}\n\\bibliography{refs}\n\n",
+    END + "\n",
+])
+(HERE / "supplementary.tex").write_text(supplement, encoding="utf-8")
 
 # The figures were copied here once, by hand, and nothing refreshed them: a
 # re-rendered figure left the package silently showing the old one, with a
@@ -331,6 +370,7 @@ stale = sorted(p.name for p in figdir.glob("fig*.pdf")
                if p.name not in {q.name for q in rendered})
 assert not stale, f"figures in the package that results/ no longer renders: {stale}"
 
-print(f"wrote main.tex: {out.count(chr(10))} lines, "
-      f"tables_generated.tex and robustness_generated.tex refreshed, "
+print(f"wrote main.tex ({out.count(chr(10))} lines) and "
+      f"supplementary.tex ({supplement.count(chr(10))} lines); "
+      f"{len(table_files)} generated tables split, "
       f"{len(rendered)} figures restaged")

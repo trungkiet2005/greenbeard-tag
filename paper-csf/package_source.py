@@ -19,18 +19,18 @@ ROOT_FILES = (
     "main.tex",
     "main.bbl",
     "refs.bib",
-    "tables_generated.tex",
-    "robustness_generated.tex",
+    "table_race_generated.tex",
     "cas-sc.cls",
     "cas-common.sty",
 )
-FIGURES = tuple(f"figures/fig{i:02d}_{name}.pdf" for i, name in enumerate(
-    (
-        "exclusion", "handshake", "invasion", "cliff", "nucleation",
-        "instruments", "channels", "providers", "robustness",
-    ),
-    start=1,
-))
+FIGURES = (
+    "figures/fig01_exclusion.pdf",
+    "figures/fig02_handshake.pdf",
+    "figures/fig03_invasion.pdf",
+    "figures/fig04_cliff.pdf",
+    "figures/fig05_nucleation.pdf",
+    "figures/fig06_instruments.pdf",
+)
 THUMBNAILS = tuple(
     f"thumbnails/cas-{name}.{suffix}"
     for name, suffix in (
