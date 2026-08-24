@@ -9,6 +9,12 @@ import pytest
 
 from gbtag import config as cfg
 from gbtag import theory as th
+from gbtag.dynamics import (
+    focal_mass_start,
+    full_dimensional_perturbations,
+    replicator_attractor,
+    replicator_field,
+)
 from gbtag.functionals import build_functionals, unbadged_subspace
 from gbtag.identity import IdentityParams
 from gbtag.race import RaceParams, build_race_tables
@@ -115,6 +121,20 @@ def test_spoof_threshold_is_the_invasion_boundary() -> None:
     above = replace(WM, sigma=s + 0.01)
     assert not invades(TABLES, below, 0.0, cfg.FALSEBEARD, cfg.CLUB)
     assert invades(TABLES, above, 0.0, cfg.FALSEBEARD, cfg.CLUB)
+
+
+def test_spoof_denominator_can_vanish_even_when_club_actions_differ() -> None:
+    """The exact condition is rho=P(w,v)-P(w,u), not u=v and rho=0.
+
+    At zero liability, a CAS forger earns 61.63 against CS and 101.77 against
+    AS. A positive fine equal to that payoff difference therefore makes the
+    denominator vanish even though the club actions differ.
+    """
+    rho = TABLES.payoff[2, 0] - TABLES.payoff[2, 1]
+    assert rho > 0.0
+    assert spoof_threshold_closed_form(
+        TABLES, 0.0, "CS", "AS", "CAS", 2.0, 0.0, rho
+    ) is None
 
 
 def test_assortment_raises_the_spoof_threshold() -> None:
@@ -354,8 +374,8 @@ def test_monomorphic_decomposition_has_no_interface() -> None:
     assert dec.interface_share == pytest.approx(0.0)
 
 
-def test_the_flow_is_bistable_with_no_badge_mixed_attractor() -> None:
-    """The correct object: two disjoint regimes, not one mixed population.
+def test_uniform_starts_reach_two_faces_and_no_badge_mixed_endpoint() -> None:
+    """Uniform starts reach two disjoint regimes, not one mixed population.
 
     Averaging the attractors and scoring a bilinear observable at the mean
     manufactures encounters between designs that never meet, so the state
@@ -379,6 +399,52 @@ def test_the_flow_is_bistable_with_no_badge_mixed_attractor() -> None:
 
     # the mean state, by contrast, looks catastrophic; that is the artefact
     assert aggregate_unsafe_frequency(ends.mean(axis=0), fun) > 0.3
+
+
+def test_targeted_unsafe_rest_face_and_perturbation_probe_are_reproducible() -> None:
+    """The targeted exception is specified fully and is numerically robust.
+
+    This test establishes reachability, rest-point consistency, non-invadability
+    and robustness over deterministic full-dimensional perturbations.  It does
+    not turn the finite probe into an estimate of basin volume.
+    """
+    from gbtag.functionals import aggregate_unsafe_frequency
+
+    fun = build_functionals(TABLES, cfg.IDENTITY, cfg.LIABILITY, cfg.SOCIAL_HARM)
+    focal = fun.index(*cfg.TARGETED_DESIGN)
+    x0 = focal_mass_start(fun.n, focal, cfg.TARGETED_MASS)
+    assert x0[focal] == pytest.approx(0.7)
+    assert np.delete(x0, focal) == pytest.approx(
+        np.full(fun.n - 1, 0.3 / (fun.n - 1))
+    )
+
+    end = replicator_attractor(fun.fitness, x0)
+    carries = np.array([badge != "N" for badge in fun.badge], dtype=float)
+    fitness = fun.fitness @ end
+    growth = fitness - float(end @ fitness)
+    assert aggregate_unsafe_frequency(end, fun) == pytest.approx(1.0, abs=1e-10)
+    assert 0.90 < float(end @ carries) < 0.97
+    assert np.abs(replicator_field(end, fun.fitness)).max() < 1e-10
+    assert growth.max() < 1e-10
+    support = end > 1e-8
+    assert np.all(np.abs(growth[support]) < 1e-10)
+    assert np.all(growth[~support] <= 1e-10)
+    assert np.any(growth[~support] < -1e-3)
+
+    starts = full_dimensional_perturbations(
+        x0, cfg.TARGETED_PERTURBATIONS, cfg.TARGETED_EPSILON,
+        cfg.TARGETED_SEED,
+    )
+    assert np.all(starts > 0.0)
+    assert np.all(np.abs(starts - x0).sum(axis=1) <= 2 * cfg.TARGETED_EPSILON)
+    perturbed_ends = [replicator_attractor(fun.fitness, start) for start in starts]
+    assert all(aggregate_unsafe_frequency(state, fun) > 1.0 - 1e-9
+               for state in perturbed_ends)
+    assert all(0.85 < float(state @ carries) < 0.97 for state in perturbed_ends)
+    assert all(np.abs(replicator_field(state, fun.fitness)).max() < 1e-10
+               for state in perturbed_ends)
+    assert all((fun.fitness @ state - float(state @ (fun.fitness @ state))).max()
+               < 1e-10 for state in perturbed_ends)
 
 
 def test_the_equilibrium_averages_observables_not_states() -> None:

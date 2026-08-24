@@ -1,6 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "gbtag: agent identity as a forgeable greenbeard in an evolutionary AI race"
+version: "1.0.0"
+date-released: 2026-08-24
 abstract: >-
   Evolutionary dynamics of badge-conditioned trust in a reduced AI race.
   A seat carries an identity badge that is verifiable but forgeable and
@@ -12,9 +14,8 @@ authors:
     email: "23122039@student.hcmus.edu.vn"
     affiliation: >-
       Faculty of Information Technology, University of Science, Vietnam National University Ho Chi Minh City, Ho Chi Minh City, Vietnam
-  - family-names: "Dao Sy Duy"
-    given-names: "Minh"
-    orcid: "https://orcid.org/0009-0002-4501-2788"
+  - family-names: "Dao-Sy"
+    given-names: "Duy-Minh"
     email: "23122041@student.hcmus.edu.vn"
     affiliation: >-
       Faculty of Information Technology, University of Science, Vietnam National University Ho Chi Minh City, Ho Chi Minh City, Vietnam
@@ -24,8 +25,7 @@ authors:
     email: "23122044@student.hcmus.edu.vn"
     affiliation: >-
       Faculty of Information Technology, University of Science, Vietnam National University Ho Chi Minh City, Ho Chi Minh City, Vietnam
-version: 1.0.0
-date-released: 2026-08-19
+repository-code: "https://github.com/trungkiet2005/greenbeard-tag"
 license: MIT
 type: software
 keywords:

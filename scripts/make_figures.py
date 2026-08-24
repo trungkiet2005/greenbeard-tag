@@ -463,9 +463,9 @@ def fig06(tables, results: Path, figdir: Path) -> None:
         arrowprops=dict(arrowstyle="->", color=PALETTE["unsafe"], lw=0.8),
     )
     ax.set_xlabel(r"spoof success $\sigma$")
-    ax.set_ylabel(r"smallest protective fine $\rho^{*}$")
+    ax.set_ylabel(r"break-even fine $\rho^{*}$")
     ax.set_xlim(0.85, 1.0)
-    panel_title(ax, "B", "no fine substitutes for detection")
+    panel_title(ax, "B", "no finite fine replaces detection")
 
     ax = axes[1, 0]
     ax.plot(dues.setting, dues.club, color=PALETTE["club"], label="club share")
@@ -595,14 +595,14 @@ def fig01(tables, results: Path, figdir: Path) -> None:
     ax_a.set_ylim(1e-25, 1e2)
     ax_a.set_xlim(-0.08, 1.08)
     ax_a.axvspan(0.08, 0.92, color=PALETTE["neutral"], alpha=0.07)
-    ax_a.text(0.5, 1e-12, "no attractor\nhere", ha="center", va="center",
+    ax_a.text(0.5, 1e-12, "none in uniform\nsample", ha="center", va="center",
               fontsize=FS["tiny"], color=PALETTE["neutral"])
     ax_a.text(0.02, 3e0, f"{1 - key['certified_basin_share']:.0%}\nunbadged",
               ha="left", va="top", fontsize=FS["tiny"],
               color=PALETTE["unbadged cooperator"])
     ax_a.text(0.98, 3e0, f"{key['certified_basin_share']:.0%}\nbadged",
               ha="right", va="top", fontsize=FS["tiny"], color=PALETTE["club"])
-    ax_a.set_xlabel("badge-carrying share of the attractor")
+    ax_a.set_xlabel("badge-carrying share of the end state")
     ax_a.set_ylabel("unsafe frequency")
     panel_title(ax_a, "A", "two regimes, both safe")
 

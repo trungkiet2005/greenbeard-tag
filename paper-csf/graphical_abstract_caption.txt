@@ -1,3 +1,6 @@
+NOT FOR SUBMISSION. Historical working artifact retained in the repository;
+excluded from the CSF upload plan under Elsevier's current generative-AI policy.
+
 Graphical abstract. A forgeable certification signal places genuine cooperators
 and tagged mimics in the same observable category. Nonlinear population flow
 then separates initial conditions into cooperative and collapse basins. Mimics

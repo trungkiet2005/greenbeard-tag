@@ -52,7 +52,12 @@
 %% thumbnails/thumbnails/.
 \graphicspath{{figures/}{./}}
 
-\hypersetup{allcolors=blue!55!black}
+\hypersetup{
+  allcolors=blue!55!black,
+  pdftitle={Forgeable greenbeards: multistability and hollow collapse in certified agent populations},
+  pdfauthor={Trung-Kiet Huynh; Dao-Sy Duy-Minh; Chi-Nguyen Tran},
+  pdfkeywords={evolutionary game theory; replicator dynamics; multistability; tag-based cooperation; greenbeard; certification; multi-agent systems}
+}
 
 % keep floats near the text that refers to them
 \renewcommand{\topfraction}{0.92}
@@ -111,7 +116,7 @@ certified agent populations}
 Investigation, Validation, Visualization, Writing -- original draft,
 Writing -- review and editing}
 
-\author[1]{Dao Sy Duy Minh}[orcid=0009-0002-4501-2788]
+\author[1]{Dao-Sy Duy-Minh}
 \fnmark[1]
 \ead{23122041@student.hcmus.edu.vn}
 \credit{Conceptualization, Methodology, Software, Formal analysis,
@@ -152,7 +157,8 @@ before an exploiter and hollows out credential integrity while conduct remains
 safe. Their invasion boundaries meet at a codimension-two point, beyond which
 assortment removes the visible exploiter but not the mimic. Globally, dominant
 trajectories converge to disjoint certified and uncertified safe faces, while
-targeted starts reveal a rare unsafe mixed attractor. Certification therefore
+targeted starts reach a numerically robust unsafe mixed rest face outside the
+uniform sample. Certification therefore
 buys robustness to displacement rather than a lower harm level at a settled
 state. The same exclusionary conduct that provides this robustness imposes an
 entry barrier on compliant unbadged agents; making a club gentle to outsiders
@@ -236,7 +242,8 @@ invasion boundaries meet at a codimension-two point, beyond which stronger
 assortment removes the visible exploiter while leaving the mimic essentially
 unchanged. The credential is then hollow even though behaviour remains safe.
 Globally, the dominant trajectories settle on disjoint certified and
-uncertified safe faces, alongside a rare unsafe mixed attractor. Certification
+uncertified safe faces, while a fully specified targeted start reaches a
+numerically robust unsafe mixed rest face outside the uniform sample. Certification
 therefore buys robustness to displacement rather than a lower harm level at a
 settled state. Its sustaining mechanism is an exclusionary entry barrier: a
 club gentle to outsiders is cheaper to imitate and cannot survive forgery.
@@ -246,7 +253,6 @@ They also give a practical measurement lesson: conduct alone cannot diagnose
 credential integrity. A regime must measure whether passed credentials are
 genuine and must treat mutual recognition across providers as part of the
 safety architecture, rather than as a separate interoperability choice.
-
 \subsection{Related work}
 \label{sec:related}
 
@@ -575,15 +581,15 @@ the locus of marginal protection escapes to infinity
   & $(\sigma, \rho)$ jointly
   & Eq.~\eqref{eq:rhostar}
   & pole at $\sigma \to 1$ \\[2pt]
-two attractors on disjoint faces of the simplex
+two measure-dominant rest faces in the uniform-start experiment
   & none
   & Obs.~\ref{prop:bistable}
-  & basins $0.388$, $0.612$ \\
+  & shares $0.388$, $0.612$; targeted unsafe face outside sample \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-All propositions below are proved in Appendix~\ref{app:proofs}. The two
+Proofs of all propositions appear after the main text. The two
 statements labelled as observations are computations over sampled initial
 conditions rather than proofs, and are labelled that way for exactly that
 reason.
@@ -692,8 +698,9 @@ affine in $\sigma$ and the threshold is
 Provided $P(w,u) - P(w,v) + \rho > 0$, the club resists forgery for all
 $\sigma < \sigma^{*}$. When that denominator is negative the invasion advantage
 decreases in $\sigma$ and the inequality reverses, so the club resists only
-above $\sigma^{*}$; when it vanishes, which happens exactly when $u = v$ and
-$\rho = 0$, the forger's advantage is the constant
+above $\sigma^{*}$; when it vanishes, which happens exactly when
+$\rho=P(w,v)-P(w,u)$ (within the feasible domain $\rho\geq 0$), the
+forger's advantage is the constant
 $P(w,u) - P(u,u) + \kappa_g - \kappa_f$, independent of $\sigma$ altogether.
 \end{proposition}
 
@@ -746,12 +753,12 @@ Table~\ref{tab:bifurcations} is a simple root rather than an estimate.}
 \label{sec:fines}
 
 A natural response to forgery is to punish it. Setting the invasion advantage
-to zero and solving for the fine gives the smallest protective penalty.
+to zero and solving for the fine gives the break-even protective penalty.
 
 \begin{proposition}[Becker limit of attestation]
 \label{prop:fines}
-In a well-mixed population, the smallest fine that keeps the unconditional
-forger out is
+In a well-mixed population, the break-even fine against the unconditional
+forger is
 \begin{equation}
 \label{eq:rhostar}
 \rho^{*}(\sigma) \;=\;
@@ -760,7 +767,8 @@ forger out is
 \end{equation}
 which diverges as $\sigma \to 1$ whenever exploiting the club at full pass
 beats club membership. Where the club already resists unaided, that is for
-$\sigma < \sigma^{*}$, the expression is negative and no fine is required.
+$\sigma < \sigma^{*}$, the expression is negative and the smallest feasible
+fine is $\max\{0,\rho^{*}(\sigma)\}$.
 \end{proposition}
 
 The expected penalty a forger faces is $(1 - \sigma)\rho$, so as detection power
@@ -812,7 +820,7 @@ at a spoof rate where nothing else does.
 \includegraphics[width=\linewidth]{figures/fig06_instruments.pdf}
 \caption{\textbf{Four instruments, three of which have a limit.}
 \textbf{(A)} Fines suppress forgers, and less so as detection weakens.
-\textbf{(B)} The smallest protective fine diverges as $\sigma \to 1$
+\textbf{(B)} The break-even protective fine diverges as $\sigma \to 1$
 (Proposition~\ref{prop:fines}); note the logarithmic axis. \textbf{(C)}
 Certification dues weaken the club on both margins: the club share falls and
 the spoof threshold falls with it, by Equation~\eqref{eq:duesgrad}.
@@ -1089,13 +1097,15 @@ The results so far read as a qualified endorsement of certification: it works,
 it has thresholds, and the thresholds can be engineered. The eighth result
 qualifies the endorsement in a way that the thresholds do not reveal.
 
-Everything above was computed in the small-mutation limit, which describes a
-market that is monomorphic almost always and moves between designs by mutation
-and fixation. The replicator flow asks a different question: from an arbitrary
+The long-run composition summaries above use the small-mutation limit, which
+describes a market that is monomorphic almost always and moves between designs
+by mutation and fixation; the local invasion thresholds and payoff identities
+are exact and do not rely on that limit. The replicator flow asks a different
+question: from an arbitrary
 starting composition, what does the market settle into? The answer is not one
 thing.
 
-\begin{observation}[Dominant two-face basin split, numerical]
+\begin{observation}[Dominant two-face split and a targeted unsafe rest face, numerical]
 \label{prop:bistable}
 At the baseline, no interior start in the uniform Dirichlet sample reached a
 badge-mixed rest point. Of $20\,000$ such starts, $38.8\%$ converged to a state
@@ -1103,14 +1113,20 @@ that is entirely badged and $61.2\%$ to one that is entirely unbadged (Wilson
 $95\%$ interval $[38.2, 39.5]$ on the first), and no design has positive growth
 at any end state reached. Both regimes are internally safe: the largest unsafe
 frequency over all end states is below $10^{-13}$.
-Targeted initialization at $70\%$ unconditional-forger mass instead reaches an
-unsafe badge-mixed attractor with $U=1$; its basin is small under the uniform
-measure but has positive volume. The reported two-face split is therefore
-measure-specific and does not establish global bistability.
+A deterministic targeted start places $0.70$ on $(\mathsf{F},\AU,\AU)$ and
+spreads the remaining mass uniformly across the other 47 designs. It reaches
+an unsafe badge-mixed rest state with $U=1.000$, badged mass $0.937$, field
+residual below $10^{-13}$ and no design with invasion growth above $10^{-13}$.
+All $64$ deterministic full-dimensional perturbations
+$x_0^{(k)}=0.95x_0+0.05z_k$, with $z_k\sim\operatorname{Dirichlet}(1)$ under
+the recorded seed, also reach $U=1.000$ and have no invasion growth above
+$10^{-13}$. This finite neighbourhood probe shows numerical robustness, not
+the basin's volume or a third isolated attractor. The reported two-face split
+is therefore measure-specific and does not establish global bistability.
 \end{observation}
 
 Figure~\ref{fig:exclusion}A plots a readable subsample of the uniform starts,
-of them landing on one of the two pure regimes.
+all of them landing on one of the two pure regimes.
 
 The limit sets deserve their proper names, because the flow is more degenerate
 than ``two attractors'' suggests. Inside a certified population every check
@@ -1151,13 +1167,12 @@ face, and a more concentrated start measure gives a different number. At $200$
 draws, which is what a sweep can afford, the sampling error on it is about
 $0.035$, so only the first digit is real. The second is that ``no badge-mixed
 rest point'' is a statement about what the sample reached, not a theorem. Other
-rest points exist and the uniform measure does not find them: starting from a
-state with $70\%$ of its mass on the unconditional forger
-$(\mathsf{F}, \AU, \AU)$, the flow converges instead to a badge-mixed state
-that is maximally unsafe, at $U = 1$. Its basin has positive volume but is
-negligible under a uniform start. The bistability we report is the bistability
-a market reaches from an arbitrary composition, which is the question the
-replicator reading was introduced to answer.
+rest points exist and the uniform measure does not find them. The targeted
+experiment in Observation~\ref{prop:bistable} reaches a maximally unsafe mixed
+rest face and survives the recorded finite perturbation probe. That evidence
+does not establish the face's basin volume or justify calling it a third
+isolated attractor. The two-face split we report is therefore explicitly a
+property of the uniform-start experiment.
 
 The coincidence of the two safe regimes has an immediate and unflattering
 consequence for certification.
@@ -1465,8 +1480,9 @@ is worth making depends on how often the market is knocked out of safety and
 on how many participants sit outside the club, neither of which the model can
 settle and both of which are measurable in a deployed system. What the model
 does settle is that the trade cannot be avoided by asking clubs to be gentle
-towards outsiders: that policy has spoof threshold zero, and no fine repairs
-it (Corollary~\ref{cor:rescue}).
+towards outsiders: that policy has spoof threshold zero without a fine. A
+sufficiently large fine can restore resistance at fixed $\sigma$, but it cannot
+give the gentle club a reason to exist (Corollary~\ref{cor:rescue}).
 
 \paragraph{On multistability.} The methodological point generalises past this
 model. Multistable evolutionary dynamics are
@@ -1523,11 +1539,12 @@ rate would interpolate between them and would be the natural next step.
 
 One consequence of the multistability is worth naming as a limitation rather
 than a result. The uniform-start sample does not estimate the basin of the
-targeted mixed attractor, so the realised share of cross-boundary states is
-unknown. Proposition~\ref{prop:exclusion} therefore measures the barrier off
+targeted unsafe rest face, and the $64$ perturbations around one deterministic
+start establish only local numerical robustness, so the realised share of
+cross-boundary states is unknown. Proposition~\ref{prop:exclusion} therefore measures the barrier off
 the dominant equilibrium path, as the payoff a compliant entrant would
 receive. That is the relevant quantity for entry, but the model predicts
-neither the mixed attractor's basin share nor the realised volume of
+neither that rest face's basin share nor the realised volume of
 cross-boundary harm when certified and uncertified regimes coexist.
 
 \section{Conclusion}
@@ -1541,15 +1558,17 @@ worthless. A club's resistance to forgery is set by its in-group conduct, and
 conditional cooperation buys more than twice the tolerance of unconditional
 trust. Fines cannot substitute for detection, because the protective fine
 diverges as forgeries become undetectable, and in an agent economy detection is
-technological rather than budgetary. No badge starts a club without assortment,
+technological rather than budgetary. No badge by itself starts a club from
+anarchy without assortment,
 and none rebuilds one after collapse. Mimics hollow out the credential before
 exploiters degrade the conduct, so a monitoring regime that watches behaviour
 sees nothing wrong while the mark stops meaning anything.
 
 The result that reframes the rest concerns what certification is worth once a
 market has settled. The replicator flow is multistable: two measure-dominant
-safe faces coexist with a rare unsafe badge-mixed attractor revealed by
-targeted initialization. A
+safe faces coexist with a numerically robust unsafe badge-mixed rest face
+revealed by targeted initialization. This targeted result is neither a basin
+volume estimate nor evidence of a third isolated attractor. A
 settled certified market is therefore no safer than an uncertified one and
 poorer by exactly its dues; what certification buys is robustness, the
 protection of a safe market against being knocked out of safety, which is why
@@ -1557,7 +1576,9 @@ it shows up under rare mutation and not at a rest point. Its cost is a
 barrier: a compliant outsider that behaves exactly as club members do is
 charged $30.36$ for carrying no badge. That toll is not incidental. It is the
 only conduct under which the club survives forgery at all, since a club that
-is safe towards outsiders has spoof threshold zero and no fine repairs it.
+is safe towards outsiders has spoof threshold zero without a fine. A large
+fine can restore its resistance at a fixed spoof rate, but not its evolutionary
+purpose, and no finite fine substitutes for detection as $\sigma\to1$.
 Certification and exclusion are the same mechanism, and a governance regime
 that adopts the first has adopted the second whether or not it says so. The
 instrument that escapes the trade is federation, which does not ask any club
@@ -1585,9 +1606,10 @@ public, commercial, or not-for-profit sectors.
 \section*{Data availability}
 
 \begin{sloppypar}
-All code, generated tables and figures are openly available in the replication
-package at \url{https://github.com/trungkiet2005/greenbeard-tag}. Every scalar
-quoted in this manuscript is regenerated by \texttt{scripts/run\_analysis.py}
+The code, machine-readable results, generated tables and figures supporting
+this article are deposited in the public repository at
+\url{https://github.com/trungkiet2005/greenbeard-tag}. Every scalar quoted in
+this manuscript is regenerated by \texttt{scripts/run\_analysis.py}
 and \texttt{scripts/run\_robustness.py} into \texttt{results/};
 \texttt{scripts/check\_numbers.py} then pins each quoted value to the results
 key it came from, asserts that the value it pins occurs in the manuscript
@@ -1596,8 +1618,9 @@ source, and exits non-zero on any drift. Every figure is rendered by
 accompanying test suite. The interaction and identity layers carry no
 simulation: the race is evaluated exactly over the horizon law, and the
 handshake of Equation~\eqref{eq:handshake} is an exact four-term expectation.
-The sampled quantities are the basin distributions of the replicator flow,
-described in Section~\ref{sec:dynamics}. The closed-form spoof threshold of
+The sampled quantities are the basin distribution and the explicitly separate
+targeted perturbation probe of the replicator flow, described in
+Section~\ref{sec:dynamics}. The closed-form spoof threshold of
 Equation~\eqref{eq:sigmastar} is verified against brute-force root-finding on
 the exact payoff matrices across dues, fines and liabilities; the remaining
 closed forms are verified as invasion boundaries at the reported parameter
@@ -1608,17 +1631,17 @@ values.
 manuscript preparation process}
 
 During the preparation of this work the authors used Anthropic's Claude through
-the Claude Code command-line interface and OpenAI Codex to draft and edit
-prose, inspect and revise the LaTeX source, scaffold parts of the analysis code,
-and check quoted numerical values against the generated results files. The
-authors also used OpenAI's image-generation system to render the graphical
-abstract from an author-specified four-panel scientific layout. The graphical
-abstract is conceptual and contains no simulated or empirical data. The
-authors reviewed and edited all tool output, verified every scientific label,
-and take full responsibility for the content of the published article. Every
-scalar in the manuscript is tied by an automated check to its regenerated
-result, and every analytical threshold is independently verified against the
-exact payoff matrices.
+the Claude Code command-line interface and OpenAI Codex to assist with drafting
+and editing prose; inspecting and revising LaTeX and bibliography files;
+reviewing and revising analysis and theory code, validation checks and tests;
+and developing deterministic plotting, build, packaging and reproducibility
+tooling. All numerical values reported in the manuscript were checked against
+or regenerated from deterministic, version-controlled scientific code, and all
+submitted figures were rendered deterministically from model outputs and data
+by that code. No generative image is included in the submission. The authors
+reviewed and edited all tool-assisted output, reran the analysis and test
+suites, reproduced the reported results, and take full responsibility for the
+content of the published article.
 
 \printcredits
 
@@ -1660,9 +1683,12 @@ member plays $u$; otherwise the member plays $v$. The forger plays $w$
 regardless. Its payoff is therefore
 $\sigma P(w, u) + (1-\sigma) P(w, v) - \kappa_f - (1-\sigma)\rho$ and the
 resident earns $P(u,u) - \kappa_g$. Both are affine in $\sigma$; equating and
-solving gives Equation~\eqref{eq:sigmastar}. The denominator
-$P(w,u) - P(w,v) + \rho$ is positive whenever exploiting a trusting member
-beats being shut out, which holds for every $(u, v, w)$ used here.
+solving gives Equation~\eqref{eq:sigmastar} whenever
+$D=P(w,u)-P(w,v)+\rho\neq0$. This $D$ is the slope of the forger's advantage:
+for $D>0$ that advantage increases with $\sigma$ and the club resists below the
+threshold; for $D<0$ it decreases and the inequality reverses. Finally,
+$D=0$ exactly when $\rho=P(w,v)-P(w,u)$, in which case the advantage is
+independent of $\sigma$ and no division is made.
 \end{proof}
 
 \begin{proof}[Proof of Proposition~\ref{prop:fines}]
@@ -1696,8 +1722,9 @@ Rearranging the inequality gives Equation~\eqref{eq:rstar}.
 \end{proof}
 
 \begin{proof}[Proof of Proposition~\ref{prop:mimicry}]
-The mimic $(\mathsf{F}, u, v)$ in a club population plays $u$ when its badge
-passes and $v$ when it does not, and the member reciprocally plays $u$ or $v$.
+The mimic $(\mathsf{F}, u, v)$ in a club population always sees the genuine
+resident badge pass and therefore plays $u$. The resident plays $u$ towards
+the mimic when its forged badge passes and $v$ when it does not.
 Its expected payoff is $\sigma P(u,u) + (1-\sigma) P(u,v) - \kappa_f -
 (1-\sigma)\rho$ against the resident's $P(u,u) - \kappa_g$. Solving for the
 indifference point gives Equation~\eqref{eq:sigmam}. The mimic's threshold lies

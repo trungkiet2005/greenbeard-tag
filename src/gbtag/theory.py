@@ -317,7 +317,7 @@ def required_fine(
     kappa_g: float,
     kappa_f: float,
 ) -> float:
-    r"""Smallest fine that keeps the unconditional forger out, well-mixed.
+    r"""Break-even fine against the unconditional forger, well-mixed.
 
     Setting the invasion advantage to zero and solving for ``rho``:
 
@@ -327,8 +327,9 @@ def required_fine(
     which diverges as ``sigma`` approaches one whenever exploiting the club
     at full pass beats club membership: no finite fine substitutes for
     detection in the spoof-proof limit.  Negative values mean no fine is
-    needed at this ``sigma``; ``inf`` is returned at ``sigma = 1`` when the
-    exploit pays.
+    needed at this ``sigma`` and the smallest feasible fine is
+    ``max(0, rho_star)``; ``inf`` is returned at ``sigma = 1`` when the exploit
+    pays.
     """
     p = race_private(tables, liability)
     u, v, w = _IDX[club_in], _IDX[club_out], _IDX[exploit]

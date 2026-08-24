@@ -1,5 +1,13 @@
 # Model identity as a spoofable greenbeard tag
 
+**Publication status:** this public repository is a non-peer-reviewed preprint
+and development source, first made publicly accessible on 19 August 2026. It is
+not a formally published version of record.
+
+`CITATION.cff` records release metadata for version 1.0.0 dated 24 August
+2026. The `v1.0.0` tag and GitHub release identify the exact tested submission
+snapshot. They provide immutable source archives but do not mint a DOI.
+
 Evolutionary dynamics of badge-conditioned trust in the reduced AI race of
 Fernandez Domingos and Han (2026).  A seat in the race carries an identity
 badge -- a cryptographic attestation, a certification mark, or a stylistic

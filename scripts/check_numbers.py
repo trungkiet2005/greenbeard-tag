@@ -95,6 +95,12 @@ CLAIMS: list[tuple[str, float, int]] = [
     ("certified_basin_wilson_hi", 0.395, 3),
     ("certified_face_dominant_mean", 0.83, 2),
     ("uncertified_face_dominant_mean", 0.71, 2),
+    ("targeted_initial_mass", 0.70, 2),
+    ("targeted_endpoint_unsafe", 1.000, 3),
+    ("targeted_endpoint_badged_mass", 0.937, 3),
+    ("targeted_perturbation_count", 64.0, 0),
+    ("targeted_perturbation_epsilon", 0.05, 2),
+    ("targeted_perturbation_unsafe_count", 64.0, 0),
     ("unsafe_at_the_mean_state", 0.368, 3),
     ("payoff_cs_cas", 26.64, 2),
 ]
@@ -278,6 +284,22 @@ def main() -> int:
         )
     )
     checked += 1
+    failures.append(
+        _upper_bound_claim(
+            "targeted_endpoint_external_growth_max",
+            key["targeted_endpoint_external_growth_max"], 1e-13,
+            "largest invasion growth at the targeted endpoint",
+        )
+    )
+    checked += 1
+    failures.append(
+        _upper_bound_claim(
+            "targeted_perturbation_external_growth_max",
+            key["targeted_perturbation_external_growth_max"], 1e-13,
+            "largest invasion growth over the targeted perturbation endpoints",
+        )
+    )
+    checked += 1
 
     # Coverage: every claim that is supposed to be quoted must occur in the
     # manuscript at the precision it is checked at.  A claim that has silently
@@ -321,6 +343,19 @@ def _bound_claim(
             f"{name}: {what} is {stored:.3e}, so the manuscript's "
             f"'below {bound:.0e}' is a decade too loose"
         )
+    return None
+
+
+def _upper_bound_claim(
+    name: str, stored: float, bound: float, what: str
+) -> str | None:
+    """Check a one-sided numerical stability bound.
+
+    Exact zeros are legitimate here, so unlike ``_bound_claim`` this helper
+    does not reject a result that is much smaller than the stated tolerance.
+    """
+    if not stored < bound:
+        return f"{name}: {what} is {stored:.3e}, required below {bound:.0e}"
     return None
 
 
