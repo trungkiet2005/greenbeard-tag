@@ -118,6 +118,53 @@ def replicator_attractors(
     return ends
 
 
+def focal_mass_start(
+    n_designs: int, focal_index: int, focal_mass: float = 0.7
+) -> np.ndarray:
+    """Interior start with ``focal_mass`` on one design.
+
+    The residual mass is spread uniformly over every other design.  Stating
+    this rule explicitly removes the ambiguity in phrases such as "70% on the
+    forger", which otherwise leave 30% of a 48-dimensional state unspecified.
+    """
+    if n_designs < 2:
+        raise ValueError("a focal-mass start needs at least two designs")
+    if not 0 <= focal_index < n_designs:
+        raise IndexError(f"focal index {focal_index} outside 0..{n_designs - 1}")
+    if not 0.0 < focal_mass < 1.0:
+        raise ValueError("focal_mass must lie strictly between zero and one")
+    x0 = np.full(n_designs, (1.0 - focal_mass) / (n_designs - 1), dtype=float)
+    x0[focal_index] = focal_mass
+    return x0
+
+
+def full_dimensional_perturbations(
+    x0: np.ndarray,
+    n_starts: int,
+    epsilon: float = 0.05,
+    seed: int = 20260819,
+) -> np.ndarray:
+    """Deterministic interior perturbations of a targeted start.
+
+    Each row is ``(1 - epsilon) * x0 + epsilon * z``, where ``z`` is an
+    independent Dirichlet(1) draw.  This probes directions throughout the
+    simplex while keeping the perturbation scale and random seed auditable.  A
+    finite probe demonstrates numerical robustness, not a basin-volume proof.
+    """
+    x0 = np.asarray(x0, dtype=float)
+    if x0.ndim != 1 or x0.size < 2:
+        raise ValueError("x0 must be a one-dimensional simplex state")
+    if np.any(x0 < 0.0) or not np.isclose(x0.sum(), 1.0):
+        raise ValueError("x0 must be a probability distribution")
+    if n_starts < 1:
+        raise ValueError("n_starts must be positive")
+    if not 0.0 < epsilon < 1.0:
+        raise ValueError("epsilon must lie strictly between zero and one")
+    rng = np.random.default_rng(seed)
+    directions = rng.dirichlet(np.ones(x0.size), size=n_starts)
+    return (1.0 - epsilon) * x0[None, :] + epsilon * directions
+
+
 def basin_average(values: np.ndarray) -> float:
     """Average of a scalar observable already evaluated at each attractor."""
     return float(np.mean(np.asarray(values, dtype=float)))

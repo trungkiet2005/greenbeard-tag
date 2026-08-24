@@ -75,6 +75,18 @@ REPLICATOR_STARTS = 200
 BASIN_STARTS = 20000
 SEED = 20260819
 
+#: Fully specified targeted probe used to show that the two uniform-start
+#: faces are not a global classification.  The focal design receives 70% of
+#: the initial mass and the remaining 30% is uniform over the other 47
+#: designs.  The perturbation ensemble explores full-dimensional Dirichlet
+#: directions at a fixed five-per-cent scale.  It is a robustness probe, not a
+#: basin-volume estimator.
+TARGETED_DESIGN = ("F", "AU", "AU")
+TARGETED_MASS = 0.70
+TARGETED_PERTURBATIONS = 64
+TARGETED_EPSILON = 0.05
+TARGETED_SEED = SEED + 1
+
 #: Grids shared by every sweep, so cross-sections always agree.
 SIGMA_GRID = np.round(np.linspace(0.0, 1.0, 101), 4)
 R_GRID = np.round(np.linspace(0.0, 0.5, 51), 4)

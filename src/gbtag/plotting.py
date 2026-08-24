@@ -158,6 +158,12 @@ def use_paper_style() -> None:
             "font.family": "serif",
             "font.serif": ["DejaVu Serif", "Times New Roman", "STIXGeneral"],
             "mathtext.fontset": "stix",
+            # Matplotlib's default PDF font type is Type 3.  Those bitmap-like
+            # glyphs have no usable Unicode map and routinely fail publisher
+            # preflight.  Embed TrueType outlines instead so labels remain
+            # searchable and accessible in the assembled Elsevier PDF.
+            "pdf.fonttype": 42,
+            "ps.fonttype": 42,
             "font.size": FS["label"],
             "axes.titlesize": FS["title"],
             "axes.labelsize": FS["label"],

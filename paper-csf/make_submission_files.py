@@ -15,8 +15,8 @@ from docx.shared import Pt
 
 HERE = Path(__file__).resolve().parent
 
-TITLE = ("Forgeable greenbeards: bistability and hollow collapse in the "
-         "evolutionary dynamics of certified agent populations")
+TITLE = ("Forgeable greenbeards: multistability and hollow collapse in "
+         "certified agent populations")
 
 def _highlights_from_front_matter():
     r"""The highlights the typeset paper carries, read out of _front.tex.
@@ -44,6 +44,24 @@ HIGHLIGHTS = _highlights_from_front_matter()
 for h in HIGHLIGHTS:
     assert len(h) <= 85, f"highlight over 85 characters ({len(h)}): {h}"
 assert 3 <= len(HIGHLIGHTS) <= 5, "CSF wants 3 to 5 highlights"
+
+# Keep the optional standalone LaTeX page on the same source as the editable
+# Word upload and the manuscript front matter.
+latex_items = "\n".join(r"\item " + h for h in HIGHLIGHTS)
+(HERE / "highlights.tex").write_text(
+    "%% Generated from _front.tex by make_submission_files.py.\n"
+    "\\documentclass[12pt]{article}\n"
+    "\\usepackage[T1]{fontenc}\n"
+    "\\usepackage[margin=1in]{geometry}\n"
+    "\\pagestyle{empty}\n"
+    "\\begin{document}\n"
+    "\\section*{Highlights}\n"
+    "\\begin{itemize}\n"
+    f"{latex_items}\n"
+    "\\end{itemize}\n"
+    "\\end{document}\n",
+    encoding="utf-8",
+)
 
 
 def new_doc():
@@ -85,13 +103,17 @@ doc.add_heading(
     level=2,
 )
 doc.add_paragraph(
-    "During the preparation of this work the authors used a large language "
-    "model assistant in order to draft and edit prose, to scaffold parts of the "
-    "analysis code, and to check the consistency of quoted numerical values "
-    "against the generated results files. After using this tool the authors "
-    "reviewed and edited the content as needed and take full responsibility for "
+    "During the preparation of this work the authors used Anthropic's Claude "
+    "through the Claude Code command-line interface and OpenAI Codex to draft "
+    "and edit prose, inspect and revise the LaTeX source, scaffold parts of the "
+    "analysis code, and check quoted numerical values against the generated "
+    "results files. The authors also used OpenAI's image-generation system to "
+    "render the graphical abstract from an author-specified four-panel "
+    "scientific layout. The graphical abstract is conceptual and contains no "
+    "simulated or empirical data. The authors reviewed and edited all tool "
+    "output, verified every scientific label, and take full responsibility for "
     "the content of the published article."
 )
 doc.save(HERE / "declaration_of_interest.docx")
 
-print("wrote highlights.docx and declaration_of_interest.docx")
+print("wrote highlights.tex, highlights.docx and declaration_of_interest.docx")

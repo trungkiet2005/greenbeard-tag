@@ -20,6 +20,7 @@ from gbtag.plotting import (
     contrast_ratio,
     readable_on,
     relative_luminance,
+    use_paper_style,
 )
 
 
@@ -65,3 +66,10 @@ def test_the_diverging_colormap_case_that_motivated_the_helper() -> None:
         assert readable_on(cmap(norm(value))) == "black"
     for value in (5.4, 101.8):  # the dark ends
         assert readable_on(cmap(norm(value))) == "white"
+
+
+def test_paper_style_uses_searchable_pdf_fonts() -> None:
+    """Publisher PDFs must not fall back to Matplotlib's Type 3 glyphs."""
+    use_paper_style()
+    assert mpl.rcParams["pdf.fonttype"] == 42
+    assert mpl.rcParams["ps.fonttype"] == 42

@@ -21,7 +21,14 @@ import pandas as pd
 from gbtag import config as cfg
 from gbtag import interventions as iv
 from gbtag import theory as th
-from gbtag.dynamics import replicator_attractors
+from gbtag.dynamics import (
+    focal_mass_start,
+    full_dimensional_perturbations,
+    integrate_replicator,
+    replicator_attractor,
+    replicator_attractors,
+    replicator_field,
+)
 from gbtag.functionals import (
     aggregate_unsafe_frequency,
     build_functionals,
@@ -467,6 +474,105 @@ def main(outdir: Path) -> None:
     # the artefact this replaced, kept so the correction is auditable
     key["unsafe_at_the_mean_state"] = float(
         aggregate_unsafe_frequency(ends.mean(axis=0), fun)
+    )
+
+    # A fully specified targeted construction probes a part of the simplex that
+    # the uniform sample does not reach.  It is intentionally reported as a
+    # numerical reachability and robustness result, not as a basin-volume
+    # estimate or proof of a third isolated attractor.
+    target_index = fun.index(*cfg.TARGETED_DESIGN)
+    target_x0 = focal_mass_start(fun.n, target_index, cfg.TARGETED_MASS)
+    target_times, target_traj = integrate_replicator(
+        fun.fitness, target_x0, t_end=3000.0, n_points=301
+    )
+    target_end = target_traj[-1]
+    target_fit = fun.fitness @ target_end
+    target_mean_fit = float(target_end @ target_fit)
+    target_growth = target_fit - target_mean_fit
+    target_badged = float(target_end @ carries)
+    target_unsafe = aggregate_unsafe_frequency(target_end, fun)
+    target_field_inf = float(np.abs(replicator_field(target_end, fun.fitness)).max())
+
+    endpoint_rows = []
+    for j, (badge, s_in, s_out) in enumerate(fun.designs):
+        endpoint_rows.append(
+            {
+                "design_index": j,
+                "badge": badge,
+                "s_in": s_in,
+                "s_out": s_out,
+                "initial_share": target_x0[j],
+                "endpoint_share": target_end[j],
+                "invasion_growth": target_growth[j],
+            }
+        )
+    pd.DataFrame(endpoint_rows).to_csv(
+        tables_dir / "targeted_mixed_endpoint.csv", index=False
+    )
+
+    trajectory = {
+        "time": target_times,
+        "unsafe": [aggregate_unsafe_frequency(x, fun) for x in target_traj],
+        "badged_mass": target_traj @ carries,
+        "focal_forger_mass": target_traj[:, target_index],
+    }
+    for j, (badge, s_in, s_out) in enumerate(fun.designs):
+        trajectory[f"share_{j:02d}_{badge}_{s_in}_{s_out}"] = target_traj[:, j]
+    pd.DataFrame(trajectory).to_csv(
+        tables_dir / "targeted_mixed_trajectory.csv", index=False
+    )
+
+    perturbed_starts = full_dimensional_perturbations(
+        target_x0,
+        cfg.TARGETED_PERTURBATIONS,
+        cfg.TARGETED_EPSILON,
+        cfg.TARGETED_SEED,
+    )
+    perturbed_ends = np.vstack(
+        [replicator_attractor(fun.fitness, x) for x in perturbed_starts]
+    )
+    perturbation_rows = []
+    for k, (start, end) in enumerate(zip(perturbed_starts, perturbed_ends)):
+        fit = fun.fitness @ end
+        growth_k = fit - float(end @ fit)
+        perturbation_rows.append(
+            {
+                "probe": k,
+                "epsilon": cfg.TARGETED_EPSILON,
+                "l1_distance_from_target": float(np.abs(start - target_x0).sum()),
+                "unsafe": aggregate_unsafe_frequency(end, fun),
+                "badged_mass": float(end @ carries),
+                "field_inf": float(np.abs(replicator_field(end, fun.fitness)).max()),
+                "external_growth_max": float(growth_k.max()),
+            }
+        )
+    perturbations = pd.DataFrame(perturbation_rows)
+    perturbations.to_csv(
+        tables_dir / "targeted_mixed_perturbations.csv", index=False
+    )
+
+    key["targeted_design"] = "-".join(cfg.TARGETED_DESIGN)
+    key["targeted_initial_mass"] = cfg.TARGETED_MASS
+    key["targeted_residual_per_design"] = float((1.0 - cfg.TARGETED_MASS) / (fun.n - 1))
+    key["targeted_endpoint_unsafe"] = target_unsafe
+    key["targeted_endpoint_badged_mass"] = target_badged
+    key["targeted_endpoint_field_inf"] = target_field_inf
+    key["targeted_endpoint_external_growth_max"] = float(target_growth.max())
+    key["targeted_endpoint_support_size"] = int((target_end > 1e-8).sum())
+    key["targeted_perturbation_count"] = cfg.TARGETED_PERTURBATIONS
+    key["targeted_perturbation_epsilon"] = cfg.TARGETED_EPSILON
+    key["targeted_perturbation_unsafe_count"] = int(
+        (perturbations.unsafe > 1.0 - 1e-9).sum()
+    )
+    key["targeted_perturbation_unsafe_min"] = float(perturbations.unsafe.min())
+    key["targeted_perturbation_badged_mass_min"] = float(
+        perturbations.badged_mass.min()
+    )
+    key["targeted_perturbation_badged_mass_max"] = float(
+        perturbations.badged_mass.max()
+    )
+    key["targeted_perturbation_external_growth_max"] = float(
+        perturbations.external_growth_max.max()
     )
 
     dec = mono.harm_blocks

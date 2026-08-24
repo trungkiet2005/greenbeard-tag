@@ -3,7 +3,7 @@
 Reads the venue-neutral ../paper/main.tex, keeps most of its body verbatim, and
 
   * swaps in an elsarticle single-column front matter (CSF requirement),
-  * inserts the nonlinear-dynamics framing that the venue's scope asks for,
+  * replaces the long venue-neutral introduction with a compact CSF version,
   * replaces Related work with a half-length subsection of the Introduction,
   * folds Limitations into the Discussion as a subsection,
   * swaps the venue-neutral data statement for the Elsevier declarations,
@@ -109,7 +109,7 @@ CONCLUSION = "\\section{Conclusion}"
 AVAILABILITY = "\\section*{Data and code availability}"
 APPENDIX = "\\appendix"
 
-intro = seg(INTRO, RELATED)
+intro_full = seg(INTRO, RELATED)
 related = seg(RELATED, MODEL)
 model = seg(MODEL, RESULTS)              # includes \input{tables_generated}
 results = seg(RESULTS, DISCUSSION)       # includes \input{robustness_generated}
@@ -126,7 +126,21 @@ assert "\\section{" not in _skipped, \
     "a numbered section has appeared between the conclusion and the appendix"
 
 # ------------------------------------------------------------------- edits
-intro = insert_before(intro, "\\paragraph{Results.}", block("intro"), "intro")
+# The venue-neutral introduction previews every result in detail.  That makes
+# sense when the paper has to establish its policy setting, but it repeats the
+# Results section and delays the nonlinear object that CSF editors assess at
+# triage.  The CSF version keeps the problem, gap, flow and main mechanisms in
+# a dedicated compact introduction.
+intro = (HERE / "_intro_csf.tex").read_text(encoding="utf-8")
+_intro_first = next(l for l in intro.splitlines()
+                    if l.strip() and not l.lstrip().startswith("%"))
+assert _intro_first.startswith("\\section{Introduction}"), \
+    "_intro_csf.tex must open with the Introduction section"
+assert "\\label{sec:intro}" in intro, "_intro_csf.tex lost \\label{sec:intro}"
+_iw = prose_words(intro)
+assert 550 <= _iw <= 900, (
+    f"CSF introduction is {_iw} prose words; the budget is 550--900 "
+    f"(the venue-neutral introduction is {prose_words(intro_full)})")
 
 # CSF demotes Related work from a standalone section to a subsection of the
 # Introduction, and runs it at about half length.  The venue publishes compact
@@ -135,10 +149,6 @@ intro = insert_before(intro, "\\paragraph{Results.}", block("intro"), "intro")
 # lives in _related_csf.tex rather than in the venue-neutral master, which
 # keeps its full-length section for the fallback venues.
 #
-# Twenty-eight of the references in that section are cited nowhere else in the
-# paper, so a careless compression deletes them from the bibliography without
-# any visible symptom.  The assertion below is what makes that impossible: the
-# condensed text has to carry every key the full-length text carried.
 related_full = related
 related = (HERE / "_related_csf.tex").read_text(encoding="utf-8")
 
@@ -148,22 +158,24 @@ assert _first.startswith("\\subsection{Related work}"), \
     "_related_csf.tex must open as a subsection, not a section"
 assert "\\label{sec:related}" in related, "_related_csf.tex lost \\label{sec:related}"
 
-# _blocks_related.tex is no longer inserted into the manuscript: its content is
-# folded into the condensed subsection.  It is kept because it is the record of
-# what the CSF-specific framing paragraph cited, and the two assertions below
-# hold the condensed text to that record.
-dropped = sorted((cite_keys(related_full) | cite_keys(block("related")))
-                 - cite_keys(related))
-assert not dropped, (
-    f"condensing Related work dropped {len(dropped)} reference(s) that the "
-    f"full-length section cited: {', '.join(dropped)}")
-
-added = sorted(cite_keys(related) - cite_keys(related_full) - cite_keys(block("related")))
-assert not added, f"_related_csf.tex cites keys the source never did: {', '.join(added)}"
+# Compression is intentional, so the CSF subsection need not carry every
+# citation in the venue-neutral review.  Guard the conceptual spine instead:
+# evolutionary dynamics, greenbeards, forgeability, enforcement, AI races and
+# recent papers from the target journal must all remain represented.
+required_related = {
+    "taylor1978ess", "hofbauer1998evolutionary", "perc2017statphys",
+    "ren2021tolerance", "zhang2023expulsion", "yue2025reputation",
+    "hamilton1964genetical1", "riolo2001evolution", "jansen2006altruism",
+    "gardner2010greenbeards", "robson1990efficiency", "becker1968crime",
+    "han2020regulate", "chan2025infrastructure", "otsuka2026aiidentity",
+}
+dropped_core = sorted(required_related - cite_keys(related))
+assert not dropped_core, (
+    "condensed Related work lost core references: " + ", ".join(dropped_core))
 
 _rw = prose_words(related)
-assert 620 <= _rw <= 790, (
-    f"condensed Related work is {_rw} prose words; the budget is about 700 "
+assert 300 <= _rw <= 550, (
+    f"condensed Related work is {_rw} prose words; the budget is 300--550 "
     f"(the full-length section is {prose_words(related_full) + prose_words(block('related'))})")
 
 model = insert_before(

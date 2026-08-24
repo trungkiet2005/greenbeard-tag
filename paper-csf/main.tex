@@ -94,8 +94,8 @@
 \shorttitle{Forgeable greenbeards}
 \shortauthors{T.-K. Huynh et al.}
 
-\title[mode=title]{Forgeable greenbeards: bistability and hollow collapse in
-the evolutionary dynamics of certified agent populations}
+\title[mode=title]{Forgeable greenbeards: multistability and hollow collapse in
+certified agent populations}
 
 %% ------------------------------------------------------------------
 %% Chaos, Solitons & Fractals runs a single-anonymized review, so the
@@ -103,7 +103,7 @@ the evolutionary dynamics of certified agent populations}
 %% equally; the shared first authorship is carried by the
 %% \fnmark[1]/\fntext[1] note below.
 %% ------------------------------------------------------------------
-\author[1,2]{Trung-Kiet Huynh}[orcid=0009-0000-5463-754X]
+\author[1]{Trung-Kiet Huynh}[orcid=0009-0000-5463-754X]
 \cormark[1]
 \fnmark[1]
 \ead{23122039@student.hcmus.edu.vn}
@@ -111,27 +111,24 @@ the evolutionary dynamics of certified agent populations}
 Investigation, Validation, Visualization, Writing -- original draft,
 Writing -- review and editing}
 
-\author[1,2]{Dao Sy Duy Minh}[orcid=0009-0002-4501-2788]
+\author[1]{Dao Sy Duy Minh}[orcid=0009-0002-4501-2788]
 \fnmark[1]
 \ead{23122041@student.hcmus.edu.vn}
 \credit{Conceptualization, Methodology, Software, Formal analysis,
 Investigation, Validation, Visualization, Writing -- original draft,
 Writing -- review and editing}
 
-\author[1,2]{Chi-Nguyen Tran}[orcid=0009-0007-6716-7269]
+\author[1]{Chi-Nguyen Tran}[orcid=0009-0007-6716-7269]
 \fnmark[1]
 \ead{23122044@student.hcmus.edu.vn}
 \credit{Conceptualization, Methodology, Software, Formal analysis,
 Investigation, Validation, Visualization, Writing -- original draft,
 Writing -- review and editing}
 
-\affiliation[1]{organization={Faculty of Information Technology,
-            University of Science (HCMUS)},
-            city={Ho Chi Minh City},
-            country={Vietnam}}
-
-\affiliation[2]{organization={Vietnam National University -- Ho Chi
-            Minh City (VNU-HCM)},
+\affiliation[1]{organization={Faculty of Information Technology, University of
+            Science, Vietnam National University Ho Chi Minh City},
+            addressline={Room I53, Building I, 227 Nguyen Van Cu Street,
+            Cho Quan Ward},
             city={Ho Chi Minh City},
             country={Vietnam}}
 
@@ -139,351 +136,169 @@ Writing -- review and editing}
 \fntext[1]{These authors contributed equally to this work.}
 
 \begin{abstract}
-A greenbeard is a signal that lets its bearers treat one another differently
-from everyone else, and impostors can wear it. Machine agents now carry such
-signals: provenance attestations and certification marks, cheap to check and
-forgeable. We make the mark a strategic variable in a four-design race model,
-holding the game fixed so every effect belongs to the identity layer, and
-analyse the resulting 48-design replicator flow and its finite-population
-counterpart. A design pairs a badge, genuine, forged or absent, with in-group
-and out-group conduct; a forged badge passes with a fixed probability. Six of
-the eight transitions are transversal eigenvalues crossing zero, so those
-critical values are exact. Identity earns its keep only below a reciprocity
-threshold, and below an assortment at which reciprocity holds a safe population
-unaided. A club that reciprocates only within its membership tolerates more
-than twice the forgery of one that trusts unconditionally, so in-group conduct
-is a security parameter, and the protective fine diverges as forgery becomes
-undetectable, so penalties cannot substitute for detection. Collapse is
-graceful in the wrong way: above an assortment of about 0.08 a behavioural
-mimic invades before the exploiter, hollowing out the credential while conduct
-still looks sound, so better interaction structure leaves mimicry the only
-failure mode. The flow settles onto one of two disjoint faces, badged or
-unbadged, with nothing between them, so certification buys robustness rather
-than a lower level of harm, held up by the pressure it puts on unbadged
-conduct.
+Identity credentials can change how machine agents treat one another, making
+them forgeable greenbeards. We study the resulting nonlinear population
+dynamics by adding genuine, forged and absent badges to a four-strategy race.
+The construction yields 48 designs on a 47-dimensional simplex under
+replicator dynamics, with a finite-population counterpart. Most regime
+boundaries occur when a transversal eigenvalue changes sign and are therefore
+available in closed form; numerical integration is reserved for basin
+measures. A reciprocating certified club tolerates more than twice the forgery
+of an unconditionally trusting club, so in-group conduct is a security
+parameter. The protective fine diverges as forged badges become
+undetectable, and verification quality cannot help a costly club nucleate
+without positive assortment. At the baseline, a behavioural mimic invades
+before an exploiter and hollows out credential integrity while conduct remains
+safe. Their invasion boundaries meet at a codimension-two point, beyond which
+assortment removes the visible exploiter but not the mimic. Globally, dominant
+trajectories converge to disjoint certified and uncertified safe faces, while
+targeted starts reveal a rare unsafe mixed attractor. Certification therefore
+buys robustness to displacement rather than a lower harm level at a settled
+state. The same exclusionary conduct that provides this robustness imposes an
+entry barrier on compliant unbadged agents; making a club gentle to outsiders
+eliminates both the barrier and the club's resistance to forgery.
 \end{abstract}
 
 \begin{highlights}
-\item A forgeable identity tag turns certification into a nonlinear population flow
-\item In-group conduct is a security parameter: forgery tolerance 0.866 vs 0.400 at r=0
-\item The protective fine diverges as forgery becomes undetectable
-\item Behavioural mimics hollow out the tag before conduct ever degrades
-\item Two disjoint attracting faces: certification buys robustness, not a safer level
+\item A forgeable identity tag induces multistability in a 48-strategy flow
+\item Conditional cooperation more than doubles tolerance to credential forgery
+\item No finite fine replaces detection as forgery becomes undetectable
+\item Mimics hollow out credential integrity before observable conduct degrades
+\item Certification buys robustness through an exclusionary entry barrier
 \end{highlights}
 
 \begin{keywords}
-evolutionary game theory \sep replicator dynamics \sep bistability \sep
+evolutionary game theory \sep replicator dynamics \sep multistability \sep
 tag-based cooperation \sep greenbeard \sep certification \sep
 multi-agent systems
 \end{keywords}
 
 \maketitle
-
 \section{Introduction}
 \label{sec:intro}
 
-Machine agents are beginning to carry identity. Agent-to-agent protocols
-publish identity and capability metadata before agents exchange
-work~\citep{a2a2026spec}; regulatory technical-documentation duties require
-providers to identify an AI system or general-purpose model and its
-version~\citep{euaiact2024}; and proposals for agent attestation
-infrastructure are being drafted while the systems they would govern are being
-deployed~\citep{chan2024visibility,chan2025infrastructure,shavit2023practices}.
-Even where nothing is formally attested, model evaluators can recognise and
-favour their own generations, while language models in general favour
-machine-generated communications~\citep{panickssery2024llm,laurito2025aiai}.
+Machine agents increasingly carry identity and capability metadata before they
+interact~\citep{a2a2026spec}. Regulation already requires providers to identify
+AI systems and model versions~\citep{euaiact2024}, while attestation and
+provenance infrastructures are being proposed for agent
+ecosystems~\citep{chan2024visibility,chan2025infrastructure,shavit2023practices}.
+These developments usually frame identity as an accountability tool. Identity
+can also change conduct directly: an agent may trust, cooperate with or grant
+access to a partner because its credential passes verification.
 
-An identity signal that changes how its bearers treat one another is a
-\emph{greenbeard}, and evolutionary biology has known for fifty years both what
-greenbeards can do and how they
-fail~\citep{hamilton1964genetical1,dawkins1976selfish}.
-They can sustain cooperation among strangers with no repeated interaction and
-no kinship, because the tag substitutes for
-both~\citep{riolo2001evolution,traulsen2003minimal}.
-They fail when the tag comes apart from the behaviour it advertises, so that an
-impostor wears the beard and takes the benefit without paying the
-cost~\citep{roberts2002does,jansen2006altruism,gardner2010greenbeards}.
-The biological literature is largely concerned with tags that are hard to fake,
-because a gene cannot easily choose its own phenotype. An agent's badge is not
-like that. Whether a mark is forgeable is a property of the verification
-technology~\citep{jovanovic2024watermarkstealing,anbiaee2026threatmodeling}, and
-therefore a design choice, and therefore something a governance regime can spend
-money on.
+An identity signal that elicits preferential treatment among its bearers is a
+\emph{greenbeard}. Such signals can support cooperation without repeated
+interaction, but they fail when the marker separates from the behaviour it is
+supposed to identify~\citep{riolo2001evolution,jansen2006altruism,gardner2010greenbeards}.
+For machine agents, this separation is an engineering variable rather than a
+biological constraint: the pass rate of a forged credential depends on the
+verification technology~\citep{jovanovic2024watermarkstealing,anbiaee2026threatmodeling}.
+The unresolved question is therefore dynamical. If credentials are costly to
+obtain honestly, valuable when accepted and imperfectly verifiable, which
+population regimes persist, and how do those regimes change as verification,
+penalties and interaction structure vary?
 
-The question this paper answers is what a population of agent operators does
-with that choice. The question is not rhetorical, because two forces pull
-against each other. Certification and third-party quality disclosure are
-established mechanisms for addressing information problems~\citep{dranove2010quality}.
-Here the certification mark is also a private cost: it must be obtained,
-maintained and audited, and by assumption every unit of that cost burdens the
-compliant operator and never the impostor. A certification mark is also a
-private benefit: it buys access to partners who will behave well towards whoever
-carries it. Which force wins is not a matter of taste, and neither is
-the policy question that follows, namely whether an authority does better to
-spend on harder attestation, on penalties for forgery, on cheaper compliance,
-or on the interaction structure that decides who meets whom.
+We answer this question by adding a strategic identity layer to a reduced
+four-strategy AI race~\citep{domingos2026falling}. Each design combines a badge
+that is genuine, forged or absent with conduct toward partners whose badge
+passes or fails verification. The construction yields 48 designs evolving on
+a 47-dimensional simplex under replicator dynamics; the same payoff structure
+also drives a finite-population birth--death process. The underlying race is
+held fixed, and every pairwise payoff is evaluated exactly, so all changes are
+attributable to the identity layer rather than to sampling or to a modified
+interaction game.
 
-We answer both by making the badge a strategic variable in an evolutionary
-model. The interaction layer is the reduced four-strategy AI race
-of~\citet{domingos2026falling}, used without modification, so that every effect
-we report is attributable to the identity layer we build on top of it. A design
-is a triple $(b, s_{\mathrm{in}}, s_{\mathrm{out}})$: a badge that is genuine
-($\mathsf{G}$), forged ($\mathsf{F}$) or absent ($\mathsf{N}$), the reduced
-race design run against a partner whose badge passes the focal agent's check,
-and the design run against everyone else. Operators do not optimise; designs
-that pay better are copied more, in the standard replicator and
-finite-population dynamics of evolutionary game
-theory~\citep{taylor1978ess,hofbauer1998evolutionary,traulsen2006stochastic}.
+The analysis separates local stability from global basin structure. At a
+monomorphic resident, invasion is governed by a transversal eigenvalue of the
+replicator flow. Most regime boundaries are simple zeros of these eigenvalues
+and are therefore available in closed form; numerical integration is used only
+to measure basins and to locate attractors. This distinction matters because
+the flow is multistable. Averaging states across its disjoint attracting faces
+before evaluating a pairwise observable creates cross-regime encounters that
+no trajectory contains, so observables must be evaluated within each attractor
+and only then averaged over basins.
 
-Our contribution is an explanation, not a method or a benchmark. In one
-sentence: \emph{a forgeable identity mark buys an agent ecosystem robustness
-rather than safety, and pays for it with an entry barrier that cannot be
-legislated away, because the exclusionary conduct that creates the barrier is
-exactly what makes the mark survive forgery.} The results below make that
-precise.
+Three mechanisms organise the results. First, credentials are useful only
+where ordinary reciprocity and liability fail to protect safe play. A
+reciprocating certified club tolerates more than twice the forgery of an
+unconditionally trusting club, showing that in-group conduct is part of the
+security design. Penalties help only while detection remains informative: the
+protective fine has a vertical asymptote as forged badges become
+undetectable. Second, verification does not help a costly club form because an
+unbadged population does not read its signal; positive assortment is required
+for nucleation. Once formed, however, the club can persist under weaker
+conditions than those required to rebuild it after collapse.
 
-\paragraph{The model as a dynamical system.}
-The object we analyse is a nonlinear flow. Forty-eight designs compete on a
-$47$-dimensional simplex under replicator dynamics, and the same payoff
-structure drives a finite-population birth-death process. Every result below
-is a statement about that flow, and it takes one of two forms. Most are
-critical parameter values at which a transversal eigenvalue at a vertex of the
-simplex changes sign, so that a rest point exchanges stability with an invading
-direction. Because the underlying race is evaluated exactly rather than
-sampled, and because each of those eigenvalues is affine in the parameters,
-every such critical value is a simple root available in closed form; numerical
-integration confirms them rather than producing them. The remaining results
-concern the global structure of the flow rather than local stability at a
-vertex: the flow turns out to be bistable, with two attractors lying on
-disjoint faces of the simplex, and it is the two basins, not the equilibrium
-level of harm, that carry the eighth result. Nonlinearity is not incidental
-here. It is why a regime whose credential works and one whose credential means
-nothing can be indistinguishable from the outside, and why an ecosystem that
-has fallen out of the certified regime does not climb back into it.
+Third, certification can fail without an observable deterioration in conduct.
+A behavioural mimic copies the club's conduct while avoiding its dues and
+crosses its invasion threshold before an exploiter at the baseline. The two
+invasion boundaries meet at a codimension-two point, beyond which stronger
+assortment removes the visible exploiter while leaving the mimic essentially
+unchanged. The credential is then hollow even though behaviour remains safe.
+Globally, the dominant trajectories settle on disjoint certified and
+uncertified safe faces, alongside a rare unsafe mixed attractor. Certification
+therefore buys robustness to displacement rather than a lower harm level at a
+settled state. Its sustaining mechanism is an exclusionary entry barrier: a
+club gentle to outsiders is cheaper to imitate and cannot survive forgery.
 
-\paragraph{Results.}
-We show, first, that identity is the instrument of last resort rather than of
-first choice. The race has a reciprocity threshold $L_R = 0.551$
-(Proposition~\ref{prop:reciprocity}): below it, and below an assortment
-$r^{\dagger} = 0.076$, a first-striker profitably exploits any safe unbadged
-resident, because the half-step lead it steals in the opening round converts
-into the prize and reciprocity punishes it only in kind. Where liability is
-enforceable, so that $L$ lies above $L_R$, the identity layer is close to
-worthless, and the certification value we measure falls from an average of
-$0.054$ below $L_R$ to $0.0025$ above it. Identity earns its keep precisely in the
-regime where harm cannot be traced to the seat that caused
-it~\citep{chan2024visibility,kolt2025governing}.
+These results connect nonlinear evolutionary dynamics to certification design.
+They also give a practical measurement lesson: conduct alone cannot diagnose
+credential integrity. A regime must measure whether passed credentials are
+genuine and must treat mutual recognition across providers as part of the
+safety architecture, rather than as a separate interoperability choice.
 
-Second, in-group conduct is a defensive parameter, not an ethical one. In a
-well-mixed population a club that reciprocates inside its membership tolerates
-$\sigma^{*} = 0.866$ spoof success before an exploiter invades; one that trusts
-verified partners unconditionally tolerates only $0.400$
-(Proposition~\ref{prop:spoof}). At the baseline assortment the pair is $0.962$
-against $0.444$. The
-ratio is $2.17$ either way. A club is safest when its members are conditional
-cooperators, not when they are saints, because unconditional trust is what an
-impostor is buying access to.
+\subsection{Related work}
+\label{sec:related}
 
-Third, fines cannot buy what detection does not deliver. Setting the invasion
-condition to zero and solving for the penalty gives a protective fine that
-diverges as $\sigma \to 1$ (Proposition~\ref{prop:fines}): well mixed, $11.9$ at
-$\sigma = 0.90$, $58.2$ at $0.95$, $428.6$ at $0.99$. This divergence is the
-Becker trade-off between penalty size and detection
-probability~\citep{becker1968crime}. Its novel feature here is that in an agent
-economy the detection probability is fixed by cryptography rather than by how
-many inspectors are hired, so the usual policy substitution is unavailable.
+Evolutionary game dynamics describes a population of competing designs as a
+nonlinear flow on a simplex~\citep{taylor1978ess,hofbauer1998evolutionary,hofbauer2003evolutionary}.
+Changes in cooperation can then be studied as changes of stability and basin
+structure rather than only as changes in an average payoff. Statistical-physics
+work on social dilemmas shows that these transitions depend strongly on
+interaction structure~\citep{perc2017statphys}; spatial contact, network
+heterogeneity and multilayer coupling can each stabilise cooperation
+~\citep{nowak1992spatial,santos2005scale,wang2015multilayer}. Recent studies in
+\emph{Chaos, Solitons \& Fractals} likewise examine exclusion, tolerance and
+evolving reputation as mechanisms that reorganise cooperative
+regimes~\citep{ren2021tolerance,zhang2023expulsion,yue2025reputation}. Tags are
+one route to assortment without memory, both as phenotypic similarity in a
+well-mixed population~\citep{antal2009phenotypic} and as a mutating trait in a
+finite population~\citep{traulsen2007chromodynamics}. Our tag differs because
+its reliability is a controllable property of a verification technology and
+because failure changes which face of the population simplex attracts the
+flow.
 
-Fourth, verification quality is irrelevant to whether a club can start. Against
-any resident that does not condition on badges, a genuine badge earns exactly
-its unbadged twin's payoff minus the dues, at every $\sigma$
-(Proposition~\ref{prop:futility}). Clubs therefore nucleate only above an
-assortment threshold, $r^{*} = 0.063$ at our baseline
-(Proposition~\ref{prop:nucleation}), and no amount of attestation engineering
-substitutes for it.
+The biological origin is the greenbeard mechanism: a marker and the behaviour
+it elicits are inherited together~\citep{hamilton1964genetical1,dawkins1976selfish}.
+Tag similarity can sustain cooperation~\citep{riolo2001evolution}, but
+falsebeards profit when the marker separates from the cooperative
+behaviour~\citep{jansen2006altruism,gardner2010greenbeards}. Models of
+ethnocentrism and parochial altruism also combine an in-group tag with distinct
+out-group conduct~\citep{hammond2006ethnocentrism,choi2007parochial}. They rely
+on unforgeable or jointly inherited tags, spatial structure or group
+competition. Here the tag can be forged at an exogenous pass rate, and
+out-group harshness is selected because it makes costly membership excludable,
+not because groups fight.
 
-Fifth, collapse arrives in the wrong order. The behavioural mimic, a forger
-whose conduct is identical to the club's, invades at
-$\sigma_m = 0.938$, below the exploiter's threshold
-(Proposition~\ref{prop:mimicry}). Between the two thresholds the ecosystem
-still behaves well while the mark has stopped meaning anything: at
-$\sigma = 0.96$ forgers hold $0.54$ of the population, the posterior
-probability that a passed badge is genuine has fallen to $0.07$, and the unsafe
-frequency is $0.063$ against the baseline $0.090$. An observer monitoring
-conduct would see nothing wrong, and would in fact record an improvement.
+The credential is also a secret handshake: a pre-play signal that a mutant may
+display without the conduct it advertises~\citep{robson1990efficiency}.
+Classical signalling models maintain honesty through differential costs
+~\citep{grafen1990biological,spence1973job}; certification intermediaries
+instead disclose otherwise hidden quality~\citep{dranove2010quality}. Our
+forger pays less than a compliant member, so honesty rests on imperfect
+detection. Penalties and detection are normally substitutes
+~\citep{becker1968crime}; the model identifies where that substitution fails
+when detection is fixed by technology.
 
-Which of the two arrives first is decided by the interaction structure, in a
-direction that undercuts the instrument of the fourth result. Clustering
-penalises an exploiter, which meets its own aggression in a self-encounter,
-and not a mimic, which meets the club's own conduct: the exploiter's threshold
-rises from $0.866$ to $1$ as $r$ increases to $0.134$ while the mimic's moves
-by $0.001$, and the two cross at $r = 0.077$. Improving the interaction
-structure therefore removes the visible failure mode and concentrates all
-remaining risk in the invisible one.
-
-Sixth, the collapse is not reversible. At zero assortment a club cannot
-re-enter a population that has collapsed to forgery or to anarchy, at any
-verification quality whatsoever. Keeping a mark is strictly easier than
-rebuilding one.
-
-Seventh, scoping marks to providers makes concentration a safety variable. With
-$K$ symmetric provider clubs whose marks do not recognise each other, the
-ecosystem unsafe frequency is exactly $1 - \mathrm{HHI}$
-(Proposition~\ref{prop:providers}): a duopoly runs at $0.500$ and eight
-providers at $0.875$, while federated recognition is safe at any
-concentration. The same fragmentation dissipates the exclusion rent, from
-$30.4$ under a single club to $2.5$ across eight, which is why the incentive to
-federate is weakest exactly where federation would help
-most~\citep{katz1985network}.
-
-Eighth, and the result that reframes the other seven: what certification buys a
-settled market is not safety but an entry barrier. The replicator flow is
-multistable. Under the uniform Dirichlet start measure, two measure-dominant
-faces account for the observed split: $38.8\%$ of $20\,000$ starts reached the
-badged face and $61.2\%$ the unbadged face. Targeted starts also reveal a rare
-unsafe badge-mixed attractor, so this is not an exhaustive two-attractor
-classification. Since the two dominant faces are safe, the certified regime's
-social payoff is
-lower than the uncertified one by exactly the dues, $57.0$ against $59.0$
-(Corollary~\ref{cor:dues}). The small-mutation result is not contradicted:
-certification does lower harm there, from $0.159$ to $0.090$, but what it lowers
-is the harm of a market being knocked out of safety, not of one sitting in it.
-Certification buys robustness, not level.
-
-The exclusion is paid instead at the boundary. A compliant unbadged outsider
-that plays the club's own conduct towards everyone is charged $30.36$ for no
-conduct-related reason, and the encounter runs unsafe at $0.461$
-(Proposition~\ref{prop:exclusion}). A club that charges nothing leaves the
-outsider $2.00$ better off than a member, is behaviourally indistinguishable
-from an unbadged cooperator, has spoof threshold exactly zero and never
-survives. Across the four out-group policies the toll and the forgery tolerance
-order identically, with nothing in between. Fining forgery restores the gentle
-club's threshold to $0.923$ but not its share, which stays below $0.032$,
-because a fine changes what an impostor faces and not what a badge earns against
-agents who never check one (Corollary~\ref{cor:rescue}). The exclusion is not an
-unfortunate side effect of certification that better rules could remove. It is
-the load-bearing element.
-
-\paragraph{Why this matters beyond the model.}
-Agent identity standards are being written
-now~\citep{a2a2026spec,xu2026agentdid,grogan2025agentfacts}, and the case for them is
-usually made in terms of accountability~\citep{south2025delegation}: if we know
-which agent did what, we can hold someone responsible. Our results say that identity delivers something
-different from accountability. It delivers a club, and clubs are safe inside
-and hostile at the edge. The policy question is therefore not whether to build
-attestation but what to require of the conduct it gates, and our answer is
-uncomfortable: the requirement that would remove the harm also removes the
-club. Managed mutual recognition and equitable interoperability are established
-institutional proposals~\citep{nicolaidis2005transnational,scottmorton2023equitable}.
-In our model, such federation converts the boundary into an interior without
-asking any club to be gentle to strangers.
-
-\subsection{Related work}\label{sec:related}
-
-\paragraph{Evolutionary dynamics as a nonlinear system.}
-The formal setting is evolutionary game
-dynamics~\citep{taylor1978ess,hofbauer1998evolutionary,hofbauer2003evolutionary}:
-a population of competing designs is a nonlinear flow on a simplex, qualitative
-changes of behaviour are bifurcations of that flow, and the objects of interest
-are collective rather than
-individual~\citep{perc2010coevolutionary,perc2017statphys}. That programme has
-established that transitions between cooperative and defecting phases are sharp
-and often reducible to a universal
-form~\citep{perc2016phase,wang2015universal}, and that much of the outcome is
-decided by who meets whom, through networks, layers or
-conformity~\citep{nowak1992spatial,santos2005scale,ohtsuki2006simple,szabo2007evolutionary,wang2015multilayer,szolnoki2015conformity}.
-Tags have been studied there as generators of assortment without memory, as
-phenotypic similarity in well-mixed populations~\citep{antal2009phenotypic}
-and as a mutating tag space in finite
-ones~\citep{traulsen2007chromodynamics}. Two features separate this
-system. First, the tag is forgeable at a rate the modeller sets, so the
-bifurcation parameter belongs to a verification technology rather than to the
-players, and the comparative statics are with respect to an engineering budget.
-Second, the flow carries two disjoint attracting faces differing in whether the
-tag exists at all rather than in how much cooperation it supports, so what
-matters is basin structure and not equilibrium level. Whether either regime
-arises at all turns on a classical condition, that altruism invades only under
-positive assortment~\citep{eshel1982assortment,fletcher2009simple}, supplied
-here by one provider's agents sharing a platform; by
-Proposition~\ref{prop:futility} the badge contributes nothing to nucleation, so
-assortment is the only route.
-
-\paragraph{Greenbeards, forgeable tags and parochial conduct.}
-Kin selection~\citep{hamilton1964genetical1,hamilton1964genetical2} explains
-why a gene favours copies of itself in others, and a greenbeard is a gene
-carrying both marker and
-behaviour~\citep{dawkins1976selfish}. \citet{riolo2001evolution} showed that tag
-similarity alone sustains cooperation without reciprocity,
-and~\citet{roberts2002does} that this rests on the rule that identical tags
-always donate, since cooperation collapses once agents may decline, which the
-original authors disputed~\citep{riolo2002similarity}.
-\citet{jansen2006altruism} showed that a continuously mutating tag space
-outruns impostors, and~\citet{gardner2010greenbeards} reviewed the empirical
-cases, which are real but
-rare~\citep{keller1998selfish,queller2003single}. In biology forgeability is a
-fact about the organism; in an agent economy it is a fact about the
-verification
-infrastructure~\citep{jovanovic2024watermarkstealing,anbiaee2026threatmodeling}.
-The closest structural ancestor
-is~\citet{hammond2006ethnocentrism}, whose agents carry a tag and two
-conditional strategies, our design triple minus the badge type. Their tags
-cannot be faked, so our question does not arise:
-their result explains why differential treatment emerges, ours why it cannot
-be removed from a certification regime without removing the regime.
-\citet{choi2007parochial} pair in-group generosity with out-group hostility
-too, but need group selection and explicit intergroup warfare,
-while~\citet{masuda2015ingroup} give the standard condition that tag and
-strategy be inherited as one unit, satisfied here by construction. Nearest to
-the mechanism is tag-based or tolerance-based expulsion of those who do not
-carry the mark~\citep{zhang2023expulsion,ren2021tolerance}, where exclusion is
-a rule imposed on a spatial game; here it is one of four conduct options
-towards unverified partners, and the mark survives forgery only under the harsh
-ones. We need neither group selection nor a spatial substrate. Out-group
-harshness is favoured because it is the only thing that makes a costly
-membership signal worth acquiring honestly, so excludability, not conflict,
-carries the result.
-
-\paragraph{Signalling, certification and enforcement.}
-Our object is Robson's secret handshake~\citep{robson1990efficiency}, a
-pre-play signal that a mutant can display without the conduct it advertises;
-what a forgeable badge adds is a display that fails at a rate the modeller
-sets, turning a known vulnerability into a threshold in the pass rate. In the
-handicap tradition signals are honest because they are differentially
-costly to fake~\citep{zahavi1975mate,grafen1990biological}, and market
-signalling separates types for the same reason~\citep{spence1973job}. Our
-forger pays less than the compliant member, not more, and honesty need not rest
-on a realised equilibrium cost~\citep{szamado2011cost}: here it rests on
-detection. The setting is
-nearer a market degraded by failed quality
-signalling~\citep{akerlof1970market} and certification
-intermediaries~\citep{lizzeri1999information,dranove2010quality}; the attribute
-our badge certifies is never learned even after the encounter, which makes the
-badge a credence rather than an experience
-good~\citep{darby1973free,dulleck2006doctors}. Penalty and detection are
-classically substitutes~\citep{becker1968crime};
-Proposition~\ref{prop:fines} states the limits of that substitution when
-detection is technological rather than budgetary.
-
-\paragraph{AI races and agent identity.}
-The interaction layer is the reduced race of~\citet{domingos2026falling},
-descended from~\citet{armstrong2016racing} and formalised evolutionarily
-by~\citet{han2020regulate}, whose programme covers voluntary commitments,
-heterogeneity, auditing and
-trust~\citep{han2022voluntary,cimpeanu2022heterogeneous,bova2024vigilant,bashir2026trust}.
-Those instruments act on the race's payoffs or on an external monitor; ours
-acts on who is recognised as an insider, the only lever available where the
-payoff levers have no purchase (Proposition~\ref{prop:reciprocity}). Applied work on agent
-governance treats visibility and provenance as
-prerequisites~\citep{chan2024visibility,chan2025infrastructure,shavit2023practices,kolt2025governing},
-and~\citet{hammond2025multiagent} name selection pressures and multi-agent
-security, under which impersonation sits, among their risk factors without
-formalising either. Work on model-origin cues documents self-favouring
-evaluation and identity-conditioned
-interaction~\citep{panickssery2024llm,long2025mirror,wang2026outgroup}, and
-outputs carry detectable idiosyncratic signatures~\citep{sun2025idiosyncrasies}
-while models show no consistent
-self-recognition~\citep{davidson2024self}: recognition is available but
-imperfect. What that strand lacks, and we supply, is the population-level
-consequence of recognition that is imperfect and worth faking.
+Finally, evolutionary models of AI races have studied regulation, voluntary
+commitments, auditing and trust~\citep{han2020regulate,han2022voluntary,bova2024vigilant}.
+Agent-governance work treats identity, visibility and provenance as
+prerequisites~\citep{chan2024visibility,chan2025infrastructure,otsuka2026aiidentity},
+while empirical work documents identity-conditioned evaluation and imperfect
+model-origin recognition~\citep{panickssery2024llm,sun2025idiosyncrasies,wang2026outgroup}.
+Those literatures do not derive the population-level consequences of a
+credential that is both valuable and worth forging. The present model supplies
+that link through local bifurcation thresholds and global basin analysis.
 \section{Model}
 \label{sec:model}
 
@@ -715,25 +530,16 @@ $\beta = 0.05$. Every one of them is swept.
 \label{sec:results}
 
 
-Table~\ref{tab:bifurcations} is a map of what follows. Each row is one
-qualitative change in the flow of Equation~\eqref{eq:replicator}, together with
-the parameter that drives it, the closed form that locates it and its value at
-the baseline. The subsections then take them in order and say what each one
-means for a certification regime.
+Table~\ref{tab:bifurcations} maps the qualitative changes analysed below to
+their control parameters and locations.
 
 \begin{table}[pos=t]
 \centering
-\caption{The qualitative transitions of the identity layer. Rows one to four
-and row six are transcritical bifurcations of Equation~\eqref{eq:replicator}
-restricted to an edge of the simplex: a transversal eigenvalue
-$\lambda_{i \mid j}$ of Equation~\eqref{eq:eigen} passes through zero and the
-resident vertex exchanges stability with the invading direction. Row five is a
-codimension-two degeneracy at which two such eigenvalues vanish together, so
-that the ecosystem changes which of its two failure modes it meets first. Row
-seven is not a bifurcation of the flow but a divergence of the locus of one:
-the curve in the $(\sigma, \rho)$ plane along which the club is marginally
-protected has a vertical asymptote at $\sigma = 1$. Row eight is a global
-property that no local calculation reveals.}
+\caption{Qualitative transitions of the identity layer. Rows one to four and
+six are edge transcritical bifurcations; row five is the codimension-two
+intersection of two such bifurcation curves. Row seven is the vertical
+asymptote of a marginal-stability locus, and row eight is a global basin
+property.}
 \label{tab:bifurcations}
 \small
 \vspace{2pt}
@@ -772,7 +578,7 @@ the locus of marginal protection escapes to infinity
 two attractors on disjoint faces of the simplex
   & none
   & Obs.~\ref{prop:bistable}
-  & basins $0.44$, $0.56$ \\
+  & basins $0.388$, $0.612$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1718,17 +1524,11 @@ rate would interpolate between them and would be the natural next step.
 One consequence of the multistability is worth naming as a limitation rather
 than a result. The uniform-start sample does not estimate the basin of the
 targeted mixed attractor, so the realised share of cross-boundary states is
-unknown. The boundary conduct we identify as the cost of certification is
-therefore still measured off the dominant equilibrium path, as the payoff a
-compliant entrant would receive. Because the mixed attractor itself is unsafe,
-boundary conduct we identify as the cost of certification is never exercised
-in equilibrium, and Proposition~\ref{prop:exclusion} measures it off the
-equilibrium path, as the payoff a compliant entrant would receive. Measuring
-it there is the right choice for an entry barrier, which is by definition what a
-party outside the market faces, but it does mean the model produces no
-prediction about the realised volume of cross-boundary harm. In a market
-where both regimes coexist for exogenous reasons, that volume would be the
-quantity to measure, and our model does not supply it.
+unknown. Proposition~\ref{prop:exclusion} therefore measures the barrier off
+the dominant equilibrium path, as the payoff a compliant entrant would
+receive. That is the relevant quantity for entry, but the model predicts
+neither the mixed attractor's basin share nor the realised volume of
+cross-boundary harm when certified and uncertified regimes coexist.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1807,18 +1607,18 @@ values.
 \section*{Declaration of generative AI and AI-assisted technologies in the
 manuscript preparation process}
 
-During the preparation of this work the authors used Anthropic's Claude,
-accessed through the Claude Code command-line interface, in order to draft and
-edit prose, to scaffold parts of the analysis code, and to check the
-consistency of quoted numerical values against the generated results files.
-After using this tool the authors reviewed and edited
-the content as needed and take full responsibility for the content of the
-published article. No text, figure or numerical result was accepted without
-independent verification: every scalar in the manuscript is pinned by an
-automated check to the results file it is regenerated into, and every
-analytical threshold is verified against the exact payoff matrices, the spoof
-threshold by brute-force root-finding and the rest as invasion boundaries.
-
+During the preparation of this work the authors used Anthropic's Claude through
+the Claude Code command-line interface and OpenAI Codex to draft and edit
+prose, inspect and revise the LaTeX source, scaffold parts of the analysis code,
+and check quoted numerical values against the generated results files. The
+authors also used OpenAI's image-generation system to render the graphical
+abstract from an author-specified four-panel scientific layout. The graphical
+abstract is conceptual and contains no simulated or empirical data. The
+authors reviewed and edited all tool output, verified every scientific label,
+and take full responsibility for the content of the published article. Every
+scalar in the manuscript is tied by an automated check to its regenerated
+result, and every analytical threshold is independently verified against the
+exact payoff matrices.
 
 \printcredits
 

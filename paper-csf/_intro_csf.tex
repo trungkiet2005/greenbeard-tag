@@ -1,0 +1,73 @@
+\section{Introduction}
+\label{sec:intro}
+
+Machine agents increasingly carry identity and capability metadata before they
+interact~\citep{a2a2026spec}. Regulation already requires providers to identify
+AI systems and model versions~\citep{euaiact2024}, while attestation and
+provenance infrastructures are being proposed for agent
+ecosystems~\citep{chan2024visibility,chan2025infrastructure,shavit2023practices}.
+These developments usually frame identity as an accountability tool. Identity
+can also change conduct directly: an agent may trust, cooperate with or grant
+access to a partner because its credential passes verification.
+
+An identity signal that elicits preferential treatment among its bearers is a
+\emph{greenbeard}. Such signals can support cooperation without repeated
+interaction, but they fail when the marker separates from the behaviour it is
+supposed to identify~\citep{riolo2001evolution,jansen2006altruism,gardner2010greenbeards}.
+For machine agents, this separation is an engineering variable rather than a
+biological constraint: the pass rate of a forged credential depends on the
+verification technology~\citep{jovanovic2024watermarkstealing,anbiaee2026threatmodeling}.
+The unresolved question is therefore dynamical. If credentials are costly to
+obtain honestly, valuable when accepted and imperfectly verifiable, which
+population regimes persist, and how do those regimes change as verification,
+penalties and interaction structure vary?
+
+We answer this question by adding a strategic identity layer to a reduced
+four-strategy AI race~\citep{domingos2026falling}. Each design combines a badge
+that is genuine, forged or absent with conduct toward partners whose badge
+passes or fails verification. The construction yields 48 designs evolving on
+a 47-dimensional simplex under replicator dynamics; the same payoff structure
+also drives a finite-population birth--death process. The underlying race is
+held fixed, and every pairwise payoff is evaluated exactly, so all changes are
+attributable to the identity layer rather than to sampling or to a modified
+interaction game.
+
+The analysis separates local stability from global basin structure. At a
+monomorphic resident, invasion is governed by a transversal eigenvalue of the
+replicator flow. Most regime boundaries are simple zeros of these eigenvalues
+and are therefore available in closed form; numerical integration is used only
+to measure basins and to locate attractors. This distinction matters because
+the flow is multistable. Averaging states across its disjoint attracting faces
+before evaluating a pairwise observable creates cross-regime encounters that
+no trajectory contains, so observables must be evaluated within each attractor
+and only then averaged over basins.
+
+Three mechanisms organise the results. First, credentials are useful only
+where ordinary reciprocity and liability fail to protect safe play. A
+reciprocating certified club tolerates more than twice the forgery of an
+unconditionally trusting club, showing that in-group conduct is part of the
+security design. Penalties help only while detection remains informative: the
+protective fine has a vertical asymptote as forged badges become
+undetectable. Second, verification does not help a costly club form because an
+unbadged population does not read its signal; positive assortment is required
+for nucleation. Once formed, however, the club can persist under weaker
+conditions than those required to rebuild it after collapse.
+
+Third, certification can fail without an observable deterioration in conduct.
+A behavioural mimic copies the club's conduct while avoiding its dues and
+crosses its invasion threshold before an exploiter at the baseline. The two
+invasion boundaries meet at a codimension-two point, beyond which stronger
+assortment removes the visible exploiter while leaving the mimic essentially
+unchanged. The credential is then hollow even though behaviour remains safe.
+Globally, the dominant trajectories settle on disjoint certified and
+uncertified safe faces, alongside a rare unsafe mixed attractor. Certification
+therefore buys robustness to displacement rather than a lower harm level at a
+settled state. Its sustaining mechanism is an exclusionary entry barrier: a
+club gentle to outsiders is cheaper to imitate and cannot survive forgery.
+
+These results connect nonlinear evolutionary dynamics to certification design.
+They also give a practical measurement lesson: conduct alone cannot diagnose
+credential integrity. A regime must measure whether passed credentials are
+genuine and must treat mutual recognition across providers as part of the
+safety architecture, rather than as a separate interoperability choice.
+
