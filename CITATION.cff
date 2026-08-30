@@ -26,6 +26,18 @@ authors:
     email: "23122044@student.hcmus.edu.vn"
     affiliation: >-
       Faculty of Information Technology, University of Science, Vietnam National University Ho Chi Minh City, Ho Chi Minh City, Vietnam
+  - family-names: "Pham"
+    given-names: "Phu-Hoa"
+    orcid: "https://orcid.org/0009-0001-5471-2578"
+    email: "23122030@student.hcmus.edu.vn"
+    affiliation: >-
+      Faculty of Information Technology, University of Science, Vietnam National University Ho Chi Minh City, Ho Chi Minh City, Vietnam
+  - family-names: "Nguyen-Lam"
+    given-names: "Phu-Quy"
+    orcid: "https://orcid.org/0009-0002-9694-8105"
+    email: "23122048@student.hcmus.edu.vn"
+    affiliation: >-
+      Faculty of Information Technology, University of Science, Vietnam National University Ho Chi Minh City, Ho Chi Minh City, Vietnam
 repository-code: "https://github.com/trungkiet2005/greenbeard-tag"
 license: MIT
 type: software

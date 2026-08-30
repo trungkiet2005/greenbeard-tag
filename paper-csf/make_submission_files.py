@@ -20,21 +20,9 @@ HERE = Path(__file__).resolve().parent
 
 TITLE = ("Forgeable greenbeards: multistability and hollow collapse in "
          "certified agent populations")
-
-AI_DECLARATION = (
-    "During the preparation of this work the authors used Anthropic's Claude "
-    "through the Claude Code command-line interface and OpenAI Codex to assist "
-    "with drafting and editing prose; inspecting and revising LaTeX and "
-    "bibliography files; reviewing and revising analysis and theory code, "
-    "validation checks and tests; and developing deterministic plotting, build, "
-    "packaging and reproducibility tooling. All numerical values reported in the "
-    "manuscript were checked against or regenerated from deterministic, "
-    "version-controlled scientific code, and all submitted figures were rendered "
-    "deterministically from model outputs and data by that code. No generative "
-    "image is included in the submission. The authors reviewed and edited all "
-    "tool-assisted output, reran the analysis and test suites, reproduced the "
-    "reported results, and take full responsibility for the content of the "
-    "published article."
+AUTHORS = (
+    "Trung-Kiet Huynh, Dao-Sy Duy-Minh, Chi-Nguyen Tran, Pham Phu Hoa, "
+    "and Nguyen Lam Phu Quy"
 )
 
 
@@ -77,6 +65,8 @@ latex_items = "\n".join(r"\item " + h for h in HIGHLIGHTS)
     "\\pagestyle{empty}\n"
     "\\begin{document}\n"
     "\\section*{Highlights}\n"
+    f"\\textit{{{TITLE}}}\\\\[0.5em]\n"
+    f"{AUTHORS}\\\\[0.75em]\n"
     "\\begin{itemize}\n"
     f"{latex_items}\n"
     "\\end{itemize}\n"
@@ -103,6 +93,7 @@ doc = new_doc()
 doc.add_heading("Highlights", level=1)
 p = doc.add_paragraph()
 p.add_run(TITLE).italic = True
+doc.add_paragraph(AUTHORS)
 for h in HIGHLIGHTS:
     doc.add_paragraph(h, style="List Bullet")
 doc.save(HERE / "highlights.docx")
@@ -123,12 +114,6 @@ doc.add_paragraph(
     "This research did not receive any specific grant from funding agencies in "
     "the public, commercial, or not-for-profit sectors."
 )
-doc.add_heading(
-    "Declaration of generative AI and AI-assisted technologies in the "
-    "manuscript preparation process",
-    level=2,
-)
-doc.add_paragraph(AI_DECLARATION)
 doc.save(HERE / "declaration_of_interest.docx")
 
 

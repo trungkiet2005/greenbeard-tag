@@ -32,10 +32,12 @@ required core citation is lost.
 exact tested revision, as required by `SUBMISSION_CHECKLIST.md`. A Git tag does
 not itself mint a DOI.
 
-All three authors confirmed the spelling and order, equal-contribution note,
-CRediT roles, corresponding-author address, funding and competing-interest
-statements, generative-AI declaration and companion-paper disclosure on
-24 August 2026. The shortened manuscript still requires a final author read.
+The author list was updated on 25 August 2026 to Trung-Kiet Huynh, Dao-Sy
+Duy-Minh, Chi-Nguyen Tran, Pham Phu Hoa and Nguyen Lam Phu Quy, in that order;
+the first three retain the equal-contribution note. AI use was limited to basic
+checks of grammar, spelling and punctuation, for which Elsevier does not
+require a disclosure statement. All five authors must approve the final list,
+CRediT roles, declarations and shortened manuscript before submission.
 
 - 16 PDF pages: one unnumbered CAS highlights sheet and 15 numbered manuscript
   pages; the separate Supplementary Material is 7 pages.
@@ -91,7 +93,7 @@ explicit. `_results_csf.tex`, `_discussion_csf.tex` and `_conclusion_csf.tex`
 carry the shortened CSF narrative. `_blocks_results.tex` supplies the compact
 bifurcation inventory. `supplementary.tex` is generated from the extended
 sweeps and analytical derivations. `_blocks_declarations.tex` contains
-competing-interest, funding, data-availability and generative-AI disclosures.
+competing-interest, funding and data-availability statements.
 CRediT roles are in `_front.tex`.
 
 The revision also removes repeated previews of every result, corrects the
