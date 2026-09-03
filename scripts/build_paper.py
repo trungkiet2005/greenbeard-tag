@@ -28,6 +28,8 @@ FIGURES = [
     "fig07_channels",
     "fig08_providers",
     "fig09_robustness",
+    "fig10_assortment",
+    "fig11_phase",
 ]
 
 
@@ -155,6 +157,46 @@ def emit_tables() -> None:
                 rf"{_fmt(row.unsafe_federated)} & {row.member_payoff:.1f} & "
                 rf"{row.exclusion_rent:.1f} \\"
             )
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
+
+    # --------------------------------------------------- badge ablation table
+    # The four arms answer "is the mark a greenbeard or an assortment device",
+    # which no amount of sweeping the baseline model can settle on its own.
+    ablation = pd.read_csv(tables / "badge_ablation.csv")
+    arms = [
+        ("full", "full 48-design space"),
+        ("unforgeable", r"unforgeable badge ($\sigma = 0$)"),
+        ("no-badge", "no badge at all"),
+        ("random-badge", "badge drawn independently of conduct"),
+    ]
+    shown = [0.0, 0.06, 0.1, 0.2]
+    available = [r for r in shown if (ablation.r - r).abs().min() < 1e-9]
+    lines += [
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\caption{What the mark contributes, against three counterfactual",
+        r"marks.  Entries are the stationary unsafe frequency of the",
+        r"small-mutation process at four assortments.  The unforgeable arm is",
+        r"the best case and the no-badge arm the reference.  The fourth arm",
+        r"keeps the badge, the dues and the handshake and removes only the",
+        r"correlation between the mark and the conduct behind it, so every",
+        r"design passes a check at the same rate; it is markedly worse than",
+        r"carrying no badge at all, because conduct still conditions on a",
+        r"check that has stopped discriminating.}",
+        r"\label{tab:ablation}",
+        r"\small",
+        r"\begin{tabular}{l" + "r" * len(available) + "}",
+        r"\toprule",
+        r"design pool & " + " & ".join(rf"$r={r:g}$" for r in available) + r" \\",
+        r"\midrule",
+    ]
+    for key, label in arms:
+        column = f"sml_{key}"
+        cells = []
+        for r in available:
+            row = ablation.loc[(ablation.r - r).abs().idxmin()]
+            cells.append(_fmt(row[column]))
+        lines.append(rf"{label} & " + " & ".join(cells) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
 
     (ROOT / "paper" / "tables_generated.tex").write_text("\n".join(lines))

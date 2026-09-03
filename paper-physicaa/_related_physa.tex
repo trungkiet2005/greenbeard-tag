@@ -1,0 +1,87 @@
+%% Physica A related work.
+%%
+%% Demoted from a standalone 1833-word section to a subsection of the
+%% Introduction at roughly 750 words.  All six strands of the venue-neutral
+%% review survive: tags and greenbeards, parochial altruism, signalling and
+%% certification, AI races, agent identity infrastructure, and population
+%% structure.  The venue-specific addition is the Physica A work on reputation,
+%% trust thresholds and social exclusion as mechanisms that reorganise
+%% cooperative regimes; the CSF package cited the equivalent CSF papers here.
+
+\subsection{Related work}
+\label{sec:related}
+
+\paragraph{Tags, greenbeards and population structure.}
+Evolutionary game dynamics describes a population of competing designs as a
+nonlinear flow on a simplex, so a change in cooperation is a change of
+stability and basin structure rather than only of an average
+payoff~\citep{taylor1978ess,hofbauer1998evolutionary,hofbauer2003evolutionary,sandholm2010population}.
+Statistical-physics work on social dilemmas shows that these transitions depend
+strongly on interaction structure~\citep{perc2017statphys}: spatial contact,
+degree heterogeneity and multilayer coupling each stabilise
+cooperation~\citep{nowak1992spatial,santos2005scale,wang2015multilayer}, and
+conditional strategies change which regime is reached~\citep{szolnoki2012conditional}.
+Recent work in this journal treats reputation, trust thresholds and social
+exclusion in the same way, as mechanisms that reorganise cooperative regimes
+rather than as parameters that shift a
+mean~\citep{quan2019exclusion,zhu2025adaptive,zhang2026trust}. Tags are one
+route to assortment without memory, as phenotypic similarity in a well-mixed
+population~\citep{antal2009phenotypic} and as a mutating trait in a finite
+one~\citep{traulsen2007chromodynamics,traulsen2003minimal}. The biological
+origin is the greenbeard: a marker and the behaviour it elicits are inherited
+together~\citep{hamilton1964genetical1,dawkins1976selfish}. Tag similarity can
+sustain cooperation~\citep{riolo2001evolution}, but falsebeards profit once the
+marker separates from the behaviour~\citep{roberts2002does,jansen2006altruism,gardner2010greenbeards},
+and tags plus a harmful conduct produce
+evilbeards~\citep{garcia2014evilbeards}. Our tag differs from all of these in
+that its reliability is a controllable property of a verification technology
+rather than a fixed or accidental one, and in that its failure changes which
+face of the simplex attracts the flow. The distinction is not cosmetic. Where
+those models let a marker come apart from its behaviour either as symmetric
+recognition noise or as a discrete impostor lineage, a forged credential is a
+continuous, adversarial and one-sided parameter, and it is the one-sidedness
+that reverses the order in which the regime fails. We study the same object in
+both the deterministic replicator flow and its finite-population birth-death
+counterpart~\citep{traulsen2006stochastic}, and report where the two readings
+disagree rather than presenting either as the model.
+
+\paragraph{Parochial altruism.}
+Models of ethnocentrism and parochial altruism also pair an in-group tag with
+distinct out-group conduct~\citep{hammond2006ethnocentrism,choi2007parochial}.
+They rely on unforgeable or jointly inherited tags, on spatial structure, or on
+competition between groups. Here the tag can be forged at an exogenous pass
+rate, and out-group harshness is selected because it makes costly membership
+excludable, not because groups fight. There is no selection above the level of
+the individual design anywhere in the model.
+
+\paragraph{Signalling and certification.}
+The credential is also a secret handshake: a pre-play signal a mutant may
+display without the conduct it advertises~\citep{robson1990efficiency}.
+Classical signalling models keep signals honest through differential
+costs~\citep{grafen1990biological,spence1973job}, and certification
+intermediaries instead disclose otherwise hidden
+quality~\citep{dranove2010quality,leland1979quacks}. Our forger pays strictly
+less than a compliant member, so honesty cannot rest on a realised cost and
+rests on imperfect detection and on the off-equilibrium cost of being
+caught~\citep{szamado2011cost}. Penalties and detection are ordinarily
+substitutes~\citep{becker1968crime}; the model identifies where that
+substitution fails, which is where detection is fixed by cryptography rather
+than by an inspection budget.
+
+\paragraph{AI races, agent identity and what is missing.}
+Evolutionary models of AI development races have studied regulation, voluntary
+commitments, auditing and
+trust~\citep{han2020regulate,han2022voluntary,bova2024vigilant}, and we take the
+reduced four-strategy race of~\citet{domingos2026falling} as an unmodified
+interaction layer so that every effect reported here is attributable to the
+identity layer above it. Agent-governance work treats identity, visibility and
+provenance as prerequisites for any of
+this~\citep{chan2024visibility,chan2025infrastructure,otsuka2026aiidentity,kolt2025governing},
+while empirical work documents identity-conditioned evaluation and imperfect
+recognition of model
+origin~\citep{panickssery2024llm,sun2025idiosyncrasies,wang2026outgroup}. What
+neither literature supplies is the population-level consequence of a credential
+that is simultaneously valuable, costly and worth forging. Supplying it is the
+purpose of this paper, through closed-form invasion boundaries, an exact
+reduction on the invariant faces, and a global regime map.
+

@@ -1,0 +1,58 @@
+%% Supplementary material for the Physica A submission.
+%%
+%% Compiled separately from main.tex.  Cross-references into the main paper are
+%% resolved through main.aux at build time by xr, so main.tex must be compiled
+%% first; the submitted PDF is final-form and does not need main.aux to be read.
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,allcolors=blue!55!black]{hyperref}
+\usepackage{xr}
+\externaldocument[][nocite]{main}
+
+\graphicspath{{figures/}{./}}
+
+%% One 0.7pt overfull box on a theorem heading; the measure is tight and
+%% the heading cannot be rewrapped, so let TeX stretch the line instead.
+\setlength{\emergencystretch}{2em}
+
+\newtheorem{proposition}{Proposition}
+\newcommand{\AS}{\textsf{AS}}
+\newcommand{\CS}{\textsf{CS}}
+\newcommand{\CAS}{\textsf{CAS}}
+\newcommand{\AU}{\textsf{AU}}
+\newcommand{\piP}{\pi_{P}}
+\newcommand{\piS}{\pi_{S}}
+
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thesubsection}{S\arabic{section}.\arabic{subsection}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\theproposition}{S\arabic{proposition}}
+
+\title{Supplementary Material for\\
+\emph{Certification without a safety dividend: forgeable credentials in
+populations of autonomous agents}}
+\author{Trung-Kiet Huynh \and Duy-Minh Dao-Sy \and Chi-Nguyen Tran \and
+Phu-Hoa Pham \and Phu-Quy Nguyen-Lam}
+\date{}
+
+\begin{document}
+\maketitle
+
+This document reports two results referred to by name in the main text,
+together with the extended parameter sweeps, the secondary policy experiments
+and the analytical derivations supporting it. All quantities are generated from
+the same version-controlled analysis pipeline, and every proof of a numbered
+statement in the main text appears in Section~\ref{app:proofs}.
+

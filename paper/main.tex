@@ -64,7 +64,8 @@
 \newcommand{\piS}{\pi_{S}}
 \newcommand{\R}{\mathbb{R}}
 
-\title{\bfseries Forgeable greenbeards: multistability and hollow collapse in certified agent populations}
+\title{\bfseries Certification without a safety dividend: forgeable credentials
+in populations of autonomous agents}
 
 \author[1,2]{Trung-Kiet Huynh$^{\dagger}$}
 \author[1,2]{Dao-Sy Duy-Minh$^{\dagger}$}
@@ -77,34 +78,34 @@
 
 \begin{abstract}
 \noindent
-A greenbeard is a signal that lets its bearers treat one another differently
-from everyone else, and its classical vulnerability is that an impostor can wear
-it. Machine agents are beginning to carry exactly such signals: provenance
-attestations and certification marks, cheap to check and possible to forge. We
-make the mark a strategic variable in a reduced four-strategy model of a
-competitive development race, holding the underlying game fixed so that every
-effect belongs to the identity layer. A design is a triple: a badge that is
-genuine, forged or absent, the conduct it runs towards partners whose badge
-passes verification, and the conduct it runs towards everyone else. A forged
-badge passes with probability $\sigma$. Identity matters exactly where
-deterrence fails: below a reciprocity threshold no unbadged population sustains
-safe play. A club that merely reciprocates within its membership tolerates more
-than twice the forgery of one that trusts its members unconditionally, so
-in-group conduct, not goodwill, sets how much impersonation a mark survives.
-Fines cannot substitute for detection, because the protective fine diverges as
-forgery becomes undetectable. Collapse is graceful in the wrong way: a mimic
-that forges the badge and behaves well invades before the exploiter does,
-hollowing out the credential while conduct still looks sound, and assortment
-leaves this as the only failure mode. The flow is multistable: two
-measure-dominant safe faces account for the uniform-start basin split, while
-targeted starts reach a numerically robust unsafe badge-mixed rest face outside
-that sample. Thus
-certification buys robustness rather than a lower level of harm, and what
-holds it up is the rent it charges outsiders.
+Machine agents increasingly carry identity credentials, and a credential that
+changes how its bearers are treated is a greenbeard whose classical weakness is
+that an impostor can wear it. For software the marker separates from the
+behaviour at a rate the verification technology sets, so forgery is continuous,
+adversarial and one-sided rather than symmetric noise. We attach genuine,
+forged or absent badges and badge-contingent conduct to an unmodified
+four-strategy development race, giving 48 designs on a 47-dimensional simplex
+whose interaction has rank 13. Our central result is a reduction rather than a
+measurement: the fully badged and fully unbadged faces carry the same
+four-conduct replicator flow, differing by the constant certification cost.
+Their rest points, stability and attractors coincide, so a settled certified
+market carries exactly the harm of an uncertified one and is poorer by its
+dues, at every verification quality, fine, liability and assortment.
+Neither the forgery rate nor the fine appears in the reduced payoff, so the
+verification layer is invisible from inside a settled regime. What forgeability
+determines is composition rather than conduct: a behavioural mimic invades
+before an outright exploiter and stronger assortment removes only the
+exploiter, so the credential empties while conduct still looks sound. The
+exclusion that sustains it is a dial and not a switch: an entry toll of $2.0$
+already delivers $72\%$ of the forgery tolerance that a toll of $30.4$ buys.
+Basin shares
+are reported as ranges over start measures, since changing only the start
+distribution moves the badged share from $0.04$ to $0.47$.
 \end{abstract}
 
-\noindent\textbf{Keywords:} evolutionary game theory; tag-based cooperation;
-greenbeard; agent identity; attestation; AI governance; multi-agent systems
+\noindent\textbf{Keywords:} evolutionary game theory; replicator dynamics;
+tag-based cooperation; greenbeard; agent identity; attestation; certification;
+multi-agent systems
 
 \section{Introduction}
 \label{sec:intro}
@@ -137,6 +138,18 @@ technology~\citep{jovanovic2024watermarkstealing,anbiaee2026threatmodeling}, and
 therefore a design choice, and therefore something a governance regime can spend
 money on.
 
+That distinction is the specific gap this paper addresses, and it is narrower
+than it first appears. Existing tag models do allow the mark to come apart from
+the behaviour, but they do so in one of two ways: as recognition
+\emph{noise}, which is symmetric, accidental and costly to everyone, or as a
+discrete \emph{mutation} that creates an impostor lineage. A forged credential
+is neither. It is continuous, because the pass rate is a number an engineer
+sets; it is adversarial, because someone chose to forge; and it is one-sided,
+because only the impostor gains from a false pass. Nobody has asked what that
+asymmetry does to the order in which a certification regime fails. It turns out
+to invert it, and the inversion is the reason a regime can look healthy from the
+outside long after it has stopped working.
+
 The question this paper answers is what a population of agent operators does
 with that choice. The question is not rhetorical, because two forces pull
 against each other. Certification and third-party quality disclosure are
@@ -163,11 +176,45 @@ finite-population dynamics of evolutionary game
 theory~\citep{taylor1978ess,hofbauer1998evolutionary,traulsen2006stochastic}.
 
 Our contribution is an explanation, not a method or a benchmark. In one
-sentence: \emph{a forgeable identity mark buys an agent ecosystem robustness
-rather than safety, and pays for it with an entry barrier that cannot be
-legislated away, because the exclusionary conduct that creates the barrier is
-exactly what makes the mark survive forgery.} The results below make that
-precise.
+sentence: \emph{a costly identity mark cannot change how safely a settled
+market behaves, only who it is made of, and forgeability decides which,} so a
+regime that watches conduct cannot see its credential system fail. Four results
+make that precise.
+
+\begin{enumerate}
+\item \textbf{A settled market is no safer for being certified, and this is a
+theorem rather than a measurement.} The fully badged and fully unbadged faces
+of the state space carry the \emph{same} four-conduct replicator flow, differing
+by the constant $\kappa_g$ (Theorem~\ref{thm:face}). Their rest points,
+stability and conduct attractors coincide, so at any settled regime the unsafe
+frequency is identical and the certified market is poorer by exactly its dues,
+at every value of the verification quality, the dues, the fine, the liability
+and the assortment. Neither $\sigma$ nor $\rho$ appears in the reduced payoff:
+the entire verification layer is invisible from inside a settled regime.
+
+\item \textbf{The credential empties before the conduct degrades, and better
+interaction structure makes that worse.} A behavioural mimic crosses its
+invasion boundary before an outright exploiter does
+(Section~\ref{sec:mimicry}), and the two boundaries exchange places on an
+explicit algebraic locus rather than at one fitted number. Above it the only
+remaining invader is one that behaves correctly, so conduct monitoring reports
+success exactly where the mark has stopped meaning anything.
+
+\item \textbf{The exclusion that sustains a credential is far cheaper than the
+published dichotomy suggests.} Reading out-group conduct as a continuous
+severity rather than as four discrete rules turns
+Table~\ref{tab:outgroup} into a strictly convex frontier, on which a small
+fraction of the maximum entry toll buys most of the maximum forgery tolerance.
+Exclusion is a dial, not a switch, which makes it a design variable rather than
+a dilemma.
+
+\item \textbf{A basin share is a property of the start measure, and we report
+it as one.} Holding the model fixed and changing only the concentration of the
+start distribution moves the badged basin share across most of the unit
+interval. We therefore quote the range across measures rather than a confidence
+interval for one of them, and we resolve the global outcome in the two
+parameters that actually move it.
+\end{enumerate}
 
 \paragraph{Results.}
 We show, first, that identity is the instrument of last resort rather than of
@@ -304,12 +351,23 @@ space can outrun impostors, a mechanism that survives in finite stochastic
 populations~\citep{traulsen2007chromodynamics}, and~\citet{gardner2010greenbeards}
 reviewed the empirical cases, which are real but
 rare~\citep{keller1998selfish,queller2003single}, and characterised the conditions
-under which the tag and the behaviour stay linked. We depart from this
+under which the tag and the behaviour stay linked. The mechanism is more robust
+than a single marker suggests: several tags coexisting turn the interaction into
+a rock-paper-scissors cycle~\citep{biernaskie2013multicoloured}, and altruism
+conditioned on similarity of a complex, high-dimensional phenotype survives far
+weaker matching than a one-locus beard~\citep{bavik2023fiftyshades}.
+
+We depart from this
 literature in one respect that changes the economics. In biology, whether a tag
-is forgeable is a fact about the organism. In an agent economy it is a fact
-about the verification
-infrastructure~\citep{jovanovic2024watermarkstealing,anbiaee2026threatmodeling}, so
-$\sigma$ is a policy variable, and the
+is forgeable is a fact about the organism, and where the marker does separate
+from the behaviour it does so by mutation, as a discrete event. In an agent
+economy it is a fact about the verification
+infrastructure~\citep{jovanovic2024watermarkstealing,anbiaee2026threatmodeling},
+so the separation is continuous, adversarial and one-sided: only an impostor
+gains from a false pass. This is the distinction between recognition
+\emph{noise}, which is symmetric and hurts everyone, and \emph{forgery}, which
+is chosen. Recent work on imperfect phenotypic matching sharpens the first of
+these; $\sigma$ is the second, it is a policy variable, and the
 question becomes what buying a lower $\sigma$ is worth relative to the other
 things a regulator could buy.
 
@@ -326,6 +384,30 @@ why differential treatment emerges, ours explains why it cannot be removed from
 a certification regime without removing the regime, because it is the
 differential treatment that makes a counterfeit badge worth less than a genuine
 one.
+
+Nearest of all is \citet{garcia2014evilbeards}, who show that tags and
+assortment interact in a way neither mechanism predicts alone: at low
+assortment tags produce the conventional greenbeard cycles, while at high
+assortment ``evil green beard'' cycles emerge in which the tag is used not to
+build cooperation with those who share it but to withhold cooperation from
+those who do not. Both of our out-group findings therefore have a published
+ancestor, and we claim neither the observation that tags can be used to
+withhold nor the observation that tags and assortment interact
+counterintuitively. What their model does not contain is a price on the tag or
+a rate at which it can be faked. In their setting out-group hostility is an
+emergent by-product of assortment that \emph{lowers} cooperation, and the
+outcome is a cycle. Here it is the mechanism that makes paid membership
+excludable, and its effect is to \emph{sustain} the institution: the two gentle
+out-group policies of Table~\ref{tab:outgroup} have spoof threshold exactly
+zero, so a club that treats outsiders well has no resistance to forgery at all.
+Removing the hostility does not merely reduce cooperation, it removes the
+credential's reason to exist, and that consequence cannot arise in a model
+without a forgery rate. A complementary result runs the other
+way: \citet{laird2011traitorousness} finds that in a two-tag prisoner's dilemma
+the greenbeard mechanism can also favour cooperation \emph{across} tags. Taken
+together the two say that out-group conduct is a free parameter of a tag
+system, which is precisely what our continuous severity axis makes into a
+design variable.
 
 The second ancestor is the parochial-altruism literature.
 \citet{choi2007parochial} showed that altruism towards one's own group and
@@ -365,6 +447,37 @@ modeller sets, which turns that vulnerability into a threshold in the pass rate
 (Equation~\eqref{eq:sigmastar}), an ordering between the exploiting and the
 mimicking invader (Section~\ref{sec:mimicry}), and a cost asymmetry
 $\kappa_f < \kappa_g$ between forging the handshake and earning it.
+
+The closest existing dynamics are those of costly pre-play \emph{commitment}.
+In that family a proposer pays an arrangement cost to demand a deal and a
+compensation is owed by whoever violates it, and cooperation survives when the
+arrangement cost lies within
+bounds~\citep{han2013agreements,han2017commitment}. The mapping onto our
+objects is close enough to state plainly: the arrangement cost is
+$\kappa_g$, the compensation is the fine $\rho$, and the
+free-rider who accepts a deal without paying to arrange it is our behavioural
+mimic. \citet{martinez2017freeriders} show that such acceptors can exploit
+proposers and take over the population, which is the invasion our
+Section~\ref{sec:mimicry} measures.
+
+Two differences make the present model something other than a re-derivation of
+that one, and both stem from the same source. The commitment acceptor is
+honest: it really does accept the deal and really does cooperate, and declines
+only to share the cost of arranging it. Our mimic displays a credential it does
+not hold, and whether the display works is set by a verification technology
+rather than by the other player. First, the severity of the free-riding problem
+therefore becomes a continuous engineering parameter, which is what produces a
+threshold $\sigma_m$ at all and what lets a second, differently behaved invader
+exchange places with the mimic as interaction structure changes. Second, their
+compensation is negotiated bilaterally and paid on a violation that is
+\emph{observed}, whereas our fine is levied by an authority on a forgery that
+must first be \emph{detected}, and detection fails with probability $\sigma$.
+That is exactly why $\rho^{*}(\sigma)$ has a pole and why a penalty cannot be
+bought in place of detection, a substitution the commitment models never face
+because in them the violation is always seen. Setting $\sigma = 0$ recovers
+their world: no forged badge ever passes, the only available free-rider is an
+honest non-payer, and what remains is a problem of cost and compensation. The
+present model is what happens when that limit is relaxed.
 
 Our badge is a signal whose reliability is not guaranteed by cost, which places
 it between two classical treatments. In the handicap tradition, signals are
@@ -555,16 +668,90 @@ small-mutation chain uses a closed-form birth-death fixation probability,
 which is what makes the 48-design space tractable, and is checked against the
 full EGTtools chain on reduced spaces.
 
+\paragraph{The flow.}
+Write $\Delta$ for the simplex of population states over the $48$ designs and
+$x \in \Delta$ for a state. With assortment $r$, the expected private payoff of
+design $i$ is
+\begin{equation}
+\label{eq:fitness}
+f_i(x) \;=\; r\,\piP(i,i) \;+\; (1-r)\sum_{j} x_j\, \piP(i,j),
+\end{equation}
+and the replicator flow is
+\begin{equation}
+\label{eq:replicator}
+\dot{x}_i \;=\; x_i\big[\,f_i(x) - \bar{f}(x)\,\big],
+\qquad \bar{f}(x) \;=\; \sum_k x_k f_k(x).
+\end{equation}
+Every vertex $e_j$ of $\Delta$ is a rest point of
+Equation~\eqref{eq:replicator} at every parameter value, and the eigenvalue of
+the linearisation at $e_j$ transversal to that vertex in the direction of
+design $i$ is
+\begin{equation}
+\label{eq:eigen}
+\lambda_{i \mid j} \;=\; f_i(e_j) - f_j(e_j)
+  \;=\; r\,\piP(i,i) \;+\; (1-r)\,\piP(i,j) \;-\; \piP(j,j).
+\end{equation}
+The eigenvalue is affine in $\rho$, $\kappa_g$, $\kappa_f$ and $L$, and it lies
+in the span of the six monomials $\{1, \sigma, \sigma^{2}\} \times \{1, r\}$.
+It is affine in $\sigma$ unless both seats can carry a forged badge, because
+the handshake of Equation~\eqref{eq:handshake} is bilinear in their pass rates;
+and when the quadratic term is present it is carried entirely by $r$, since two
+independent checks of forged badges occur in one encounter only in an assorted
+self-encounter. The baseline mimic eigenvalue is
+$-2.0750\,r\sigma^{2} + (32.3556 + 1.5195\,r)\,\sigma - 30.3556 + 0.5556\,r$,
+which at $r = 0.1$ is $-0.2075\sigma^2 + 32.5075\sigma - 30.300$ with unique
+admissible root $\sigma_m = 0.9377$. All thresholds below are exact roots of
+Equation~\eqref{eq:eigen}, not estimates.
+
+On the edge $\{e_i,e_j\}$, the flow reduces to
+$\dot{x}=x(1-x)(\alpha+\beta x)$ with
+$\alpha=\lambda_{i\mid j}$. At a reported threshold the interior edge
+equilibrium $-\alpha/\beta$ crosses the vertex and exchanges stability with
+it, giving a transcritical bifurcation~\citep{strogatz2018nonlinear}.
+The closed forms verify transversality, and $\beta\neq0$ at every reported
+crossing. Every threshold below is therefore a local edge bifurcation, while
+basin shares remain global numerical properties.
+
+Forty-eight designs do not mean forty-seven dimensions of interaction. The
+handshake of Equation~\eqref{eq:handshake} is a sum of four products, so a
+design's payoff against a population depends on that population only through a
+short list of aggregates.
+
+\begin{lemma}[Macroscopic reduction]
+\label{lem:rank}
+For $y \in \{\mathrm{in}, \mathrm{out}\}$ and each conduct $c$, define
+\begin{equation}
+\label{eq:macro}
+T_{y,c}(x) = \sum_{j} x_j\,\mathbf{1}\!\left[s^{j}_{y} = c\right],
+\qquad
+Q_{y,c}(x) = \sum_{j} x_j\, q_j\,\mathbf{1}\!\left[s^{j}_{y} = c\right].
+\end{equation}
+Every row of the pairwise payoff lies in the span of these sixteen functionals.
+Since $\sum_c T_{y,c} = 1$ for each $y$ and $\sum_c Q_{\mathrm{in},c} =
+\sum_c Q_{\mathrm{out},c}$ is the mean pass rate, thirteen of them are free, and
+the $48 \times 48$ payoff matrix has rank $13$ at every $\sigma$ and $r$.
+\end{lemma}
+
+The interaction is therefore a rank-$13$ game on a $47$-dimensional simplex,
+which is what produces the neutral directions and the continua of rest points
+reported below: thirty-four directions of the state space are invisible to
+every payoff, so selection cannot see them. We verify the factorisation
+numerically as well as deriving it, with a maximum residual of
+$1.9 \times 10^{-13}$ over the sampled parameter grid.
+
 Everything else in the study is evaluated exactly; the replicator basins are
-the only sampled quantities, and there are four families of them. Interior
-starts are drawn $\mathrm{Dirichlet}(1, \dots, 1)$ on the simplex under a fixed
-seed: $20\,000$ starts for the headline split of
-Observation~\ref{prop:bistable}, and $200$ each for every out-group conduct of
-Table~\ref{tab:outgroup}, for every fine level of
-Corollary~\ref{cor:rescue} and at each verification level of the agreement
-check in Section~\ref{sec:robustness}. A basin share is a sample proportion, so
-the headline one is reported with a Wilson interval; the $200$-start shares
-carry a standard error near $0.035$ and are quoted to one digit accordingly.
+the only sampled quantities. Interior
+starts are drawn $\mathrm{Dirichlet}(\alpha, \dots, \alpha)$ on the simplex
+under a fixed seed, with $\alpha = 1$ unless stated: $20\,000$ starts for the
+split of Observation~\ref{prop:bistable}, and $200$ to $400$ each for the
+out-group conducts of Table~\ref{tab:outgroup}, the fine levels of
+Corollary~\ref{cor:rescue}, the agreement check of
+Section~\ref{sec:robustness} and the parameter-resolved experiments of
+Section~\ref{sec:exclusion}. A basin share is a property of the flow
+\emph{and} of the measure the starts are drawn from, so it is reported with the
+range it takes across start measures rather than with a confidence interval for
+one of them; Section~\ref{sec:exclusion} shows that the range is much the wider
+of the two.
 
 The distinction between the two dynamics is not a robustness check, and it
 needs one
@@ -754,8 +941,8 @@ where it resists invasion and dotted where it does not; the dashed branch is
 the interior edge equilibrium $-\alpha/\beta$ of
 $\dot{x} = x(1-x)(\alpha + \beta x)$. The two exchange stability where they
 meet, at $\sigma^{*} = 0.866$ well mixed and $0.962$ at the baseline
-assortment: a transcritical bifurcation, and the reason every threshold in
-Table~\ref{tab:bifurcations} is a simple root rather than an estimate.}
+assortment: a transcritical bifurcation, and the reason every threshold
+reported here is a simple root rather than an estimate.}
 \label{fig:invasion}
 \end{figure}
 
@@ -911,6 +1098,46 @@ advantage of building one from anarchy (orange) at every assortment, and the
 gap is what makes collapse irreversible.}
 \label{fig:nucleation}
 \end{figure}
+
+\subsection{What the badge is doing, and what it is not}
+\label{sec:ablation}
+
+A mark that correlates with conduct could raise safety in two quite different
+ways. It could work as a \emph{greenbeard}, by letting the bearers of a signal
+find one another; or it could work as a mere \emph{assortment device}, by
+splitting encounters into two streams and letting the conduct game do the rest.
+At the baseline the two are indistinguishable, because the badge is both
+informative and correlated with conduct. Separating them needs a control that
+removes the information and keeps everything else, so we build one: each seat
+draws a badge independently of its conduct from a fixed distribution, which
+gives every design the same pass rate $\bar{q}$ and the same expected dues. The
+handshake, the four terms and their independence are the code path the badged
+model already uses; only the correlation is gone.
+
+Table~\ref{tab:ablation} scores four arms. Removing forgery ($\sigma = 0$) is
+the best case and removing the badge entirely is worse than the baseline, as
+expected. The informative comparison is the fourth arm, and it does not behave
+as a null model is supposed to.
+
+A non-informative badge is not neutral. It is markedly \emph{worse} than no
+badge at all: at $r = 0.1$ the unsafe frequency is $0.488$ against $0.159$ with
+no badge and $0.090$ at the baseline. The reason is visible once stated. Agents
+still condition their conduct on the check, and the check has become a coin
+flip, so each seat now executes a conduct chosen at random rather than one
+chosen for the partner in front of it. Conditional reciprocity is precisely
+what that destroys. The damage is not the cost of the badge: an arm in which
+every badge is forged and free scores the same $0.488$ as one that pays dues.
+
+Two degenerate rates confirm that the construction is sound rather than broken,
+and they do so through Theorem~\ref{thm:face}. At $\bar{q} = 0$ no check ever
+passes, every seat executes $s_{\mathrm{out}}$, and the arm reproduces the
+no-badge world exactly, at $0.158511$ against $0.158511$. At $\bar{q} = 1$
+every check passes, every seat executes $s_{\mathrm{in}}$, and the arm
+reproduces it again, to the same six digits, while paying full dues. The harm
+is therefore maximal at intermediate $\bar{q}$ and vanishes at both ends, which
+is the governance reading worth carrying away: a credential that everybody
+passes, or that nobody does, is merely useless, whereas a credential that
+passes half the time and is still acted upon is actively harmful.
 
 \subsection{Collapse hollows out the mark before it degrades the conduct}
 \label{sec:mimicry}
@@ -1098,14 +1325,54 @@ question: from an arbitrary
 starting composition, what does the market settle into? The answer is not one
 thing.
 
+It is, however, two copies of one thing, and that is a theorem rather than an
+observation about a sample. The two candidate regimes are the faces of $\Delta$
+on which every design carries a genuine badge and on which no design carries
+one. Both are invariant, because $\dot{x}_i = 0$ wherever $x_i = 0$, and on
+both the handshake of Equation~\eqref{eq:handshake} degenerates: inside a fully
+badged population every check passes, and inside a fully unbadged one every
+check fails, so in each case three of the four terms vanish.
+
+\begin{theorem}[Face reduction]
+\label{thm:face}
+Write $\Delta_{\mathsf{G}}$ and $\Delta_{\mathsf{N}}$ for the invariant faces
+carrying only genuine and only absent badges, and $P = A - L\,M$. On those
+faces the pairwise private payoff is
+\begin{equation}
+\label{eq:facereduction}
+\piP(i,j)\big|_{\Delta_{\mathsf{G}}}
+  = P\big(s^{i}_{\mathrm{in}}, s^{j}_{\mathrm{in}}\big) - \kappa_g,
+\qquad
+\piP(i,j)\big|_{\Delta_{\mathsf{N}}}
+  = P\big(s^{i}_{\mathrm{out}}, s^{j}_{\mathrm{out}}\big).
+\end{equation}
+The conduct marginal on each face therefore obeys the \emph{same}
+assortment-adjusted four-strategy replicator equation with matrix $P$,
+differing only by the constant $\kappa_g$, at every value of $\sigma$, $r$,
+$\kappa_g$, $\kappa_f$, $\rho$ and $L$. Consequently the two faces have
+identical conduct rest points, identical stability and identical conduct
+attractors; at any pair of corresponding rest points the unsafe frequencies are
+equal, and the social payoffs differ by exactly $\kappa_g$.
+\end{theorem}
+
+Neither $\sigma$ nor $\rho$ appears in Equation~\eqref{eq:facereduction}. A
+settled market has no forgery to detect and no fine to levy, so the entire
+verification layer, which is what the credential is for, is invisible from
+inside either regime. That is the sense in which certification cannot change
+the level of harm: not that it happens not to at the baseline, but that the two
+regimes are the same dynamical system wearing different labels.
+
 \begin{observation}[Dominant two-face split and a targeted unsafe rest face, numerical]
 \label{prop:bistable}
-At the baseline, no interior start in the uniform Dirichlet sample reached a
-badge-mixed rest point. Of $20\,000$ such starts, $38.8\%$ converged to a state
-that is entirely badged and $61.2\%$ to one that is entirely unbadged (Wilson
-$95\%$ interval $[38.2, 39.5]$ on the first), and no design has positive growth
-at any end state reached. Both regimes are internally safe: the largest unsafe
-frequency over all end states is below $10^{-13}$.
+At the baseline, no interior start in the $\mathrm{Dirichlet}(1)$ sample
+reached a badge-mixed rest point. Of $20\,000$ such starts, $38.8\%$ converged
+to a state that is entirely badged and $61.2\%$ to one that is entirely
+unbadged, and no design has positive growth at any end state reached. Both
+regimes are internally safe: the largest unsafe frequency over all end states
+is below $10^{-13}$. The split is quoted without a confidence interval on
+purpose. It is a property of this start measure as much as of the flow, and the
+uncertainty that matters is its range across measures, reported below; a
+$20\,000$-start interval would resolve the wrong quantity to three digits.
 A deterministic targeted start places $0.70$ on $(\mathsf{F},\AU,\AU)$ and
 spreads the remaining mass uniformly across the other 47 designs. It reaches
 an unsafe badge-mixed rest state with $U=1.000$, badged mass $0.937$, field
@@ -1118,8 +1385,8 @@ the basin's volume or a third isolated attractor. The reported two-face split
 is therefore measure-specific and does not establish global bistability.
 \end{observation}
 
-Figure~\ref{fig:exclusion}A plots a readable subsample of the uniform starts,
-all of them landing on one of the two pure regimes.
+Figure~\ref{fig:exclusion}A shows where the badge-carrying mass of the end
+states falls: two spikes, at zero and at one, with nothing between them.
 
 The limit sets deserve their proper names, because the flow is more degenerate
 than ``two attractors'' suggests. Inside a certified population every check
@@ -1153,31 +1420,150 @@ uncertified regime every design runs its out-group conduct, which for the
 survivors is \CS{}. Each population has selected a conduct that is safe against
 the only partner it ever meets.
 
-Two caveats on the quantifier, both of which a reader reproducing this should
-know. The first is that $38.8\%$ is a property of the starting measure and not
-of the flow: it is the share of the uniform Dirichlet draining to the certified
-face, and a more concentrated start measure gives a different number. At $200$
-draws, which is what a sweep can afford, the sampling error on it is about
-$0.035$, so only the first digit is real. The second is that ``no badge-mixed
-rest point'' is a statement about what the sample reached, not a theorem. Other
-rest points exist and the uniform measure does not find them. The targeted
+\paragraph{The basin share is a property of the measure.}
+It is tempting to read $38.8\%$ as a fact about the flow and to quote its
+Wilson interval as the uncertainty on it. Both moves are wrong, and the second
+is worse than the first because it attaches a precise error bar to the wrong
+quantity: a confidence interval answers ``how well is this sample proportion
+resolved'', which is not the question anyone asked, since the proportion is
+resolved to any desired precision by drawing more starts and still says nothing
+about a measure that was never argued for. We therefore ran the same flow, the
+same classifier and the same seed under a family of start measures, varying
+only the Dirichlet concentration $\alpha$ (Figure~\ref{fig:assortment}D). At
+$400$ starts each the badged share is $0.47$ at $\alpha = 0.1$, $0.42$ at
+$\alpha = 1$, $0.26$ at $\alpha = 5$ and $0.04$ at $\alpha = 50$: more than a
+tenfold swing produced by changing nothing about the model, against a sampling
+error of $0.025$ within any one of them. Its range
+across measures, $[0.04, 0.47]$, and not the interval within any one of them,
+is the honest uncertainty, and every basin share in this paper should be read
+with that range in mind. A measure placing equal expected mass on the three
+badge classes coincides with $\mathrm{Dirichlet}(1)$ here, because the three
+classes hold sixteen designs each.
+
+A second caveat concerns the qualifier rather than the quantifier. ``No
+badge-mixed rest point'' is a statement about what a sample reached, not a
+theorem, and it does not survive a change of measure either: a
+vertex-concentrated start ($\alpha = 0.1$) does reach a badge-mixed rest point,
+a forger-and-anarchy polymorphism whose composition is unchanged to twelve
+digits at integration horizons of $3\times10^{3}$, $3\times10^{4}$ and
+$2\times10^{5}$, so it is a rest point and not a slow transient. The targeted
 experiment in Observation~\ref{prop:bistable} reaches a maximally unsafe mixed
-rest face and survives the recorded finite perturbation probe. That evidence
-does not establish the face's basin volume or justify calling it a third
-isolated attractor. The two-face split we report is therefore explicitly a
-property of the uniform-start experiment.
+rest face and survives the recorded finite perturbation probe. Neither
+establishes a basin volume. What the two together do establish is that the
+badge-mixed part of the state space is populated, and that the uniform measure
+simply does not look there.
+
+\paragraph{The two faces track each other at every assortment.}
+Theorem~\ref{thm:face} predicts more than a coincidence at the baseline, and
+the prediction is testable away from it. Sweeping $r$ from $0$ to $0.25$ at
+$400$ starts each (Figure~\ref{fig:assortment}), the two faces carry the same
+unsafe frequency everywhere: $1.000$ against $1.000$ at $r = 0$, $0.623$
+against $0.619$ at $r = 0.04$, $0.290$ against $0.290$ at $r = 0.06$, and below
+$10^{-15}$ on both faces from $r = 0.08$ upwards. The residual disagreement
+peaks at $0.036$ near $r = 0.02$ and is not a failure of the theorem: the two
+faces carry identical flows but a $\mathrm{Dirichlet}$ start on $48$ designs
+projects onto them as two different measures, so wherever the conduct flow has
+more than one attractor the two \emph{samples} can differ while the two
+\emph{systems} do not. Where the conduct flow is single-valued the agreement is
+exact to machine precision.
+
+Two further things fall out of the same sweep, and neither is visible at the
+baseline. First, the safety of the settled regimes is not a property of
+certification but of assortment, and it switches on exactly where
+Proposition~\ref{prop:reciprocity} says it should: both faces run at
+$U = 0.114$ at $r = 0.07$ and at numerical zero at $r = 0.08$, straddling
+$r^{\dagger} = 0.076$. Below that bound both regimes are unsafe together, so
+the reassuring baseline picture of two safe faces is a consequence of the
+baseline sitting just above a threshold the model itself computes. Second, the
+two-face structure is not a property of the flow either. At $r = 0$, $399$ of
+$400$ end states are badge-mixed; the mixed count falls to $169$ at
+$r = 0.01$, $18$ at $r = 0.02$, and zero from $r = 0.04$ upwards. Bistability
+between two pure faces is what this system does for $r \gtrsim 0.04$, not what
+it does.
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\linewidth]{figures/fig10_assortment.pdf}
+\caption{\textbf{The two faces are one system.} \textbf{(A)} Within-attractor
+unsafe frequency on the badged and unbadged faces against assortment; the two
+curves coincide, as Theorem~\ref{thm:face} requires, and both cross into safety
+at $r^{\dagger}$. \textbf{(B)} Social payoff, separated by exactly $\kappa_g$
+wherever the regimes are settled. \textbf{(C)} Badge-mixed end states and the
+badged basin share: the clean two-face split exists only above
+$r \approx 0.04$. \textbf{(D)} The badged basin share under five start
+measures, showing the range the share takes when only the start distribution
+changes.}
+\label{fig:assortment}
+\end{figure}
+
+\paragraph{The two instruments are orthogonal.}
+Resolving the global outcome over the whole $(\sigma, r)$ plane rather than at
+one point turns the preceding results into a single picture
+(Figure~\ref{fig:phase}). Each cell integrates the flow from $100$ interior
+starts, scores the unsafe frequency over all end states and the attestation
+integrity over the badged ones, and is labelled \emph{mixed-unsafe} if the
+conduct is unsafe, \emph{hollow} if the conduct is safe but a passed badge is
+more likely forged than genuine, and \emph{badged-safe} otherwise.
+
+The plane has three regions and they are separated by two straight lines that
+cross at right angles. Every cell with $r \le 0.07$ is unsafe, at every
+verification quality from $\sigma = 0$ to $\sigma = 1$: the boundary is
+horizontal, and it sits exactly where Proposition~\ref{prop:reciprocity} puts
+$r^{\dagger} = 0.076$. Every cell with $\sigma \ge 0.92$ and $r \ge 0.08$ is
+hollow, at every assortment: that boundary is vertical, and it sits where
+Proposition~\ref{prop:mimicry} puts $\sigma_m = 0.938$, which moves by $0.001$
+across the whole range of $r$. The regions occupy $30.8\%$, $7.8\%$ and
+$61.4\%$ of the plane respectively, and no cell is labelled unbadged-safe: a
+badged regime is reachable everywhere the market is safe at all.
+
+The orthogonality is the result. Verification quality does not appear on the
+safety boundary and interaction structure does not appear on the integrity
+boundary, so the two instruments a governance regime can actually buy act on
+two different outcomes and neither substitutes for the other. Spending on
+attestation cannot make an ecosystem safe if its interaction structure sits
+below $r^{\dagger}$; improving interaction structure cannot keep a credential
+meaningful once $\sigma$ passes $\sigma_m$. Worse, the failure they produce is
+asymmetric in a way that defeats the natural monitoring strategy: crossing the
+horizontal boundary is visible in conduct, and crossing the vertical one is
+not. In the entire hollow region the unsafe frequency is at numerical zero
+while the posterior that a passed badge is genuine is also zero, and the badged
+basin share stays between $0.35$ and $0.54$ throughout, so nothing an outcome
+monitor can see changes as the credential system empties completely.
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\linewidth]{figures/fig11_phase.pdf}
+\caption{\textbf{The global regime map.} \textbf{(A)} Regime of the replicator
+flow over the $(\sigma, r)$ plane, from $100$ interior starts per cell. The
+safety boundary is horizontal and set by assortment alone; the integrity
+boundary is vertical and set by verification alone. The two analytic loci
+$r^{\dagger}$ and $\sigma_m$ are overlaid and land on the two transitions.
+\textbf{(B)} Attestation integrity on the badged endpoints, which falls from
+one to zero across the vertical boundary. \textbf{(C)} Unsafe frequency, which
+changes only across the horizontal one. A monitor watching (C) sees nothing
+happen in (B).}
+\label{fig:phase}
+\end{figure}
 
 The coincidence of the two safe regimes has an immediate and unflattering
 consequence for certification.
 
-\begin{corollary}[No safety dividend on the dominant safe faces]
+\begin{corollary}[No safety dividend at a settled regime]
 \label{cor:dues}
-Since both dominant faces are safe, the social payoff of the certified regime differs
-from the uncertified one only by the certification cost: $57.0$ against
-$59.0$, a gap of $2.0 = \kappa_g$ to machine precision. Conditional on
-convergence to either dominant safe face, the identity layer buys no safety
-and costs exactly its dues.
+By Theorem~\ref{thm:face}, at any pair of corresponding rest points of the two
+faces the unsafe frequency is the same and the social payoff of the certified
+regime is lower by exactly $\kappa_g$. At the baseline the two dominant faces
+are both safe and the payoffs are $57.0$ against $59.0$. Conditional on
+convergence to a settled regime, the identity layer buys no safety and costs
+exactly its dues, and this holds at every parameter value rather than at the
+baseline alone.
 \end{corollary}
+
+The earlier version of this statement was a numerical coincidence read off
+$20\,000$ sampled end states at one parameter point. Theorem~\ref{thm:face}
+makes it a structural identity, and the difference matters for what may be
+concluded from it: a reader cannot dismiss the result as an artefact of the
+chosen baseline, because no baseline enters it.
 
 The small-mutation result of Section~\ref{sec:results} is not contradicted by
 this, and putting the two together is the point. Under rare mutation the
@@ -1234,10 +1620,11 @@ penalty of $-2.00$ and a boundary unsafe frequency of $0$; both have spoof
 threshold exactly $0$ and equilibrium share $0.02$ or less. The two harsh
 policies, \CAS{} and \AU{}, impose penalties of $30.36$ and $40.40$ and
 boundary unsafe frequencies of $0.461$ and $0.868$; both have spoof threshold
-$0.962$ and take essentially the whole population under rare mutation. Nothing
-in between appears, because a club that is gentle to outsiders has made its
-badge behaviourally empty, at which point the dues buy nothing and any forger
-saves them.
+$0.962$ and take essentially the whole population under rare mutation. Read as
+four rows the table looks like a dichotomy: either a club is gentle and its
+badge is behaviourally empty, so that the dues buy nothing and any forger saves
+them, or it is harsh and charges a compliant outsider $30$ points of payoff.
+That reading is an artefact of scanning only four conducts, and it is wrong.
 
 \begin{table}[t]
 \centering
@@ -1262,6 +1649,34 @@ outsiders & $\sigma^{*}$ & penalty & unsafe & (monomorphic) & basin \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph{Exclusion is a dial, not a switch.}
+Out-group conduct need not be one of four rules. Because the race payoff $A$ is
+already an exact expectation over the horizon law for a pair of deterministic
+designs, a design that randomises at the start of a race between two adjacent
+rungs of the ladder $\AS \prec \CS \prec \CAS \prec \AU$ earns exactly the
+corresponding convex combination, and out-group severity becomes a continuous
+parameter $s \in [0,1]$ passing through the four rules at
+$s = 0, \tfrac{1}{3}, \tfrac{2}{3}, 1$. This is a mixture over which
+deterministic conduct is executed for a whole race, not a per-round mixture,
+which would not be a convex combination of $A$.
+
+On that axis the frontier is strictly convex, and the harsh corner of
+Table~\ref{tab:outgroup} is inefficient rather than necessary. Forgery
+resistance appears abruptly at $s = 0.375$, a mostly-\CS{} rule with an eighth
+of \CAS{} mixed in: the spoof threshold jumps from $0$ to $0.693$, which is
+$72\%$ of the attainable maximum $0.962$, for an entry toll of $2.04$ against
+the $30.36$ charged by the cheapest policy that attains that maximum. It buys
+resistance cheaply but not dominance, since the club still holds only $0.069$
+of the population under rare mutation. Dominance arrives at $s = 0.5$, an even
+mixture of \CS{} and \CAS{}, which carries a spoof threshold of $0.923$, a
+club share of $0.830$ and a toll of $14.18$: $96\%$ of the tolerance and
+$83\%$ of the population for $47\%$ of the toll. The designable point is
+therefore the middle of the ladder rather than either end, and a regime that
+must justify every unit of exclusion it imposes on compliant outsiders has
+roughly half the toll to give back before the credential stops working. What
+cannot be done is to set the toll to zero: at $s \le \tfrac{1}{3}$ the
+threshold is exactly zero and the club does not survive at all.
 
 There is an obvious objection, and answering it sharpens the result rather than
 softening it. If the problem is that a gentle club gives an impostor nothing to
@@ -1326,10 +1741,11 @@ quantities they are looking at.
 \includegraphics[width=\linewidth]{figures/fig01_exclusion.pdf}
 \caption{\textbf{The market settles into one of two internally safe regimes,
 and the cost of certification is a barrier at the boundary rather than harm
-inside it.} \textbf{(A)} Each of the $200$ interior starts plotted here, a
-readable subsample of the $20\,000$ behind
-Observation~\ref{prop:bistable}, reaches a pure regime; none is badge-mixed,
-and the unsafe frequency of each is below $10^{-21}$. \textbf{(B)} Social payoff of the two
+inside it.} \textbf{(A)} Distribution of the badge-carrying mass over the $200$ interior
+starts of this panel, a subsample of the $20\,000$ behind
+Observation~\ref{prop:bistable}. Every one reaches a pure regime and none is
+badge-mixed; the unsafe frequency of each is at numerical zero, which is why it
+is not plotted against one. \textbf{(B)} Social payoff of the two
 regimes. Both are safe, so the certified one is poorer by exactly the dues
 $\kappa_g = 2$, and the small-mutation reading, in which certification does
 reduce harm, measures robustness rather than level. \textbf{(C)} Across the
@@ -1460,22 +1876,33 @@ therefore early, and the argument for it becomes strongest exactly when the
 party who must agree has least to gain.
 
 \paragraph{On the exclusion result.} We want to be careful about what
-Observation~\ref{prop:bistable} and Proposition~\ref{prop:exclusion} do and do not
+Theorem~\ref{thm:face} and Proposition~\ref{prop:exclusion} do and do not
 say. They do not say that certification is bad. Under rare mutation it roughly
 halves
 the unsafe frequency, and below $L_R$ it is the only instrument that works at
 all. They say that its benefit is robustness rather than level, and that its
 cost is a barrier rather than a harm~\citep{leland1979quacks}. A settled certified
 market is exactly as safe as a settled uncertified one and poorer by its dues,
+and this now holds at every parameter value rather than at a fitted baseline,
 while a compliant outsider is charged $30.36$ despite conduct nobody objects
 to. Whether that trade
 is worth making depends on how often the market is knocked out of safety and
 on how many participants sit outside the club, neither of which the model can
-settle and both of which are measurable in a deployed system. What the model
-does settle is that the trade cannot be avoided by asking clubs to be gentle
-towards outsiders: that policy has spoof threshold zero without a fine. A
-sufficiently large fine can restore resistance at fixed $\sigma$, but it cannot
-give the gentle club a reason to exist (Corollary~\ref{cor:rescue}).
+settle and both of which are measurable in a deployed system.
+
+What the model does settle is subtler than the four-row scan suggested, and it
+is better news for a designer. The trade cannot be avoided altogether: a club
+that is fully gentle towards outsiders has spoof threshold zero without a fine,
+and a fine can restore resistance at fixed $\sigma$ without giving such a club
+a reason to exist (Corollary~\ref{cor:rescue}). But exclusion turns out to be a
+dial rather than a switch. On the continuous severity axis the frontier is
+strictly convex: an even mixture of \CS{} and \CAS{} towards outsiders carries
+a spoof threshold of $0.923$, which is $96\%$ of the attainable maximum, and
+takes $0.830$ of the population, for an entry toll of $14.18$ against the
+$30.36$ of the cheapest policy that attains that maximum. The harsh corner of
+Table~\ref{tab:outgroup} is therefore inefficient rather than necessary, and a
+regime that must justify every unit of exclusion it imposes has roughly half
+the toll to give back before the credential stops working.
 
 \paragraph{On multistability.} The methodological point generalises past this
 model. Multistable evolutionary dynamics are
@@ -1493,11 +1920,29 @@ boundary carrying $47.5\%$ of all encounters where the true figure is zero.
 The interaction layer is a two-player reduced race with four designs, inherited
 deliberately so that our results are comparable with the sister studies, and it
 is not a model of any particular deployment. The reduction to four designs
-means the conduct space is coarse; a richer conduct space would allow
-intermediate out-group policies that our scan cannot represent, and the sharp
-zero-or-one structure of Table~\ref{tab:outgroup} would likely soften into a
-frontier. We expect the direction of the trade to survive, since it follows
-from Equation~\eqref{eq:sigmastar}, but not the exact numbers.
+makes the conduct space coarse. We have removed that limitation on the one axis
+where it was doing damage: because the race payoff is already an exact
+expectation over the horizon law for deterministic pairs, a design that
+randomises which out-group conduct it executes for a whole race has exactly the
+convex combination of the corresponding payoffs, so out-group severity becomes
+a continuous parameter and the sharp zero-or-one structure of
+Table~\ref{tab:outgroup} does soften into the convex frontier reported above.
+The in-group axis is still coarse, and a mixture there would be a different
+object, since it would change what a club member does to another member rather
+than what it does to a stranger.
+
+Interaction structure is a single scalar. That is the limitation we would
+remove first. In the statistical physics of social dilemmas, structure is a
+lattice or a network rather than a self-encounter probability, and conditional
+strategies on such structures behave in ways a well-mixed model cannot
+anticipate~\citep{szolnoki2012conditional,perc2017statphys}. Two of our results
+are explicitly about how structure reorganises invasion, so they are the ones
+most exposed: the invader-exchange locus and the exploiter lock-out are
+statements about $r$, and a topology would replace $r$ with a degree
+distribution and a clustering coefficient. Theorem~\ref{thm:face}, by contrast,
+does not involve the encounter law at all beyond the constant $r$ that cancels,
+so it survives any structure in which a settled regime is monomorphic in badge
+type.
 
 Verification is a single Bernoulli draw with a fixed $\sigma$, identical across
 agents. A real attestation system has heterogeneous verifiers, revocation and
@@ -1704,6 +2149,71 @@ encounter is $(\CS, \CS)$, so the penalty is $59.00 - 2.00 - 59.00 = -2.00$
 and the boundary is safe. At the baseline assortment $r = 0.1$ the entrant's
 own self-encounters lift its payoff and the penalty falls to $27.12$; the sign
 and the ordering across out-group policies are unchanged.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:face}]
+Both faces are invariant because Equation~\eqref{eq:replicator} gives
+$\dot{x}_i = 0$ wherever $x_i = 0$, so a coordinate that starts at zero stays
+there and the support of a state can only shrink.
+
+Fix a state supported on $\Delta_{\mathsf{G}}$. Every design in the support
+carries a genuine badge, so $q_j = 1$ for every such $j$, and the handshake
+weights of Equation~\eqref{eq:handshake} are $w_{\mathrm{in}}(q_j) = 1$ and
+$w_{\mathrm{out}}(q_j) = 0$. Three of the four terms of the sum therefore
+vanish and $a(i,j) = A(s^{i}_{\mathrm{in}}, s^{j}_{\mathrm{in}})$. The same
+collapse applies to $m$ and $u$ with $M$ and $U$ in place of $A$, since those
+matrices are the same sum with a different kernel. No design in the support
+carries a forged badge, so the expected fine is zero and every design pays
+$\kappa_g$. Substituting into Equation~\eqref{eq:private} gives the first half
+of Equation~\eqref{eq:facereduction}. On $\Delta_{\mathsf{N}}$ every check
+fails, $q_j = 0$, the surviving term is $(\mathrm{out}, \mathrm{out})$, and no
+badge is bought, which gives the second half.
+
+For the reduction, let $y_c = \sum_{i : s^{i}_{\mathrm{in}} = c} x_i$ be the
+conduct marginal on $\Delta_{\mathsf{G}}$. By
+Equation~\eqref{eq:facereduction} the payoff of design $i$ depends on $i$ only
+through $s^{i}_{\mathrm{in}}$, so Equation~\eqref{eq:fitness} gives a common
+value $g_c = r\,[P(c,c) - \kappa_g] + (1-r)\sum_d y_d\,[P(c,d) - \kappa_g]$ for
+every design with $s^{i}_{\mathrm{in}} = c$, and $\bar{f} = \sum_d y_d g_d$.
+Summing Equation~\eqref{eq:replicator} over the designs sharing a conduct
+yields $\dot{y}_c = y_c (g_c - \bar{f})$, a four-strategy replicator equation
+in its own right. The same computation on $\Delta_{\mathsf{N}}$ with
+$s_{\mathrm{out}}$ gives the identical system without the $\kappa_g$ terms.
+Finally, adding a constant $\gamma$ to every entry of the payoff matrix sends
+$g_c \mapsto g_c + \gamma$ and $\bar{f} \mapsto \bar{f} + \gamma$, because
+$r + (1-r)\sum_d y_d = 1$, so it leaves $g_c - \bar{f}$ and hence the flow
+unchanged. The two marginal systems are therefore the same flow, and rest
+points, stability and attractors coincide. At corresponding rest points the
+realised conduct profile is the same, so $U$ is the same; the social functional
+of Equation~\eqref{eq:social} differs only by the badge cost, which is
+$\kappa_g$ on one face and $0$ on the other.
+\end{proof}
+
+\begin{proof}[Proof of Lemma~\ref{lem:rank}]
+Write the handshake of Equation~\eqref{eq:handshake} as a sum over the focal's
+executed branch $x$ and the partner's executed branch $y$. Averaging against a
+population state gives
+\[
+\sum_j x_j\,a(i,j)
+ = \sum_{x, y} w_y(q_i) \sum_{c} \Big[\sum_j x_j\, w_x(q_j)\,
+   \mathbf{1}[s^{j}_{y} = c]\Big] A\big(s^{i}_{x}, c\big).
+\]
+The bracket is $Q_{y,c}(x)$ when $x = \mathrm{in}$ and
+$T_{y,c}(x) - Q_{y,c}(x)$ when $x = \mathrm{out}$, so the whole expression is a
+linear combination of the sixteen functionals of Equation~\eqref{eq:macro} with
+coefficients depending only on $i$. The liability, badge-cost and fine terms of
+Equation~\eqref{eq:private} are constants in $j$ and are absorbed by
+$\sum_c T_{y,c} = 1$. Hence every row of $\piP$ lies in the span. Three
+independent linear relations hold on that span: $\sum_c T_{\mathrm{in},c} = 1$,
+$\sum_c T_{\mathrm{out},c} = 1$, and
+$\sum_c Q_{\mathrm{in},c} = \sum_c Q_{\mathrm{out},c} = \sum_j x_j q_j$, since
+each side counts the mean pass rate once. Sixteen functionals subject to three
+relations leave thirteen free directions, and the rank is exactly thirteen
+rather than at most thirteen because the four conducts of the race are
+pairwise distinct in $A$, so no further relation holds. A least-squares fit of
+$\piP$ onto the sixteen rows leaves a residual below
+$1.9 \times 10^{-13}$ at every sampled $(\sigma, r)$, and
+$\operatorname{rank} \piP = 13$ numerically at each of them.
 \end{proof}
 
 \begin{proof}[Proof of the harm decomposition of Section~\ref{sec:dynamics}]

@@ -21,6 +21,7 @@ reduced spaces.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 import numpy as np
@@ -91,6 +92,131 @@ def replicator_attractor(
     return traj[-1]
 
 
+def interior_starts(
+    n_designs: int,
+    n_starts: int,
+    seed: int,
+    alpha: float | np.ndarray = 1.0,
+) -> np.ndarray:
+    """Dirichlet start measure on the simplex, shape ``(n_starts, n_designs)``.
+
+    ``alpha`` is either a scalar concentration shared by every design or a
+    length-``n_designs`` vector of per-design concentrations.  It is an
+    argument rather than a constant because a basin share is a property of the
+    flow *and of the measure the starts are drawn from*: holding this model
+    fixed and moving only the concentration takes the badged share from 0.472
+    at ``alpha = 0.1`` to 0.035 at ``alpha = 50``, because a small
+    concentration piles mass near the vertices while a large one concentrates
+    it at the barycentre.  A reported share is therefore meaningless unless
+    the measure is stated, and the measure cannot be stated unless the code
+    can express more than one.
+
+    ``alpha = 1.0`` is the flat measure of the published run and must stay
+    bit-identical to it.  The draws are taken one start at a time from a single
+    generator, which is what the published run did; a single vectorised call
+    consumes the same stream in the same order today, but drawing per start
+    makes the reproduction structural rather than a property of the numpy
+    version in use.
+    """
+    if n_designs < 2:
+        raise ValueError(
+            f"an interior start needs at least two designs, got {n_designs}"
+        )
+    if n_starts < 1:
+        raise ValueError(f"n_starts must be positive, got {n_starts}")
+
+    concentration = np.asarray(alpha, dtype=float)
+    if concentration.ndim == 0:
+        concentration = np.full(n_designs, float(concentration))
+    elif concentration.ndim != 1 or concentration.size != n_designs:
+        raise ValueError(
+            "alpha must be a scalar or a vector of length "
+            f"{n_designs}, got shape {concentration.shape}"
+        )
+    if not np.all(np.isfinite(concentration)) or np.any(concentration <= 0.0):
+        raise ValueError(
+            "every Dirichlet concentration must be finite and positive, got "
+            f"{concentration.min()}"
+        )
+
+    rng = np.random.default_rng(seed)
+    starts = np.empty((n_starts, n_designs))
+    for k in range(n_starts):
+        starts[k] = rng.dirichlet(concentration)
+    return starts
+
+
+def stratified_alpha(
+    badge: np.ndarray | tuple[str, ...],
+    weights: Mapping[str, float] | None = None,
+) -> np.ndarray:
+    """Concentrations giving each badge class a prescribed expected mass.
+
+    A flat Dirichlet(1) does not give the badge classes a mass anyone chose:
+    it gives each class an expected mass proportional to the number of designs
+    that happen to carry that badge.  On the full space the three classes hold
+    16 designs each, so equal thirds fall out as an accident of the
+    enumeration; on a subspace, or under any coarser grouping, they do not.
+    This builds the concentration vector that puts a *stated* mass on each
+    class, so that the start measure of an experiment is an argument rather
+    than a by-product of how the design space was listed.
+
+    For a Dirichlet, the expected mass of design ``j`` is
+    ``alpha_j / sum(alpha)``.  Writing ``m_c`` for the number of designs in
+    class ``c`` and ``w_c`` for its target mass, setting
+
+        ``alpha_j = s * w_{b_j} / m_{b_j}``
+
+    gives ``sum(alpha) = s * sum_c m_c * (w_c / m_c) = s`` because the targets
+    sum to one, and hence class mass ``m_c * (s w_c / m_c) / s = w_c`` exactly,
+    for any scale ``s``.  The scale cancels from the expectation and only sets
+    how tightly the draws cluster around it, so it is fixed at ``s =
+    n_designs``: that is the value which returns the flat all-ones
+    concentration when the targets are proportional to the class sizes, so the
+    published measure is the ``w_c = m_c / n`` member of this family and not a
+    separate code path.
+
+    ``weights`` defaults to equal thirds over the three badge letters.
+    """
+    letters = np.asarray(badge)
+    if letters.ndim != 1 or letters.size < 2:
+        raise ValueError(
+            "badge must be a one-dimensional array of at least two badge letters, "
+            f"got shape {letters.shape}"
+        )
+    labels = [str(b) for b in letters]
+
+    if weights is None:
+        weights = {"G": 1.0 / 3.0, "F": 1.0 / 3.0, "N": 1.0 / 3.0}
+    if any(w < 0.0 for w in weights.values()):
+        raise ValueError(
+            f"badge weights must be non-negative, got {min(weights.values())}"
+        )
+    total = float(sum(weights.values()))
+    if not np.isclose(total, 1.0):
+        raise ValueError(f"badge weights must sum to one, got {total}")
+
+    counts = {letter: labels.count(letter) for letter in set(labels)}
+    for letter in sorted(counts):
+        if letter not in weights:
+            raise ValueError(f"no target mass given for badge {letter!r}")
+        if weights[letter] <= 0.0:
+            # a zero concentration is not a Dirichlet: the class cannot be
+            # switched off this way, it has to be removed from the design space
+            raise ValueError(
+                f"badge {letter!r} is carried by {counts[letter]} designs but is "
+                f"given mass {weights[letter]}, which is not a valid concentration"
+            )
+    for letter, w in weights.items():
+        if w > 0.0 and letter not in counts:
+            raise ValueError(
+                f"mass {w} asked of badge {letter!r}, which no design carries"
+            )
+
+    n = len(labels)
+    return np.array([n * float(weights[b]) / counts[b] for b in labels])
+
+
 def replicator_attractors(
     payoff: np.ndarray,
     n_starts: int = 200,
@@ -99,6 +225,10 @@ def replicator_attractors(
     # from the one in the paper, with nothing to point at.
     seed: int = 20260819,
     t_end: float = 3000.0,
+    *,
+    # keyword-only, and defaulting to the flat measure, so that the signature
+    # every existing caller was written against is untouched
+    alpha: float | np.ndarray = 1.0,
 ) -> np.ndarray:
     """End states of the replicator flow from ``n_starts`` interior starts.
 
@@ -109,12 +239,15 @@ def replicator_attractors(
     afterwards.  Every observable in this study is bilinear in the state, so
     evaluating one at the mean is exactly the error of reporting
     ``f(E[x])`` where ``E[f(x)]`` is meant.
+
+    ``alpha`` selects the start measure, see :func:`interior_starts`; the
+    default is the flat Dirichlet(1) of the published run.
     """
-    rng = np.random.default_rng(seed)
     n = payoff.shape[0]
+    starts = interior_starts(n, n_starts, seed, alpha)
     ends = np.empty((n_starts, n))
     for k in range(n_starts):
-        ends[k] = replicator_attractor(payoff, rng.dirichlet(np.ones(n)), t_end=t_end)
+        ends[k] = replicator_attractor(payoff, starts[k], t_end=t_end)
     return ends
 
 
@@ -168,6 +301,56 @@ def full_dimensional_perturbations(
 def basin_average(values: np.ndarray) -> float:
     """Average of a scalar observable already evaluated at each attractor."""
     return float(np.mean(np.asarray(values, dtype=float)))
+
+
+def basin_classification(
+    ends: np.ndarray, carries: np.ndarray, tol: float = 1e-6
+) -> dict[str, float | int | np.ndarray]:
+    """Split a set of end states into the badged and unbadged faces.
+
+    ``carries`` is the 0/1 indicator of the designs that wear a mark, so
+    ``ends @ carries`` is the badged mass of each end state and an end state
+    is assigned to the badged face when that mass exceeds one half.  The
+    returned ``mixed_count`` is the number of end states that are neither face
+    to within ``tol``: the two faces are continua of neutrally stable rest
+    points and nothing rules out an attractor between them a priori, so "no
+    badge-mixed attractor" is a claim about the sample and is counted rather
+    than assumed.
+
+    Returned as a mapping rather than a dataclass because the three scalars
+    are written straight into the key-numbers record under these names.
+    ``badged_mass`` is the per-end mass array, shape ``(n_starts,)``, kept so
+    that a caller can form its own interval without recomputing the product.
+
+    This is the classification the published basin share is built from, and it
+    lives here so that a new start measure and the published one cannot drift
+    apart by being classified two different ways.
+    """
+    ends = np.asarray(ends, dtype=float)
+    carries = np.asarray(carries, dtype=float)
+    if ends.ndim != 2 or ends.shape[0] < 1:
+        raise ValueError(
+            f"ends must be a (n_starts, n_designs) array, got shape {ends.shape}"
+        )
+    if carries.ndim != 1 or carries.size != ends.shape[1]:
+        raise ValueError(
+            f"carries must have one entry per design, got shape {carries.shape} "
+            f"for {ends.shape[1]} designs"
+        )
+    bad = carries[(carries != 0.0) & (carries != 1.0)]
+    if bad.size:
+        raise ValueError(f"carries must be a 0/1 indicator, got the value {bad[0]}")
+    if not 0.0 < tol < 0.5:
+        raise ValueError(f"tol must lie strictly between zero and one half, got {tol}")
+
+    badged_mass = ends @ carries
+    is_badged = badged_mass > 0.5
+    return {
+        "badged_share": float(is_badged.mean()),
+        "unbadged_share": float((~is_badged).mean()),
+        "mixed_count": int(((badged_mass > tol) & (badged_mass < 1.0 - tol)).sum()),
+        "badged_mass": badged_mass,
+    }
 
 
 # --------------------------------------------------------------------------

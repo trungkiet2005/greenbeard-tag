@@ -1,41 +1,13 @@
-
-\paragraph{The flow.}
-Write $\Delta$ for the simplex of population states over the $48$ designs and
-$x \in \Delta$ for a state. With assortment $r$, the expected private payoff of
-design $i$ is
-\begin{equation}
-\label{eq:fitness}
-f_i(x) \;=\; r\,\piP(i,i) \;+\; (1-r)\sum_{j} x_j\, \piP(i,j),
-\end{equation}
-and the replicator flow is
-\begin{equation}
-\label{eq:replicator}
-\dot{x}_i \;=\; x_i\big[\,f_i(x) - \bar{f}(x)\,\big],
-\qquad \bar{f}(x) \;=\; \sum_k x_k f_k(x).
-\end{equation}
-Every vertex $e_j$ of $\Delta$ is a rest point of
-Equation~\eqref{eq:replicator} at every parameter value, and the eigenvalue of
-the linearisation at $e_j$ transversal to that vertex in the direction of
-design $i$ is
-\begin{equation}
-\label{eq:eigen}
-\lambda_{i \mid j} \;=\; f_i(e_j) - f_j(e_j)
-  \;=\; r\,\piP(i,i) \;+\; (1-r)\,\piP(i,j) \;-\; \piP(j,j).
-\end{equation}
-The eigenvalue is affine in $\rho$, $\kappa_g$, $\kappa_f$, $L$ and $r$.
-It is also affine in $\sigma$ unless both seats can carry a forged badge,
-because the handshake of Equation~\eqref{eq:handshake} is bilinear in their
-pass rates. This exception affects only the baseline mimic threshold: its
-eigenvalue is $-0.2075\sigma^2+32.5075\sigma-30.300$ and has the unique
-admissible root $\sigma_m=0.9377$. All thresholds below are therefore exact
-roots of Equation~\eqref{eq:eigen}, not estimates.
-
-On the edge $\{e_i,e_j\}$, the flow reduces to
-$\dot{x}=x(1-x)(\alpha+\beta x)$ with
-$\alpha=\lambda_{i\mid j}$. At a reported threshold the interior edge
-equilibrium $-\alpha/\beta$ crosses the vertex and exchanges stability with
-it, giving a transcritical bifurcation~\citep{strogatz2018nonlinear}.
-The closed forms verify transversality, and $\beta\neq0$ at every reported
-crossing; the numerical regularity checks are collected in the Supplementary
-Material. Thus the table in Section~\ref{sec:results} is an inventory of local
-edge bifurcations, while basin shares remain global numerical properties.
+%% CSF-only addition to the Model section.
+%%
+%% The flow, the transversal eigenvalue and the edge transcritical bifurcation
+%% used to live here, because the venue-neutral master described the dynamics
+%% in prose and never wrote the replicator equation down.  They now live in the
+%% master, where every venue version needs them and where the appendix proofs
+%% reference them.  What remains here is the one sentence that is specific to
+%% this package: the CSF Results section opens with a bifurcation inventory
+%% table that the master does not carry.
+Table~\ref{tab:bifurcations} in Section~\ref{sec:results} collects the
+qualitative transitions below with their control parameters and locations, so
+that the local edge bifurcations and the global basin properties can be read
+apart at a glance.

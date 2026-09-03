@@ -53,6 +53,13 @@ CLAIMS: list[tuple[str, float, int]] = [
     ("mimic_threshold_span_over_assortment", 0.001, 3),
     ("spoof_threshold_mimic_assorted", 0.938, 3),
     ("integrity_collapse_sigma", 0.93, 2),
+    # the face reduction, the macroscopic rank and the exchange locus
+    ("macro_rank", 13, 0),
+    ("macro_free_dimensions", 13, 0),
+    ("exchange_locus_r", 0.077, 3),
+    ("face_reduction_social_gap", 2.0, 1),
+    ("face_reduction_certified_deviation", 0.0, 1),
+    ("face_reduction_unbadged_deviation", 0.0, 1),
     ("mark_lift_inversion_sigma", 0.57, 2),
     ("free_forgery_integrity", 0.046, 3),
     # the baseline equilibrium
@@ -113,12 +120,42 @@ ROBUSTNESS_CLAIMS: list[tuple[str, float, int]] = [
     ("process_unsafe_min", 0.044, 3),
     ("process_unsafe_max", 0.330, 3),
     ("value_share_above_001", 0.15, 2),
+    # the parameter-resolved global experiments added in revision
+    ("both_faces_unsafe_below_r", 0.07, 2),
+    ("severity_first_resisting", 0.375, 3),
+    ("severity_first_tolerance", 0.693, 3),
+    ("severity_first_toll", 2.04, 2),
+    ("severity_max_tolerance", 0.962, 3),
+    ("severity_max_toll", 30.36, 2),
 ]
 
 #: Claims that live in a results table rather than in a summary file:
 #: ``(csv, row filter, column, printed value, decimals)``.
 TABLE_CLAIMS: list[tuple[str, dict, str, float, int]] = [
     ("out_group_policy.csv", {"s_out": "CS"}, "spoof_threshold", 0.000, 3),
+    # the badge ablation, at the baseline assortment
+    ("badge_ablation.csv", {"r": 0.1}, "sml_full", 0.090, 3),
+    ("badge_ablation.csv", {"r": 0.1}, "sml_no-badge", 0.159, 3),
+    ("badge_ablation.csv", {"r": 0.1}, "sml_unforgeable", 0.067, 3),
+    ("badge_ablation.csv", {"r": 0.1}, "sml_random-badge", 0.488, 3),
+    # the continuous out-group severity frontier
+    ("out_group_severity.csv", {"severity": 0.5}, "spoof_threshold", 0.923, 3),
+    ("out_group_severity.csv", {"severity": 0.5}, "entry_penalty", 14.18, 2),
+    ("out_group_severity.csv", {"severity": 0.5}, "club_share", 0.830, 3),
+    ("out_group_severity.csv", {"severity": 0.375}, "club_share", 0.069, 3),
+    # the start-measure ablation: the two ends of the reported range
+    ("start_measure.csv", {"measure": "alpha=0.1"}, "badged_share", 0.47, 2),
+    ("start_measure.csv", {"measure": "alpha=50"}, "badged_share", 0.04, 2),
+    ("start_measure.csv", {"measure": "alpha=1"}, "badged_share", 0.42, 2),
+    ("start_measure.csv", {"measure": "alpha=5"}, "badged_share", 0.26, 2),
+    # the two faces track each other at every assortment
+    ("assortment_basins.csv", {"r": 0.04}, "unsafe_certified", 0.623, 3),
+    ("assortment_basins.csv", {"r": 0.04}, "unsafe_uncertified", 0.619, 3),
+    ("assortment_basins.csv", {"r": 0.06}, "unsafe_certified", 0.290, 3),
+    ("assortment_basins.csv", {"r": 0.06}, "unsafe_uncertified", 0.290, 3),
+    ("assortment_basins.csv", {"r": 0.07}, "unsafe_certified", 0.114, 3),
+    ("assortment_basins.csv", {"r": 0.01}, "mixed_count", 169, 0),
+    ("assortment_basins.csv", {"r": 0.02}, "mixed_count", 18, 0),
     ("out_group_policy.csv", {"s_out": "AS"}, "spoof_threshold", 0.000, 3),
     ("out_group_policy.csv", {"s_out": "CAS"}, "entry_penalty", 30.36, 2),
     ("out_group_policy.csv", {"s_out": "AU"}, "entry_penalty", 40.40, 2),
@@ -181,6 +218,11 @@ NON_QUOTED_INVARIANTS = {
     "free_forgery_integrity",        # backs figure 6D, which prints no value
     "free_forgery_club_share",
     "free_forgery_unsafe",
+    "face_reduction_certified_deviation",   # the theorem, printed as "exact"
+    "face_reduction_unbadged_deviation",
+    "face_reduction_social_gap",            # printed as kappa_g, not as a gap
+    "macro_free_dimensions",
+    "severity_max_tolerance",               # already printed via spoof_threshold
 }
 
 
@@ -194,6 +236,10 @@ def _manuscript_sources() -> dict:
         "paper-csf/main.tex + supplementary.tex": (
             "paper-csf/main.tex",
             "paper-csf/supplementary.tex",
+        ),
+        "paper-physicaa/main.tex + supplementary.tex": (
+            "paper-physicaa/main.tex",
+            "paper-physicaa/supplementary.tex",
         ),
     }
     for label, rels in source_sets.items():

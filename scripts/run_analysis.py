@@ -22,6 +22,7 @@ from gbtag import config as cfg
 from gbtag import interventions as iv
 from gbtag import theory as th
 from gbtag.dynamics import (
+    basin_classification,
     focal_mass_start,
     full_dimensional_perturbations,
     integrate_replicator,
@@ -409,7 +410,11 @@ def main(outdir: Path) -> None:
     basins = th.equilibrium(fun, race, "replicator", ends=ends, **rep)
     mono = pools["full"]
     carries = np.array([b != "N" for b in fun.badge], dtype=float)
-    is_certified = ends @ carries > 0.5
+    # One classifier, shared with the start-measure and assortment sweeps in
+    # gbtag.robustness, so the published split and the experiments that put it
+    # in context cannot drift apart.
+    split = basin_classification(ends, carries)
+    is_certified = split["badged_mass"] > 0.5
     rows = []
     for tag, mask in (("certified", is_certified), ("uncertified", ~is_certified)):
         face = ends[mask]
@@ -435,12 +440,40 @@ def main(outdir: Path) -> None:
     key["certified_basin_wilson_lo"] = lo
     key["certified_basin_wilson_hi"] = hi
 
-    # No draw has ever landed between the two faces, but "no badge-mixed
-    # attractor" is a claim about the sample and is recorded as one.
-    badged_mass = ends @ carries
-    key["badge_mixed_end_states"] = int(
-        ((badged_mass > 1e-6) & (badged_mass < 1 - 1e-6)).sum()
-    )
+    # No draw under this measure lands between the two faces, but "no
+    # badge-mixed attractor" is a claim about the sample and is recorded as
+    # one.  It does not generalise: a vertex-concentrated start measure does
+    # reach a badge-mixed rest point (see the start-measure ablation in
+    # gbtag.robustness), so the claim is about Dirichlet(1), not about the flow.
+    key["badge_mixed_end_states"] = int(split["mixed_count"])
+
+    # ------------------------------------------------- the face reduction
+    # Theorem: on the all-genuine face every check passes and the game is
+    # A(s_in) - L*M(s_in) - kappa_g; on the all-unbadged face every check fails
+    # and it is A(s_out) - L*M(s_out).  A constant added to every entry leaves
+    # the replicator flow unchanged, so the two faces carry the SAME conduct
+    # dynamics and differ by exactly the dues.  This is what makes "no safety
+    # dividend at a settled regime" a proposition rather than a basin count.
+    reduction = th.face_reduction(race, cfg.IDENTITY, cfg.LIABILITY)
+    key["face_reduction_certified_deviation"] = reduction.certified_deviation
+    key["face_reduction_unbadged_deviation"] = reduction.unbadged_deviation
+    key["face_reduction_social_gap"] = reduction.social_gap
+    key["face_reduction_exact"] = bool(reduction.exact)
+
+    # The 48 designs interact through only 16 macroscopic functionals, of which
+    # 13 are free, so the flow on the 47-simplex is a rank-13 game.  This is
+    # what explains the neutral directions and the continuum of endpoints above.
+    macro = th.macro_factorisation(race, cfg.IDENTITY, cfg.LIABILITY)
+    key["macro_rank"] = int(macro.rank)
+    key["macro_span_residual"] = float(macro.span_residual)
+    key["macro_free_dimensions"] = int(macro.free_dimensions)
+    key["macro_functionals"] = int(macro.functionals.shape[0])
+
+    # The invader exchange as an algebraic condition rather than one bisected
+    # number: both advantages are quadratics in sigma whose coefficients are
+    # affine in r, so the exchange is a root of their resultant.
+    locus = th.invader_exchange_locus(race, cfg.IDENTITY, cfg.LIABILITY)
+    key["exchange_locus_r"] = float(locus.r_star)
 
     # The dominant design of each face is quoted in the text.  Its spread across
     # the face is quoted too: the faces are continua of neutrally stable rest

@@ -585,26 +585,33 @@ def fig01(tables, results: Path, figdir: Path) -> None:
     badged_mass = ends @ carries
     unsafe_each = np.array([aggregate_unsafe_frequency(e, fun) for e in ends])
 
-    ax_a.scatter(
-        badged_mass, np.maximum(unsafe_each, 1e-24),
-        s=12, alpha=0.55, edgecolors="none",
-        c=[PALETTE["club"] if m > 0.5 else PALETTE["unbadged cooperator"]
-           for m in badged_mass],
-    )
-    ax_a.set_yscale("log")
-    ax_a.set_ylim(1e-25, 1e2)
-    ax_a.set_xlim(-0.08, 1.08)
-    ax_a.axvspan(0.08, 0.92, color=PALETTE["neutral"], alpha=0.07)
-    ax_a.text(0.5, 1e-12, "none in uniform\nsample", ha="center", va="center",
-              fontsize=FS["tiny"], color=PALETTE["neutral"])
-    ax_a.text(0.02, 3e0, f"{1 - key['certified_basin_share']:.0%}\nunbadged",
-              ha="left", va="top", fontsize=FS["tiny"],
+    # The end states carry unsafe frequencies at numerical zero, so the old
+    # version of this panel floored them at 1e-24 and plotted them on a log
+    # axis spanning twenty-five decades, which invited the reader to read
+    # structure into floating-point noise.  What the sample actually says is
+    # where the badge-carrying mass lands, so that is what is drawn: two
+    # spikes with nothing between them.
+    counts, edges = np.histogram(badged_mass, bins=np.linspace(0.0, 1.0, 51))
+    centres = 0.5 * (edges[:-1] + edges[1:])
+    colours = [PALETTE["club"] if c > 0.5 else PALETTE["unbadged cooperator"]
+               for c in centres]
+    ax_a.bar(centres, counts / counts.sum(), width=edges[1] - edges[0],
+             color=colours)
+    ax_a.set_xlim(-0.06, 1.06)
+    ax_a.set_ylim(0.0, 0.88)
+    unbadged_share = 1.0 - key["certified_basin_share"]
+    ax_a.text(0.07, unbadged_share + 0.04,
+              f"{unbadged_share:.0%}\nunbadged",
+              ha="left", va="bottom", fontsize=FS["tiny"],
               color=PALETTE["unbadged cooperator"])
-    ax_a.text(0.98, 3e0, f"{key['certified_basin_share']:.0%}\nbadged",
-              ha="right", va="top", fontsize=FS["tiny"], color=PALETTE["club"])
+    ax_a.text(0.93, key["certified_basin_share"] + 0.04,
+              f"{key['certified_basin_share']:.0%}\nbadged",
+              ha="right", va="bottom", fontsize=FS["tiny"], color=PALETTE["club"])
+    ax_a.text(0.5, 0.24, "no end state\nin between", ha="center", va="center",
+              fontsize=FS["tiny"], color=PALETTE["neutral"])
     ax_a.set_xlabel("badge-carrying share of the end state")
-    ax_a.set_ylabel("unsafe frequency")
-    panel_title(ax_a, "A", "two regimes, both safe")
+    ax_a.set_ylabel("share of starts")
+    panel_title(ax_a, "A", "the sample splits in two")
 
     # ---- B: what each regime is worth
     xs = np.arange(2)
@@ -810,12 +817,195 @@ def fig09(tables, results: Path, figdir: Path) -> None:
 # --------------------------------------------------------------------------
 
 
+# --------------------------------------------------------------------------
+# fig10: the two faces are one system, and the basin share is a measure
+# --------------------------------------------------------------------------
+
+
+def fig10(tables, results: Path, figdir: Path) -> None:
+    """Assortment resolves the global claim the baseline could only assert.
+
+    Panels A and B are the dynamical content of the face-reduction theorem: the
+    two faces carry the same conduct flow, so their unsafe frequencies coincide
+    at every assortment and their social payoffs stay exactly ``kappa_g`` apart
+    wherever the regimes are settled.  Panel C shows that the clean two-face
+    split is itself a property of the assortment range, and panel D that the
+    basin share is a property of the start measure.
+    """
+    basins = pd.read_csv(results / "tables" / "assortment_basins.csv")
+    measures = pd.read_csv(results / "tables" / "start_measure.csv")
+    race = build_race_tables(cfg.RACE)
+    r_dagger = th.first_strike_assortment_bound(race)
+
+    fig, axes = new_figure(5.2, nrows=2, ncols=2)
+    (ax_a, ax_b), (ax_c, ax_d) = axes
+
+    # ---- A: the two faces carry the same unsafe frequency
+    ax_a.plot(basins.r, basins.unsafe_certified, color=PALETTE["club"],
+              lw=1.8, label="badged face")
+    ax_a.plot(basins.r, basins.unsafe_uncertified, color=PALETTE["unbadged cooperator"],
+              lw=1.8, ls="--", label="unbadged face")
+    ax_a.axvline(r_dagger, color=PALETTE["neutral"], lw=0.9, ls=":")
+    ax_a.text(r_dagger + 0.004, 0.60, rf"$r^{{\dagger}}={r_dagger:.3f}$",
+              fontsize=FS["tiny"], color=PALETTE["neutral"])
+    ax_a.set_xlabel("assortment $r$")
+    ax_a.set_ylabel("unsafe frequency")
+    ax_a.set_xlim(0.0, float(basins.r.max()))
+    ax_a.set_ylim(-0.04, 1.08)
+    fitted_legend(ax_a, loc="upper right")
+    panel_title(ax_a, "A", "one flow, two labels")
+
+    # ---- B: the payoff gap is exactly the dues wherever the regime is settled
+    # Plotting the two levels hides the result: they run from -153 to +59 and
+    # the gap the theorem predicts is 2, which is a line's width on that axis.
+    # The gap itself is the quantity with something to say.
+    gap = basins.social_uncertified - basins.social_certified
+    ax_b.plot(basins.r, gap, color=PALETTE["club"], lw=1.8)
+    ax_b.axhline(cfg.IDENTITY.kappa_g, color=PALETTE["unsafe"], lw=1.0, ls="--")
+    ax_b.axvline(r_dagger, color=PALETTE["neutral"], lw=0.9, ls=":")
+    ax_b.text(float(basins.r.max()), cfg.IDENTITY.kappa_g + 0.4,
+              rf"$\kappa_g={cfg.IDENTITY.kappa_g:.0f}$", ha="right", va="bottom",
+              fontsize=FS["tiny"], color=PALETTE["unsafe"])
+    ax_b.set_xlabel("assortment $r$")
+    ax_b.set_ylabel("social payoff, unbadged $-$ badged")
+    ax_b.set_xlim(0.0, float(basins.r.max()))
+    panel_title(ax_b, "B", "the gap is the dues")
+
+    # ---- C: the two-face split exists only above a threshold in r
+    n_starts = float(basins.n_starts.iloc[0])
+    ax_c.plot(basins.r, basins.mixed_count / n_starts, color=PALETTE["forger"],
+              lw=1.8, label="badge-mixed end states")
+    ax_c.plot(basins.r, basins.badged_share, color=PALETTE["club"],
+              lw=1.8, ls="--", label="badged basin share")
+    ax_c.set_xlabel("assortment $r$")
+    ax_c.set_ylabel("share of end states")
+    ax_c.set_xlim(0.0, float(basins.r.max()))
+    ax_c.set_ylim(-0.04, 1.12)
+    fitted_legend(ax_c, loc="upper right")
+    panel_title(ax_c, "C", "when the split exists")
+
+    # ---- D: the basin share is a property of the start measure
+    labels = [str(m) for m in measures.measure]
+    xs = np.arange(len(labels))
+    ax_d.bar(xs, measures.badged_share, 0.62, color=PALETTE["club"])
+    lo, hi = float(measures.badged_share.min()), float(measures.badged_share.max())
+    ax_d.axhline(lo, color=PALETTE["unsafe"], lw=0.8, ls=":")
+    ax_d.axhline(hi, color=PALETTE["unsafe"], lw=0.8, ls=":")
+    # Short tick labels: the concentration is named once in the axis label, so
+    # repeating "alpha=" on every tick only makes them collide.
+    short = [l.replace("alpha=", "").replace("badge-stratified", "strat.")
+             for l in labels]
+    ax_d.set_xticks(xs, short)
+    ax_d.tick_params(axis="x", labelsize=FS["tick"])
+    ax_d.set_xlabel(r"start concentration $\alpha$")
+    ax_d.set_ylabel("badged basin share")
+    # Exactly the headroom the one annotation needs, and no more.
+    ax_d.set_ylim(0.0, hi * 1.18)
+    ax_d.text(0.0, hi * 1.15, f"range {lo:.2f} to {hi:.2f}", ha="left",
+              va="top", fontsize=FS["tiny"], color=PALETTE["unsafe"])
+    panel_title(ax_d, "D", "a measure, not a flow")
+
+    save(fig, figdir / "fig10_assortment")
+
+
+# --------------------------------------------------------------------------
+# fig11: the global regime map, and why conduct monitoring cannot see it
+# --------------------------------------------------------------------------
+
+
+def fig11(tables, results: Path, figdir: Path) -> None:
+    """The (sigma, r) plane of the replicator flow, resolved rather than sampled.
+
+    Panel A is the regime map.  Its two boundaries are orthogonal: the safety
+    boundary is horizontal and set by assortment alone, the integrity boundary
+    vertical and set by verification alone.  Panels B and C are the two fields
+    the labels are built from, side by side so the reader can see that the one
+    an outcome monitor observes is flat exactly where the other collapses.
+    """
+    from matplotlib.colors import ListedColormap, BoundaryNorm
+    from matplotlib.patches import Patch
+
+    with np.load(results / "grids.npz", allow_pickle=False) as z:
+        sig, rs = z["global_sigmas"], z["global_rs"]
+        regime = z["global_regime"]
+        names = [str(s) for s in z["global_regime_names"]]
+        integrity, unsafe = z["global_integrity"], z["global_unsafe"]
+
+    race = build_race_tables(cfg.RACE)
+    r_dagger = th.first_strike_assortment_bound(race)
+    sigma_m = th.mimic_threshold_closed_form(
+        race, cfg.LIABILITY, "CS", "CAS",
+        cfg.IDENTITY.kappa_g, cfg.IDENTITY.kappa_f, cfg.IDENTITY.rho,
+    )
+
+    # one colour per regime, ordered as REGIMES is
+    regime_colour = {
+        "badged-safe": PALETTE["club"],
+        "hollow": PALETTE["forger"],
+        "mixed-unsafe": PALETTE["unsafe"],
+        "unbadged-safe": PALETTE["unbadged cooperator"],
+    }
+    cmap = ListedColormap([regime_colour[n] for n in names])
+    norm = BoundaryNorm(np.arange(len(names) + 1) - 0.5, len(names))
+    extent = [sig.min(), sig.max(), rs.min(), rs.max()]
+
+    fig, axes = new_figure(3.25, ncols=3)
+    ax_a, ax_b, ax_c = axes
+
+    # ---- A: the regime map
+    ax_a.imshow(regime, origin="lower", aspect="auto", extent=extent,
+                cmap=cmap, norm=norm, interpolation="nearest")
+    ax_a.axhline(r_dagger, color="white", lw=1.3, ls="--")
+    ax_a.axvline(sigma_m, color="white", lw=1.3, ls=":")
+    ax_a.text(0.03, r_dagger + 0.006, rf"$r^{{\dagger}}={r_dagger:.3f}$",
+              fontsize=FS["tiny"], color="white", va="bottom")
+    ax_a.text(sigma_m - 0.02, 0.235, rf"$\sigma_m={sigma_m:.3f}$",
+              fontsize=FS["tiny"], color="white", ha="right", va="top",
+              rotation=90)
+    ax_a.set_xlabel(r"spoof success $\sigma$")
+    ax_a.set_ylabel("assortment $r$")
+    # The key goes outside every axes.  Inside panel A it sits on a filled
+    # image, so the audit reads its background as the image colour and the
+    # black label text fails the contrast floor however opaque the frame is.
+    present = [n for k, n in enumerate(names) if (regime == k).any()]
+    fig.legend(
+        handles=[Patch(facecolor=regime_colour[n], label=n) for n in present],
+        loc="outside lower center", ncol=len(present), fontsize=FS["legend"],
+        frameon=False,
+    )
+    panel_title(ax_a, "A", "orthogonal boundaries")
+
+    # ---- B: attestation integrity, which the vertical boundary governs
+    im_b = ax_b.imshow(np.nan_to_num(integrity, nan=0.0), origin="lower",
+                       aspect="auto", extent=extent, cmap="Blues",
+                       vmin=0.0, vmax=1.0, interpolation="nearest")
+    ax_b.axvline(sigma_m, color=PALETTE["neutral"], lw=1.1, ls=":")
+    ax_b.set_xlabel(r"spoof success $\sigma$")
+    ax_b.set_ylabel("assortment $r$")
+    fig.colorbar(im_b, ax=ax_b, fraction=0.046, pad=0.03).ax.tick_params(
+        labelsize=FS["tick"])
+    panel_title(ax_b, "B", "what a passed badge means")
+
+    # ---- C: unsafe frequency, which the horizontal boundary governs
+    im_c = ax_c.imshow(unsafe, origin="lower", aspect="auto", extent=extent,
+                       cmap="Reds", vmin=0.0, vmax=1.0, interpolation="nearest")
+    ax_c.axhline(r_dagger, color=PALETTE["neutral"], lw=1.1, ls="--")
+    ax_c.set_xlabel(r"spoof success $\sigma$")
+    ax_c.set_ylabel("assortment $r$")
+    fig.colorbar(im_c, ax=ax_c, fraction=0.046, pad=0.03).ax.tick_params(
+        labelsize=FS["tick"])
+    panel_title(ax_c, "C", "what a monitor sees")
+
+    save(fig, figdir / "fig11_phase")
+
+
 def main(outdir: Path) -> None:
     use_paper_style()
     figdir = outdir / "figures"
     figdir.mkdir(parents=True, exist_ok=True)
     tables = build_race_tables(cfg.RACE)
-    for fn in (fig01, fig02, fig03, fig04, fig05, fig06, fig07, fig08, fig09):
+    for fn in (fig01, fig02, fig03, fig04, fig05, fig06, fig07, fig08, fig09,
+               fig10, fig11):
         fn(tables, outdir, figdir)
         print(f"rendered {fn.__name__}")
 

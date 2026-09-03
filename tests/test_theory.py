@@ -655,3 +655,300 @@ def test_first_strike_assortment_bound_is_where_proposition_one_stops() -> None:
     assert uncertified_safety_is_impossible(TABLES, 0.0, r_dagger - 0.005)
     assert not uncertified_safety_is_impossible(TABLES, 0.0, r_dagger + 0.005)
     assert not uncertified_safety_is_impossible(TABLES, 0.0, cfg.IDENTITY.r)
+
+
+# ------------------------------------- Theorem 1: the invariant-face reduction
+
+#: ``(sigma, r, kappa_g, liability)``.  Two of them close the badge channel by
+#: setting the dues to zero and three of them open the liability channel, so a
+#: reduction that quietly depended on either would fail here.
+FACE_CASES = [
+    (0.5, 0.1, 2.0, 0.0),
+    (0.9, 0.3, 5.0, 0.0),
+    (0.0, 0.0, 0.0, 0.0),
+    (1.0, 0.5, 3.5, 2.5),
+    (0.25, 0.4, 0.0, 7.0),
+    (0.75, 0.05, 1.25, 0.5),
+]
+
+
+def _face_params(sigma: float, r: float, kappa_g: float) -> IdentityParams:
+    return IdentityParams(sigma=sigma, kappa_g=kappa_g, kappa_f=0.0, rho=0.0, r=r)
+
+
+@pytest.mark.parametrize("sigma,r,kappa_g,liability", FACE_CASES)
+def test_face_reduction_is_exact(
+    sigma: float, r: float, kappa_g: float, liability: float
+) -> None:
+    """The two payoff identities hold entry by entry, not approximately."""
+    red = th.face_reduction(TABLES, _face_params(sigma, r, kappa_g), liability)
+    assert red.certified_deviation == 0.0
+    assert red.unbadged_deviation == 0.0
+    assert red.exact
+
+
+@pytest.mark.parametrize("sigma,r,kappa_g,liability", FACE_CASES)
+def test_face_reduction_shares_the_conduct_payoff(
+    sigma: float, r: float, kappa_g: float, liability: float
+) -> None:
+    """The game both faces play is the private race payoff ``A - L M``."""
+    red = th.face_reduction(TABLES, _face_params(sigma, r, kappa_g), liability)
+    expected = TABLES.payoff - liability * TABLES.unsafe_count
+    assert red.conduct_payoff.shape == (4, 4)
+    assert np.array_equal(red.conduct_payoff, expected)
+
+
+@pytest.mark.parametrize("sigma,r,kappa_g,liability", FACE_CASES)
+def test_face_reduction_social_gap_is_exactly_the_dues(
+    sigma: float, r: float, kappa_g: float, liability: float
+) -> None:
+    """The whole social difference between the faces is the price of the badge.
+
+    Exact equality, not ``approx``: the gap is a difference of two entries
+    that were built by the same arithmetic on the same conduct pair, so any
+    residual would mean the reduction is not the identity it claims to be.
+    """
+    red = th.face_reduction(TABLES, _face_params(sigma, r, kappa_g), liability)
+    assert red.dues == kappa_g
+    assert red.social_gap == kappa_g
+
+
+def test_face_reduction_rejects_a_negative_liability() -> None:
+    with pytest.raises(ValueError, match="-1.0"):
+        th.face_reduction(TABLES, cfg.IDENTITY, -1.0)
+
+
+#: ``(label, params, liability)`` for the two-face flow test.  The three
+#: settings land on three different conduct outcomes -- a CS sweep, an
+#: interior CAS/AU mixture, and an interior AS/CS mixture -- so the test
+#: cannot pass by both faces trivially collapsing to the same corner.
+FLOW_CASES = [
+    ("baseline", cfg.IDENTITY, cfg.LIABILITY),
+    ("well mixed", replace(cfg.IDENTITY, r=0.0), cfg.LIABILITY),
+    ("liable, free badge", replace(cfg.IDENTITY, r=0.3, kappa_g=0.0), 1.0),
+]
+
+
+@pytest.mark.parametrize("label,params,liability", FLOW_CASES)
+def test_the_two_faces_carry_the_same_conduct_flow(
+    label: str, params: IdentityParams, liability: float
+) -> None:
+    """The dynamical consequence of the reduction, which is the point of it.
+
+    A start confined to the ``G`` block and the corresponding start confined
+    to the ``N`` block reach the same conduct marginal.  The correspondence
+    swaps the two conduct slots -- ``(G, c, d)`` maps to ``(N, d, c)`` --
+    because a certified design executes its ``s_in`` on the certified face
+    and an unbadged one executes its ``s_out`` on the unbadged face.  Mapping
+    ``(G, c, d)`` to ``(N, c, d)`` instead would compare two different
+    conduct distributions and is the mistake this correspondence exists to
+    avoid.
+    """
+    from gbtag.race import STRATEGIES
+
+    fun = build_functionals(TABLES, params, liability, cfg.SOCIAL_HARM)
+    order = {s: i for i, s in enumerate(STRATEGIES)}
+    pairs = [(a, b) for a in STRATEGIES for b in STRATEGIES]
+    rng = np.random.default_rng(20260830)
+
+    for _ in range(3):
+        weights = rng.dirichlet(np.ones(len(pairs)))
+        certified = np.zeros(fun.n)
+        unbadged = np.zeros(fun.n)
+        for k, (s_in, s_out) in enumerate(pairs):
+            certified[fun.index("G", s_in, s_out)] = weights[k]
+            unbadged[fun.index("N", s_out, s_in)] = weights[k]
+
+        end_certified = replicator_attractor(fun.fitness, certified)
+        end_unbadged = replicator_attractor(fun.fitness, unbadged)
+
+        # both faces are invariant, so nothing leaked into the other blocks
+        assert end_certified[fun.badge_block("G")].sum() == pytest.approx(1.0, abs=1e-12)
+        assert end_unbadged[fun.badge_block("N")].sum() == pytest.approx(1.0, abs=1e-12)
+
+        marginal_certified = np.zeros(len(STRATEGIES))
+        marginal_unbadged = np.zeros(len(STRATEGIES))
+        for i in range(fun.n):
+            marginal_certified[order[fun.s_in[i]]] += end_certified[i]
+            marginal_unbadged[order[fun.s_out[i]]] += end_unbadged[i]
+
+        assert marginal_certified == pytest.approx(marginal_unbadged, abs=1e-9)
+        assert marginal_certified.sum() == pytest.approx(1.0, abs=1e-12)
+
+
+def test_the_two_faces_reach_different_conducts_across_the_flow_cases() -> None:
+    """Guard on the previous test: its three settings really do differ.
+
+    If every parameterisation swept to the same corner the equality above
+    would be satisfied by a constant and would prove nothing.
+    """
+    from gbtag.race import STRATEGIES
+
+    order = {s: i for i, s in enumerate(STRATEGIES)}
+    reached = []
+    for _, params, liability in FLOW_CASES:
+        fun = build_functionals(TABLES, params, liability, cfg.SOCIAL_HARM)
+        start = np.zeros(fun.n)
+        rng = np.random.default_rng(20260830)
+        weights = rng.dirichlet(np.ones(16))
+        for k, (s_in, s_out) in enumerate(
+            [(a, b) for a in STRATEGIES for b in STRATEGIES]
+        ):
+            start[fun.index("G", s_in, s_out)] = weights[k]
+        end = replicator_attractor(fun.fitness, start)
+        marginal = np.zeros(len(STRATEGIES))
+        for i in range(fun.n):
+            marginal[order[fun.s_in[i]]] += end[i]
+        reached.append(int(np.argmax(marginal)))
+    assert len(set(reached)) > 1
+
+
+# ------------------------------- Theorem 2: the macroscopic factorisation
+
+
+@pytest.mark.parametrize("sigma,r", [(0.0, 0.0), (0.5, 0.1), (0.75, 0.35), (1.0, 0.5)])
+def test_macro_factorisation_has_thirteen_free_directions(
+    sigma: float, r: float
+) -> None:
+    """48 designs, 13 dimensions of game, at every verification quality."""
+    params = replace(cfg.IDENTITY, sigma=sigma, r=r)
+    mac = th.macro_factorisation(TABLES, params, cfg.LIABILITY)
+    assert mac.functionals.shape == (16, 48)
+    assert mac.rank == 13
+    assert mac.free_dimensions == 13
+    assert mac.span_residual < 1e-10
+
+
+def test_macro_functional_rows_are_the_stated_constraints() -> None:
+    """The three relations that take sixteen rows down to thirteen directions."""
+    from gbtag.race import STRATEGIES
+
+    fun = build_functionals(TABLES, cfg.IDENTITY, cfg.LIABILITY, cfg.SOCIAL_HARM)
+    mac = th.macro_factorisation(TABLES, cfg.IDENTITY, cfg.LIABILITY)
+    rows = dict(zip(mac.row_labels, mac.functionals))
+    q = np.array([cfg.IDENTITY.behavioural_pass_rate(b) for b in fun.badge])
+    for branch in ("in", "out"):
+        totals = sum(rows[f"T[{branch},{c}]"] for c in STRATEGIES)
+        assert totals == pytest.approx(np.ones(fun.n), abs=1e-12)
+        weighted = sum(rows[f"Q[{branch},{c}]"] for c in STRATEGIES)
+        assert weighted == pytest.approx(q, abs=1e-12)
+
+
+def test_macro_factorisation_rejects_a_negative_liability() -> None:
+    with pytest.raises(ValueError, match="-0.5"):
+        th.macro_factorisation(TABLES, cfg.IDENTITY, -0.5)
+
+
+# ------------------------------- Theorem 3: the invader-exchange locus
+
+
+def test_invader_exchange_locus_matches_the_bisected_flip() -> None:
+    """The closed-form locus reproduces the number the referee objected to."""
+    locus = th.invader_exchange_locus(TABLES, cfg.IDENTITY, cfg.LIABILITY)
+    flip = th.invader_ordering_flip(
+        TABLES, cfg.IDENTITY, cfg.LIABILITY, cfg.CLUB, cfg.FALSEBEARD, cfg.MIMIC
+    )
+    assert locus.r_star is not None
+    assert flip is not None
+    assert locus.r_star == pytest.approx(flip, abs=1e-9)
+    assert locus.basis == th.ADVANTAGE_BASIS
+    # below the locus the exploiter is the first invader, which is the
+    # visible-failure side of the exchange
+    assert not locus.mimic_first_below
+    assert "resultant" in locus.condition
+
+
+def test_the_exchange_locus_is_where_the_two_thresholds_coincide() -> None:
+    """The locus is defined by a coincidence, so check the coincidence."""
+    locus = th.invader_exchange_locus(TABLES, cfg.IDENTITY, cfg.LIABILITY)
+    at = replace(cfg.IDENTITY, r=locus.r_star)
+    exploiter = th.spoof_threshold(TABLES, at, 0.0, cfg.CLUB, cfg.FALSEBEARD)
+    mimic = th.spoof_threshold(TABLES, at, 0.0, cfg.CLUB, cfg.MIMIC)
+    assert exploiter == pytest.approx(mimic, abs=1e-9)
+    assert 0.0 < mimic < 1.0
+
+
+def test_the_quadratic_term_of_the_mimic_lives_on_the_assorted_branch() -> None:
+    """Why the exchange needs six monomials and not five.
+
+    An unconditional forger executes the same conduct whatever its badge
+    does, so its advantage carries no quadratic at all.  A conditional mimic
+    mixes two independent checks only when it meets itself, which happens
+    with probability ``r``, so its quadratic sits on ``r * sigma^2`` and its
+    pure ``sigma^2`` coefficient is exactly zero.  A five-term basis offering
+    ``sigma^2`` without ``r * sigma^2`` fits every well-mixed cross-section
+    and misses the entire plane the exchange happens in.
+    """
+    locus = th.invader_exchange_locus(TABLES, cfg.IDENTITY, cfg.LIABILITY)
+    exploiter = dict(zip(locus.basis, locus.exploiter_coeffs))
+    mimic = dict(zip(locus.basis, locus.mimic_coeffs))
+    assert exploiter["sigma^2"] == pytest.approx(0.0, abs=1e-9)
+    assert exploiter["r*sigma^2"] == pytest.approx(0.0, abs=1e-9)
+    assert mimic["sigma^2"] == pytest.approx(0.0, abs=1e-9)
+    assert mimic["r*sigma^2"] == pytest.approx(-2.0750, abs=1e-3)
+
+
+@pytest.mark.parametrize(
+    "mutant", [cfg.FALSEBEARD, cfg.MIMIC, ("F", "AS", "AU"), ("N", "CAS", "CS")]
+)
+def test_advantage_coefficients_reproduce_the_advantage(
+    mutant: tuple[str, str, str]
+) -> None:
+    """The coefficients are proved on a grid the fit never saw."""
+    coefficients = th.advantage_coefficients(
+        TABLES, cfg.IDENTITY, cfg.LIABILITY, mutant, cfg.CLUB
+    )
+    monomials = th._ADVANTAGE_MONOMIALS
+    for sigma in (0.03, 0.41, 0.87):
+        for r in (0.0, 0.13, 0.47):
+            params = replace(cfg.IDENTITY, sigma=sigma, r=r)
+            expected = th.fitness_against_resident(
+                TABLES, params, cfg.LIABILITY, mutant, cfg.CLUB
+            ) - th.pair_payoff(TABLES, params, cfg.LIABILITY, cfg.CLUB, cfg.CLUB)
+            predicted = sum(
+                c * sigma**a * r**b for c, (a, b) in zip(coefficients, monomials)
+            )
+            assert predicted == pytest.approx(expected, abs=1e-10)
+
+
+def test_the_exploiter_threshold_is_the_well_mixed_one_inflated_by_assortment() -> None:
+    """The structure that makes the exchange a ratio and not a difference.
+
+    The exploiter's advantage carries no bare ``r`` term and an ``r * sigma``
+    coefficient that exactly cancels its ``sigma`` coefficient, so its
+    threshold is ``sigma_e(0) / (1 - r)``: assortment inflates it
+    multiplicatively.  The mimic's is nearly flat, so the two meet where
+    ``1 - r`` equals the *ratio* of the two well-mixed thresholds.
+    """
+    locus = th.invader_exchange_locus(TABLES, cfg.IDENTITY, cfg.LIABILITY)
+    exploiter = dict(zip(locus.basis, locus.exploiter_coeffs))
+    assert exploiter["r"] == pytest.approx(0.0, abs=1e-9)
+    assert exploiter["r*sigma"] == pytest.approx(-exploiter["sigma"], abs=1e-9)
+
+    well_mixed = th.spoof_threshold(
+        TABLES, replace(cfg.IDENTITY, r=0.0), cfg.LIABILITY, cfg.CLUB, cfg.FALSEBEARD
+    )
+    for r in (0.0, 0.05, locus.r_star):
+        got = th.spoof_threshold(
+            TABLES, replace(cfg.IDENTITY, r=r), cfg.LIABILITY, cfg.CLUB, cfg.FALSEBEARD
+        )
+        assert got == pytest.approx(well_mixed / (1.0 - r), abs=1e-9)
+
+
+def test_the_exchange_locus_is_a_locus_and_not_one_number() -> None:
+    """The condition moves with the dues, which is what makes it a condition.
+
+    Raising the dues lowers both well-mixed thresholds, and it lowers the
+    exploiter's proportionally more.  The exchange lands where ``1 - r``
+    equals the ratio of the two, so a falling ratio pushes the exchange to
+    higher assortment: the club stays in the visible-failure regime longer
+    the more its membership costs.
+    """
+    loci = [
+        th.invader_exchange_locus(
+            TABLES, replace(cfg.IDENTITY, kappa_g=kappa_g), cfg.LIABILITY
+        ).r_star
+        for kappa_g in (1.0, 2.0, 4.0)
+    ]
+    assert all(r is not None for r in loci)
+    assert all(a < b for a, b in zip(loci, loci[1:]))

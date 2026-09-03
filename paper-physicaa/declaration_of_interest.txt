@@ -1,0 +1,13 @@
+Declaration of interests
+
+The authors declare that they have no known competing financial interests or
+personal relationships that could have appeared to influence the work reported
+in this paper.
+
+Manuscript: Certification without a safety dividend: forgeable credentials in
+populations of autonomous agents
+
+Authors: Trung-Kiet Huynh, Duy-Minh Dao-Sy, Chi-Nguyen Tran, Phu-Hoa Pham,
+Phu-Quy Nguyen-Lam
+
+Date: 2 September 2026

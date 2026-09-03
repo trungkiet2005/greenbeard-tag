@@ -44,6 +44,8 @@ FIGURE_FUNCTIONS = (
     "fig07",
     "fig08",
     "fig09",
+    "fig10",
+    "fig11",
 )
 
 

@@ -331,6 +331,71 @@ own self-encounters lift its payoff and the penalty falls to $27.12$; the sign
 and the ordering across out-group policies are unchanged.
 \end{proof}
 
+\begin{proof}[Proof of Theorem~\ref{thm:face}]
+Both faces are invariant because Equation~\eqref{eq:replicator} gives
+$\dot{x}_i = 0$ wherever $x_i = 0$, so a coordinate that starts at zero stays
+there and the support of a state can only shrink.
+
+Fix a state supported on $\Delta_{\mathsf{G}}$. Every design in the support
+carries a genuine badge, so $q_j = 1$ for every such $j$, and the handshake
+weights of Equation~\eqref{eq:handshake} are $w_{\mathrm{in}}(q_j) = 1$ and
+$w_{\mathrm{out}}(q_j) = 0$. Three of the four terms of the sum therefore
+vanish and $a(i,j) = A(s^{i}_{\mathrm{in}}, s^{j}_{\mathrm{in}})$. The same
+collapse applies to $m$ and $u$ with $M$ and $U$ in place of $A$, since those
+matrices are the same sum with a different kernel. No design in the support
+carries a forged badge, so the expected fine is zero and every design pays
+$\kappa_g$. Substituting into Equation~\eqref{eq:private} gives the first half
+of Equation~\eqref{eq:facereduction}. On $\Delta_{\mathsf{N}}$ every check
+fails, $q_j = 0$, the surviving term is $(\mathrm{out}, \mathrm{out})$, and no
+badge is bought, which gives the second half.
+
+For the reduction, let $y_c = \sum_{i : s^{i}_{\mathrm{in}} = c} x_i$ be the
+conduct marginal on $\Delta_{\mathsf{G}}$. By
+Equation~\eqref{eq:facereduction} the payoff of design $i$ depends on $i$ only
+through $s^{i}_{\mathrm{in}}$, so Equation~\eqref{eq:fitness} gives a common
+value $g_c = r\,[P(c,c) - \kappa_g] + (1-r)\sum_d y_d\,[P(c,d) - \kappa_g]$ for
+every design with $s^{i}_{\mathrm{in}} = c$, and $\bar{f} = \sum_d y_d g_d$.
+Summing Equation~\eqref{eq:replicator} over the designs sharing a conduct
+yields $\dot{y}_c = y_c (g_c - \bar{f})$, a four-strategy replicator equation
+in its own right. The same computation on $\Delta_{\mathsf{N}}$ with
+$s_{\mathrm{out}}$ gives the identical system without the $\kappa_g$ terms.
+Finally, adding a constant $\gamma$ to every entry of the payoff matrix sends
+$g_c \mapsto g_c + \gamma$ and $\bar{f} \mapsto \bar{f} + \gamma$, because
+$r + (1-r)\sum_d y_d = 1$, so it leaves $g_c - \bar{f}$ and hence the flow
+unchanged. The two marginal systems are therefore the same flow, and rest
+points, stability and attractors coincide. At corresponding rest points the
+realised conduct profile is the same, so $U$ is the same; the social functional
+of Equation~\eqref{eq:social} differs only by the badge cost, which is
+$\kappa_g$ on one face and $0$ on the other.
+\end{proof}
+
+\begin{proof}[Proof of Lemma~\ref{lem:rank}]
+Write the handshake of Equation~\eqref{eq:handshake} as a sum over the focal's
+executed branch $x$ and the partner's executed branch $y$. Averaging against a
+population state gives
+\[
+\sum_j x_j\,a(i,j)
+ = \sum_{x, y} w_y(q_i) \sum_{c} \Big[\sum_j x_j\, w_x(q_j)\,
+   \mathbf{1}[s^{j}_{y} = c]\Big] A\big(s^{i}_{x}, c\big).
+\]
+The bracket is $Q_{y,c}(x)$ when $x = \mathrm{in}$ and
+$T_{y,c}(x) - Q_{y,c}(x)$ when $x = \mathrm{out}$, so the whole expression is a
+linear combination of the sixteen functionals of Equation~\eqref{eq:macro} with
+coefficients depending only on $i$. The liability, badge-cost and fine terms of
+Equation~\eqref{eq:private} are constants in $j$ and are absorbed by
+$\sum_c T_{y,c} = 1$. Hence every row of $\piP$ lies in the span. Three
+independent linear relations hold on that span: $\sum_c T_{\mathrm{in},c} = 1$,
+$\sum_c T_{\mathrm{out},c} = 1$, and
+$\sum_c Q_{\mathrm{in},c} = \sum_c Q_{\mathrm{out},c} = \sum_j x_j q_j$, since
+each side counts the mean pass rate once. Sixteen functionals subject to three
+relations leave thirteen free directions, and the rank is exactly thirteen
+rather than at most thirteen because the four conducts of the race are
+pairwise distinct in $A$, so no further relation holds. A least-squares fit of
+$\piP$ onto the sixteen rows leaves a residual below
+$1.9 \times 10^{-13}$ at every sampled $(\sigma, r)$, and
+$\operatorname{rank} \piP = 13$ numerically at each of them.
+\end{proof}
+
 \begin{proof}[Proof of the harm decomposition of Section~\ref{sec:dynamics}]
 The decomposition is an identity, not an approximation. Let $w_{ij}$ be the
 probability of the ordered pair $(i,j)$ under the encounter law and let

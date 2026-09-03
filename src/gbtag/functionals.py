@@ -45,6 +45,7 @@ from .identity import (
     IdentityParams,
     SAFE_DESIGNS,
     apply_assortment,
+    design_index,
     design_labels,
     design_space,
     pairwise_expectation,
@@ -217,6 +218,136 @@ def plain_subspace(fun: IdentityFunctionals) -> IdentityFunctionals:
         ]
     )
     return fun.subspace(keep)
+
+
+#: Badge letter worn by every design of the non-informative-badge game.  It is
+#: deliberately *not* one of :data:`gbtag.identity.BADGES`: nothing in that
+#: game chooses a badge, so any observable that re-derives a pass rate from
+#: the letter is asking a question the game does not answer, and should fail
+#: loudly rather than silently read the sentinel as an absent badge.
+RANDOM_BADGE: str = "R"
+
+
+def random_badge_functionals(
+    fun: IdentityFunctionals, p_genuine: float, p_forged: float
+) -> IdentityFunctionals:
+    """The same race with a badge that says nothing about the seat wearing it.
+
+    Each seat's badge is drawn independently of its conduct from a fixed
+    distribution ``(p_genuine, p_forged, 1 - p_genuine - p_forged)``, so a
+    check of a partner passes with the *same* probability
+
+    ``qbar = p_genuine + sigma * p_forged``
+
+    whoever the partner is, and every design pays the same expected dues
+    ``p_genuine * kappa_g + p_forged * kappa_f`` and the same expected fine.
+    The badge is then a lottery attached to the seat rather than a signal
+    emitted by it, and the design space collapses from 48 to the 16
+    conduct pairs: what a design still chooses is ``s_in`` and ``s_out``, but
+    since the check outcome is independent of the partner, that choice is
+    exactly a per-race randomisation between two conducts with fixed weights
+    ``(qbar, 1 - qbar)``.
+
+    This is the null model the greenbeard claim needs.  A mark can raise
+    safety in two quite different ways: as a *greenbeard*, by correlating
+    conduct with a signal so that the bearers of the signal can find one
+    another, or as a mere *assortment device*, by splitting encounters into
+    two streams and letting the conduct game do the rest.  The two are
+    indistinguishable at the baseline, where the badge is both informative
+    and correlated with conduct.  Removing the information while keeping the
+    two streams, the dues and the handshake separates them: if the safety
+    survives here, it was never about identity.
+
+    The construction reuses :func:`gbtag.identity.pairwise_expectation`
+    through its ``pass_rates`` hook rather than restating the four-term sum,
+    and the race matrices ``A``, ``M`` and ``u`` are read back off the
+    unbadged face of ``fun``, where every check fails and the handshake
+    expectation is the race matrix itself (Theorem 1).  ``fun`` must
+    therefore be the full 48-design space.
+
+    The returned object carries :data:`RANDOM_BADGE` in its ``badge`` field.
+    Its payoff, harm and unsafe matrices are complete and exact, so the
+    dynamics and every observable built from those matrices are available;
+    the observables that re-derive a pass rate from the badge letter
+    (:func:`attestation_integrity`, :func:`mark_lift`, :func:`unsafe_split`)
+    are not, and will raise on the sentinel.  That is the intended
+    behaviour: a badge nobody chose has no provenance to attest.
+
+    Parameters
+    ----------
+    fun:
+        The full-space functionals whose race layer, identity parameters,
+        liability and social harm are reused.
+    p_genuine, p_forged:
+        Probabilities of drawing a genuine and a forged badge.  The residual
+        mass carries no badge.  Both the pass rate and the dues are
+        monotone in these, so they set how much verification and how much
+        cost the world carries without ever making the badge informative.
+    """
+    params = fun.params
+    if fun.designs != design_space():
+        raise ValueError(
+            "the non-informative badge game is built from the full design "
+            f"space, got {fun.n} designs"
+        )
+    if not 0.0 <= p_genuine <= 1.0:
+        raise ValueError(f"p_genuine must lie in [0, 1], got {p_genuine}")
+    if not 0.0 <= p_forged <= 1.0:
+        raise ValueError(f"p_forged must lie in [0, 1], got {p_forged}")
+    if p_genuine + p_forged > 1.0:
+        raise ValueError(
+            "p_genuine + p_forged must not exceed one, got "
+            f"{p_genuine + p_forged}"
+        )
+
+    # the unbadged face: every check fails, both seats execute ``s_out``, and
+    # the handshake expectation of a race matrix is that race matrix
+    plain = [design_index("N", "AS", c) for c in STRATEGIES]
+    face = np.ix_(plain, plain)
+
+    # the badge is drawn independently of conduct, so one rate serves every
+    # design; the behavioural rate is the one that reaches conduct, which
+    # differs from the verification rate under retrospective auditing
+    q_common = (
+        p_genuine * params.behavioural_pass_rate("G")
+        + p_forged * params.behavioural_pass_rate("F")
+        + (1.0 - p_genuine - p_forged) * params.behavioural_pass_rate("N")
+    )
+    rates = np.full(fun.n, q_common)
+    task = pairwise_expectation(fun.task[face], params, rates)
+    harm = pairwise_expectation(fun.harm[face], params, rates)
+    unsafe = pairwise_expectation(fun.unsafe_frequency[face], params, rates)
+
+    # with a constant rate vector the three badge blocks carry identical
+    # 16 x 16 matrices -- that identity *is* the non-informativeness of the
+    # badge -- so which block is kept cannot matter; the first is kept
+    keep = np.arange(len(STRATEGIES) ** 2)
+    grid = np.ix_(keep, keep)
+    designs = tuple((RANDOM_BADGE, si, so) for _, si, so in fun.designs[: keep.size])
+
+    cost = p_genuine * params.badge_cost("G") + p_forged * params.badge_cost("F")
+    fine = p_forged * params.expected_fine("F")
+    pi_P = task[grid] - fun.liability * harm[grid] - cost - fine
+    pi_S = task[grid] - fun.social_harm * harm[grid] - cost
+
+    return IdentityFunctionals(
+        designs=designs,
+        labels=tuple(f"{b}:{si}/{so}" for b, si, so in designs),
+        badge=tuple(b for b, _, _ in designs),
+        s_in=tuple(si for _, si, _ in designs),
+        s_out=tuple(so for _, _, so in designs),
+        task=task[grid],
+        harm=harm[grid],
+        unsafe_frequency=unsafe[grid],
+        badge_cost=np.full(keep.size, cost),
+        expected_fine=np.full(keep.size, fine),
+        pi_P=pi_P,
+        pi_S=pi_S,
+        fitness=apply_assortment(pi_P, params.r),
+        params=params,
+        liability=fun.liability,
+        social_harm=fun.social_harm,
+    )
 
 
 # --------------------------------------------------------------------------

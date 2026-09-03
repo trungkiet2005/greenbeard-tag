@@ -246,7 +246,7 @@ conditions than those required to rebuild it after collapse.
 Third, certification can fail without an observable deterioration in conduct.
 A behavioural mimic copies the club's conduct while avoiding its dues and
 crosses its invasion threshold before an exploiter at the baseline. The two
-invasion boundaries meet at a codimension-two point, beyond which stronger
+invasion boundaries meet on an invader-exchange locus, beyond which stronger
 assortment removes the visible exploiter while leaving the mimic essentially
 unchanged. The credential is then hollow even though behaviour remains safe.
 Globally, the dominant trajectories settle on disjoint certified and
@@ -439,18 +439,6 @@ small-mutation chain uses a closed-form birth-death fixation probability,
 which is what makes the 48-design space tractable, and is checked against the
 full EGTtools chain on reduced spaces.
 
-Everything else in the study is evaluated exactly; the replicator basins are
-the only sampled quantities, and there are four families of them. Interior
-starts are drawn $\mathrm{Dirichlet}(1, \dots, 1)$ on the simplex under a fixed
-seed: $20\,000$ starts for the headline split of
-Observation~\ref{prop:bistable}, and $200$ each for every out-group conduct of
-Table~\ref{tab:outgroup}, for every fine level of
-Corollary~\ref{cor:rescue} and at each verification level of the agreement
-check in Section~\ref{sec:robustness}. A basin share is a sample proportion, so
-the headline one is reported with a Wilson interval; the $200$-start shares
-carry a standard error near $0.035$ and are quoted to one digit accordingly.
-
-
 \paragraph{The flow.}
 Write $\Delta$ for the simplex of population states over the $48$ designs and
 $x \in \Delta$ for a state. With assortment $r$, the expected private payoff of
@@ -474,13 +462,17 @@ design $i$ is
 \lambda_{i \mid j} \;=\; f_i(e_j) - f_j(e_j)
   \;=\; r\,\piP(i,i) \;+\; (1-r)\,\piP(i,j) \;-\; \piP(j,j).
 \end{equation}
-The eigenvalue is affine in $\rho$, $\kappa_g$, $\kappa_f$, $L$ and $r$.
-It is also affine in $\sigma$ unless both seats can carry a forged badge,
-because the handshake of Equation~\eqref{eq:handshake} is bilinear in their
-pass rates. This exception affects only the baseline mimic threshold: its
-eigenvalue is $-0.2075\sigma^2+32.5075\sigma-30.300$ and has the unique
-admissible root $\sigma_m=0.9377$. All thresholds below are therefore exact
-roots of Equation~\eqref{eq:eigen}, not estimates.
+The eigenvalue is affine in $\rho$, $\kappa_g$, $\kappa_f$ and $L$, and it lies
+in the span of the six monomials $\{1, \sigma, \sigma^{2}\} \times \{1, r\}$.
+It is affine in $\sigma$ unless both seats can carry a forged badge, because
+the handshake of Equation~\eqref{eq:handshake} is bilinear in their pass rates;
+and when the quadratic term is present it is carried entirely by $r$, since two
+independent checks of forged badges occur in one encounter only in an assorted
+self-encounter. The baseline mimic eigenvalue is
+$-2.0750\,r\sigma^{2} + (32.3556 + 1.5195\,r)\,\sigma - 30.3556 + 0.5556\,r$,
+which at $r = 0.1$ is $-0.2075\sigma^2 + 32.5075\sigma - 30.300$ with unique
+admissible root $\sigma_m = 0.9377$. All thresholds below are exact roots of
+Equation~\eqref{eq:eigen}, not estimates.
 
 On the edge $\{e_i,e_j\}$, the flow reduces to
 $\dot{x}=x(1-x)(\alpha+\beta x)$ with
@@ -488,9 +480,63 @@ $\alpha=\lambda_{i\mid j}$. At a reported threshold the interior edge
 equilibrium $-\alpha/\beta$ crosses the vertex and exchanges stability with
 it, giving a transcritical bifurcation~\citep{strogatz2018nonlinear}.
 The closed forms verify transversality, and $\beta\neq0$ at every reported
-crossing; the numerical regularity checks are collected in the Supplementary
-Material. Thus the table in Section~\ref{sec:results} is an inventory of local
-edge bifurcations, while basin shares remain global numerical properties.
+crossing. Every threshold below is therefore a local edge bifurcation, while
+basin shares remain global numerical properties.
+
+Forty-eight designs do not mean forty-seven dimensions of interaction. The
+handshake of Equation~\eqref{eq:handshake} is a sum of four products, so a
+design's payoff against a population depends on that population only through a
+short list of aggregates.
+
+\begin{lemma}[Macroscopic reduction]
+\label{lem:rank}
+For $y \in \{\mathrm{in}, \mathrm{out}\}$ and each conduct $c$, define
+\begin{equation}
+\label{eq:macro}
+T_{y,c}(x) = \sum_{j} x_j\,\mathbf{1}\!\left[s^{j}_{y} = c\right],
+\qquad
+Q_{y,c}(x) = \sum_{j} x_j\, q_j\,\mathbf{1}\!\left[s^{j}_{y} = c\right].
+\end{equation}
+Every row of the pairwise payoff lies in the span of these sixteen functionals.
+Since $\sum_c T_{y,c} = 1$ for each $y$ and $\sum_c Q_{\mathrm{in},c} =
+\sum_c Q_{\mathrm{out},c}$ is the mean pass rate, thirteen of them are free, and
+the $48 \times 48$ payoff matrix has rank $13$ at every $\sigma$ and $r$.
+\end{lemma}
+
+The interaction is therefore a rank-$13$ game on a $47$-dimensional simplex,
+which is what produces the neutral directions and the continua of rest points
+reported below: thirty-four directions of the state space are invisible to
+every payoff, so selection cannot see them. We verify the factorisation
+numerically as well as deriving it, with a maximum residual of
+$1.9 \times 10^{-13}$ over the sampled parameter grid.
+
+Everything else in the study is evaluated exactly; the replicator basins are
+the only sampled quantities. Interior
+starts are drawn $\mathrm{Dirichlet}(\alpha, \dots, \alpha)$ on the simplex
+under a fixed seed, with $\alpha = 1$ unless stated: $20\,000$ starts for the
+split of Observation~\ref{prop:bistable}, and $200$ to $400$ each for the
+out-group conducts of Table~\ref{tab:outgroup}, the fine levels of
+Corollary~\ref{cor:rescue}, the agreement check of
+Section~\ref{sec:robustness} and the parameter-resolved experiments of
+Section~\ref{sec:exclusion}. A basin share is a property of the flow
+\emph{and} of the measure the starts are drawn from, so it is reported with the
+range it takes across start measures rather than with a confidence interval for
+one of them; Section~\ref{sec:exclusion} shows that the range is much the wider
+of the two.
+
+%% CSF-only addition to the Model section.
+%%
+%% The flow, the transversal eigenvalue and the edge transcritical bifurcation
+%% used to live here, because the venue-neutral master described the dynamics
+%% in prose and never wrote the replicator equation down.  They now live in the
+%% master, where every venue version needs them and where the appendix proofs
+%% reference them.  What remains here is the one sentence that is specific to
+%% this package: the CSF Results section opens with a bifurcation inventory
+%% table that the master does not carry.
+Table~\ref{tab:bifurcations} in Section~\ref{sec:results} collects the
+qualitative transitions below with their control parameters and locations, so
+that the local edge bifurcations and the global basin properties can be read
+apart at a glance.
 The distinction between the two dynamics is not a robustness check, and it
 needs one
 piece of care that is easy to skip. The replicator flow of this game turns out
@@ -531,8 +577,8 @@ their control parameters and locations.
 \begin{table}[pos=t]
 \centering
 \caption{Qualitative transitions of the identity layer. Rows one to four and
-six are edge transcritical bifurcations; row five is the codimension-two
-intersection of two such bifurcation curves. Row seven is the vertical
+six are edge transcritical bifurcations; row five is the invader-exchange
+locus, where two such bifurcation curves intersect. Row seven is the vertical
 asymptote of a marginal-stability locus, and row eight is a global basin
 property.}
 \label{tab:bifurcations}
@@ -681,7 +727,7 @@ is excluded entirely above $r=0.134$ (Figure~\ref{fig:invasion}). At the
 intersection, two independent transversal eigenvalues vanish and two
 transcritical edge bifurcations coincide. The club vertex remains non-hyperbolic
 because genuine designs that differ only in unused out-group conduct are
-payoff-equivalent; the codimension-two claim concerns the two invading edges,
+payoff-equivalent; the exchange claim concerns the two invading edges,
 not a new normal form for the full vertex.
 
 \begin{figure}[pos=t]

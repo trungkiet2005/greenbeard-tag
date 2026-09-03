@@ -1080,3 +1080,648 @@ def _badge_masses_for(fun: IdentityFunctionals, x: np.ndarray) -> dict[str, floa
         b: float(sum(x[k] for k, bb in enumerate(fun.badge) if bb == b))
         for b in BADGES
     }
+
+
+# --------------------------------------------------------------------------
+# Theorem 1: the invariant-face reduction
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class FaceReduction:
+    """Certificate that the two badge-pure faces carry the same conduct game.
+
+    Every field is measured off the assembled matrices rather than asserted,
+    so the object is the proof and not a restatement of it.
+    """
+
+    dues: float
+    """``kappa_g``: the additive constant that separates the two faces."""
+
+    certified_deviation: float
+    """``max |pi_P on the all-G face - (P(s_in) - kappa_g)|`` over the block."""
+
+    unbadged_deviation: float
+    """``max |pi_P on the all-N face - P(s_out)|`` over the block."""
+
+    conduct_payoff: np.ndarray
+    """The shared conduct game ``P = A - L M``, shape ``(4, 4)``."""
+
+    social_gap: float
+    """Social payoff on the unbadged face minus the certified face.
+
+    Constant over all sixteen ordered conduct pairs and equal to the dues:
+    the certified face buys nothing in conduct and pays for the badge.  It
+    does not depend on the social harm ``h`` either, because ``h`` multiplies
+    the same expected Unsafe count on both faces.
+    """
+
+    exact: bool
+    """Whether both deviations sit at or below the requested tolerance."""
+
+
+def face_reduction(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float = 0.0,
+    tol: float = 1e-12,
+) -> FaceReduction:
+    r"""Reduce the 48-design game on its two badge-pure faces.
+
+    A face of the simplex on which a set of designs carries zero mass is
+    invariant under the replicator flow, so the all-genuine face and the
+    all-unbadged face are each a closed subsystem.  On the all-genuine face
+    every badge passes, so ``q_i = q_j = 1``, the four handshake weights
+    collapse to ``w_in = 1`` and ``w_out = 0``, and
+
+    .. math:: \pi_P(i, j) = A(s^{\mathrm{in}}_i, s^{\mathrm{in}}_j)
+        - L\,M(s^{\mathrm{in}}_i, s^{\mathrm{in}}_j) - \kappa_g .
+
+    On the all-unbadged face every check fails, ``q = 0``, and the same
+    identity holds with ``s^{\mathrm{out}}`` in place of ``s^{\mathrm{in}}``
+    and no dues.  Adding a constant to every entry of a payoff matrix leaves
+    the replicator field unchanged, so the two faces carry *the same*
+    replicator system on the four conducts: identical rest points, identical
+    stability, identical conduct attractors, identical unsafe frequency, and
+    social payoffs differing by exactly ``kappa_g``.
+
+    This is the reduction the bistability result actually needs.  The two
+    attractors of the full game are not two behavioural worlds, one safe
+    because it is certified and one safe by accident: they are one conduct
+    game entered twice, and the whole equilibrium effect of certification on
+    a settled market is its price.  Establishing that by exhibiting the
+    identity costs nothing and holds at every ``(sigma, r, kappa_g, L)``,
+    where a sampled basin experiment at one parameter point establishes it
+    nowhere.
+
+    The two blocks are *not* aligned with one another, and that is the trap
+    in computing this.  Designs are ordered badge-major, then ``s_in``, then
+    ``s_out``, so inside the ``G`` block the executed conduct ``s_in`` is
+    constant along runs of four while inside the ``N`` block the executed
+    conduct ``s_out`` cycles every one.  The prediction is therefore indexed
+    by each block's own executed conduct, read back off the block, never by
+    position: indexing both blocks the same way yields a plausible-looking
+    matrix that is wrong in twelve of its sixteen conduct pairs.
+
+    Parameters
+    ----------
+    tables:
+        Race tables supplying ``A`` and ``M``.
+    params:
+        Identity-layer parameters.  Only ``kappa_g`` enters the statement;
+        ``sigma``, ``rho`` and ``r`` cannot, because no forged badge is
+        present on either face and assortment shifts every row of a block by
+        its own diagonal on both faces alike.
+    liability:
+        Private liability ``L`` per Unsafe action.
+    tol:
+        Tolerance for ``exact``.  The default is ``1e-12`` rather than zero
+        because the caller decides how much slack a claim of exactness may
+        carry; the deviations themselves are returned unrounded, and at every
+        parameterisation tried here they are ``0.0``.
+    """
+    from .functionals import build_functionals
+
+    if liability < 0.0:
+        raise ValueError(f"liability must be non-negative, got {liability}")
+    if tol <= 0.0:
+        raise ValueError(f"tol must be positive, got {tol}")
+
+    fun = build_functionals(tables, params, liability)
+    conduct = race_private(tables, liability)
+
+    certified = fun.badge_block("G")
+    unbadged = fun.badge_block("N")
+    # the executed conduct of each design *of that block*, in the block's own
+    # order; this is the indexing the docstring warns about
+    certified_conduct = [_IDX[fun.s_in[i]] for i in certified]
+    unbadged_conduct = [_IDX[fun.s_out[i]] for i in unbadged]
+
+    predicted_certified = (
+        conduct[np.ix_(certified_conduct, certified_conduct)] - params.kappa_g
+    )
+    predicted_unbadged = conduct[np.ix_(unbadged_conduct, unbadged_conduct)]
+    certified_deviation = float(
+        np.abs(fun.pi_P[np.ix_(certified, certified)] - predicted_certified).max()
+    )
+    unbadged_deviation = float(
+        np.abs(fun.pi_P[np.ix_(unbadged, unbadged)] - predicted_unbadged).max()
+    )
+
+    # One representative design per executed conduct on each face.  The other
+    # three per conduct are payoff-identical on their own face -- their
+    # unexecuted branch never runs -- so the choice cannot move the gap, and
+    # the constancy of the gap over the sixteen pairs is checked below rather
+    # than assumed.
+    representative_certified = [
+        int(next(i for i in certified if fun.s_in[i] == c)) for c in STRATEGIES
+    ]
+    representative_unbadged = [
+        int(next(i for i in unbadged if fun.s_out[i] == c)) for c in STRATEGIES
+    ]
+    gap = (
+        fun.pi_S[np.ix_(representative_unbadged, representative_unbadged)]
+        - fun.pi_S[np.ix_(representative_certified, representative_certified)]
+    )
+    spread = float(gap.max() - gap.min())
+    if spread > tol:
+        raise ValueError(
+            "the social gap between the faces is not constant across the "
+            f"conduct pairs, spread {spread}"
+        )
+
+    return FaceReduction(
+        dues=float(params.kappa_g),
+        certified_deviation=certified_deviation,
+        unbadged_deviation=unbadged_deviation,
+        conduct_payoff=conduct,
+        social_gap=float(gap.flat[0]),
+        exact=bool(certified_deviation <= tol and unbadged_deviation <= tol),
+    )
+
+
+# --------------------------------------------------------------------------
+# Theorem 2: the macroscopic factorisation
+# --------------------------------------------------------------------------
+
+
+def _macro_rows(
+    fun: IdentityFunctionals,
+) -> tuple[np.ndarray, tuple[str, ...]]:
+    """The sixteen ``T`` and ``Q`` rows of one design space.
+
+    ``Q`` weights each design by the pass rate its *partner* responds to,
+    which is the behavioural rate and not the verification rate.  The two
+    coincide under screening (the baseline), and under retrospective auditing
+    they do not: there a forged badge elicits the in-group response whatever
+    ``sigma`` is, so a ``Q`` row built from ``pass_rate`` would leave the span
+    and the factorisation would be false for a reason that has nothing to do
+    with the algebra.
+    """
+    q = np.array([fun.params.behavioural_pass_rate(b) for b in fun.badge])
+    rows: list[np.ndarray] = []
+    labels: list[str] = []
+    for kind in ("T", "Q"):
+        for branch, executed in (("in", fun.s_in), ("out", fun.s_out)):
+            for conduct in STRATEGIES:
+                indicator = np.array(
+                    [1.0 if s == conduct else 0.0 for s in executed]
+                )
+                rows.append(indicator if kind == "T" else indicator * q)
+                labels.append(f"{kind}[{branch},{conduct}]")
+    return np.vstack(rows), tuple(labels)
+
+
+@dataclass(frozen=True)
+class MacroFactorisation:
+    """Low-rank certificate of the 48-design game.
+
+    The design space is 48-dimensional but the game played on it is not: a
+    design enters another design's payoff only through the conduct it
+    executes on each branch of the handshake and the rate at which its badge
+    is believed.
+    """
+
+    functionals: np.ndarray
+    """The ``T`` and ``Q`` rows, shape ``(16, n_designs)``."""
+
+    rank: int
+    """``matrix_rank(pi_P)``: the true dimension of the game."""
+
+    span_residual: float
+    """``max |pi_P - C.T @ Phi|`` from the least-squares fit."""
+
+    free_dimensions: int
+    """Rank of the functional block, minus the simplex constraint."""
+
+    row_labels: tuple[str, ...]
+    """Name of each row of ``functionals``, e.g. ``Q[out,CAS]``."""
+
+
+def macro_factorisation(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float = 0.0,
+) -> MacroFactorisation:
+    r"""Factor the private functional through sixteen macroscopic observables.
+
+    For each branch ``y`` in ``{in, out}`` and each conduct ``c`` define the
+    linear functionals
+
+    .. math:: T_{y,c}(x) = \sum_j x_j\,\mathbb{1}[s^y_j = c], \qquad
+        Q_{y,c}(x) = \sum_j x_j\,q_j\,\mathbb{1}[s^y_j = c] ,
+
+    with ``q = 1, sigma, 0`` for a genuine, forged and absent badge.
+    Expanding the four-term handshake and collecting the terms that depend on
+    the partner shows every row of ``pi_P`` to be a linear combination of
+    these sixteen: the ``q_j`` and ``1 - q_j`` weights multiply race payoffs
+    that depend on the partner only through ``s^{in}_j`` or ``s^{out}_j``,
+    and the focal design's own dues and fines ride on the constant row, which
+    is ``sum_c T_{in,c}``.
+
+    Three linear relations tie the sixteen together: ``sum_c T_{y,c} = 1`` on
+    each branch (two rows, one relation, since both equal the all-ones row)
+    and ``sum_c Q_{in,c} = sum_c Q_{out,c} = q`` (one more).  Fourteen
+    independent rows remain, and one of those is the constant that the
+    simplex pins, leaving thirteen free directions -- exactly the rank of
+    ``pi_P``.
+
+    This is what makes a parameter-resolved statement about the 48-design
+    game tractable rather than a 47-dimensional fishing expedition, and it is
+    why the conduct marginals of :func:`face_reduction` are the right
+    coordinates to report a trajectory in: the game cannot distinguish two
+    states that agree on all sixteen functionals.
+
+    Parameters
+    ----------
+    tables:
+        Race tables supplying ``A`` and ``M``.
+    params:
+        Identity-layer parameters; ``sigma`` and ``protection`` set ``q``.
+    liability:
+        Private liability ``L`` per Unsafe action.  It changes the entries of
+        ``pi_P`` and not its rank: liability is charged on a race quantity
+        that factors through the same sixteen rows.
+    """
+    from .functionals import build_functionals
+
+    if liability < 0.0:
+        raise ValueError(f"liability must be non-negative, got {liability}")
+
+    fun = build_functionals(tables, params, liability)
+    phi, labels = _macro_rows(fun)
+
+    # pi_P = C.T @ Phi, i.e. Phi.T @ C = pi_P.T; lstsq rather than a solve
+    # because Phi is rank deficient by construction (the three relations above)
+    coefficients, *_ = np.linalg.lstsq(phi.T, fun.pi_P.T, rcond=None)
+    residual = float(np.abs(fun.pi_P - coefficients.T @ phi).max())
+
+    return MacroFactorisation(
+        functionals=phi,
+        rank=int(np.linalg.matrix_rank(fun.pi_P)),
+        span_residual=residual,
+        free_dimensions=int(np.linalg.matrix_rank(phi)) - 1,
+        row_labels=labels,
+    )
+
+
+# --------------------------------------------------------------------------
+# Theorem 3: the invader-exchange locus
+# --------------------------------------------------------------------------
+
+#: Monomials of an invasion advantage as ``(power of sigma, power of r)``.
+#: The advantage is a polynomial of degree at most two in ``sigma`` (two
+#: independent badge checks) and affine in ``r`` (one assorted self-encounter
+#: against one uniform draw), so this basis is complete, not a truncation.
+_ADVANTAGE_MONOMIALS: tuple[tuple[int, int], ...] = (
+    (0, 0),
+    (0, 1),
+    (1, 0),
+    (1, 1),
+    (2, 0),
+    (2, 1),
+)
+
+#: Human-readable names of :data:`_ADVANTAGE_MONOMIALS`, in the same order.
+ADVANTAGE_BASIS: tuple[str, ...] = (
+    "1",
+    "r",
+    "sigma",
+    "r*sigma",
+    "sigma^2",
+    "r*sigma^2",
+)
+
+#: ``(sigma, r)`` design points used to identify the six coefficients.  Two
+#: assortments times three spoof successes makes the design matrix a Kronecker
+#: product of two Vandermonde blocks, which is invertible by construction.
+_ADVANTAGE_DESIGN: tuple[tuple[float, float], ...] = tuple(
+    (sigma, r) for r in (0.0, 0.5) for sigma in (0.0, 0.5, 1.0)
+)
+
+
+def advantage_coefficients(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float,
+    mutant: tuple[str, str, str],
+    resident: tuple[str, str, str],
+    tol: float = 1e-10,
+    grid: tuple[int, int] = (41, 21),
+    r_hi: float = 0.5,
+) -> tuple[float, ...]:
+    r"""Exact coefficients of an invasion advantage in ``(sigma, r)``.
+
+    The advantage of a rare ``mutant`` in a monomorphic ``resident``,
+
+    .. math:: a(\sigma, r) = r\,\pi_P(\text{mutant}, \text{mutant})
+        + (1 - r)\,\pi_P(\text{mutant}, \text{resident})
+        - \pi_P(\text{resident}, \text{resident}),
+
+    is a polynomial in ``sigma`` of degree at most two -- the self-encounter
+    mixes two independent checks and nothing mixes three -- and affine in
+    ``r``.  Six coefficients therefore determine it everywhere, and they are
+    recovered by evaluating the advantage at six design points and solving,
+    which is exact arithmetic on the payoff algebra rather than a regression.
+
+    The fit is then *checked* on a dense grid and a failure raises, so the
+    returned coefficients are proved and not guessed.  That matters here
+    because the natural guess is wrong: the quadratic term of a conditional
+    forger sits on ``r * sigma^2`` and not on ``sigma^2``.  Only the assorted
+    self-encounter puts two forged badges in one interaction, so a
+    well-mixed population never sees the quadratic at all, and a basis that
+    offers ``sigma^2`` without ``r * sigma^2`` misses it entirely while
+    fitting the well-mixed cross-section perfectly.
+
+    Returns the coefficients in the order of :data:`ADVANTAGE_BASIS`.
+    """
+    if tol <= 0.0:
+        raise ValueError(f"tol must be positive, got {tol}")
+    if not 0.0 < r_hi <= 1.0:
+        raise ValueError(f"r_hi must lie in (0, 1], got {r_hi}")
+    n_sigma, n_r = grid
+    if n_sigma < 2 or n_r < 2:
+        raise ValueError(f"the verification grid must be at least 2x2, got {grid}")
+
+    def advantage(sigma: float, r: float) -> float:
+        p = replace(params, sigma=sigma, r=r)
+        return fitness_against_resident(
+            tables, p, liability, mutant, resident
+        ) - pair_payoff(tables, p, liability, resident, resident)
+
+    design = np.array(
+        [
+            [sigma**a * r**b for a, b in _ADVANTAGE_MONOMIALS]
+            for sigma, r in _ADVANTAGE_DESIGN
+        ]
+    )
+    observed = np.array([advantage(sigma, r) for sigma, r in _ADVANTAGE_DESIGN])
+    coefficients = np.linalg.solve(design, observed)
+
+    worst = 0.0
+    for sigma in np.linspace(0.0, 1.0, n_sigma):
+        for r in np.linspace(0.0, r_hi, n_r):
+            predicted = float(
+                sum(
+                    c * sigma**a * r**b
+                    for c, (a, b) in zip(coefficients, _ADVANTAGE_MONOMIALS)
+                )
+            )
+            worst = max(worst, abs(predicted - advantage(float(sigma), float(r))))
+    if worst > tol:
+        raise ValueError(
+            f"the advantage of {mutant} in {resident} is not spanned by "
+            f"{ADVANTAGE_BASIS}: worst residual {worst}"
+        )
+    return tuple(float(c) for c in coefficients)
+
+
+def _advantage_in_sigma(
+    coefficients: tuple[float, ...], r: float
+) -> tuple[float, float, float]:
+    """The advantage at one assortment, as ``(a0, a1, a2)`` in ``sigma``."""
+    return tuple(
+        float(coefficients[2 * k] + coefficients[2 * k + 1] * r) for k in range(3)
+    )
+
+
+def _smallest_upcrossing(
+    quadratic: tuple[float, float, float],
+    lo: float = 0.0,
+    hi: float = 1.0,
+    tiny: float = 1e-12,
+) -> float | None:
+    """Smallest ``sigma`` in ``[lo, hi]`` above which the quadratic is positive.
+
+    The closed-form counterpart of :func:`_threshold_by_root`, and it returns
+    the same number for the same advantage: ``lo`` when the advantage is
+    already positive there, ``None`` when it is positive nowhere on the
+    interval, and otherwise the first up-crossing.  Solving the quadratic
+    instead of scanning a grid removes the only place where a *threshold*
+    was previously found by search, which is what the exchange locus needs:
+    a locus assembled from bisected roots is a plot, not a condition.
+    """
+    a0, a1, a2 = quadratic
+
+    def value(s: float) -> float:
+        return a0 + a1 * s + a2 * s * s
+
+    roots: list[float] = []
+    if abs(a2) > tiny:
+        discriminant = a1 * a1 - 4.0 * a2 * a0
+        if discriminant >= 0.0:
+            root = float(np.sqrt(discriminant))
+            roots = [(-a1 - root) / (2.0 * a2), (-a1 + root) / (2.0 * a2)]
+    elif abs(a1) > tiny:
+        roots = [-a0 / a1]
+
+    breaks = sorted({lo, hi} | {r for r in roots if lo < r < hi})
+    for left, right in zip(breaks, breaks[1:]):
+        if value(0.5 * (left + right)) > 0.0:
+            return float(left)
+    return None
+
+
+def _polynomial_determinant(rows: list[list[np.ndarray]]) -> np.ndarray:
+    """Determinant of a matrix whose entries are polynomials in ``r``.
+
+    Entries and result are coefficient arrays in ascending powers.  A
+    cofactor expansion is used rather than a numerical determinant because
+    the entries are polynomials and not numbers: expanding keeps the answer
+    exact in the coefficients, which is the whole point of returning a locus
+    rather than a number found by bisection.
+    """
+    n = len(rows)
+    if n == 1:
+        return np.asarray(rows[0][0], dtype=float)
+    total = np.zeros(1)
+    for j in range(n):
+        minor = [[row[k] for k in range(n) if k != j] for row in rows[1:]]
+        term = np.polynomial.polynomial.polymul(
+            rows[0][j], _polynomial_determinant(minor)
+        )
+        total = np.polynomial.polynomial.polyadd(
+            total, term if j % 2 == 0 else -term
+        )
+    return total
+
+
+def _sigma_resultant(
+    first: tuple[float, ...], second: tuple[float, ...]
+) -> np.ndarray:
+    """Resultant in ``sigma`` of two advantages, as a polynomial in ``r``.
+
+    Two quadratics share a root exactly where the determinant of their
+    Sylvester matrix vanishes.  Every entry of that matrix is affine in
+    ``r``, so the determinant is a quartic in ``r`` whose real roots are the
+    complete candidate set for the exchange locus -- no interval, no scan.
+    An advantage that is only affine in ``sigma`` (an unconditional forger)
+    makes the formal degree-two Sylvester matrix singular for reasons that
+    have nothing to do with a shared root, so the candidates are filtered
+    afterwards by checking that the two thresholds really do coincide.
+    """
+    zero = np.zeros(1)
+    p = [np.array([first[2 * k], first[2 * k + 1]]) for k in range(3)]
+    q = [np.array([second[2 * k], second[2 * k + 1]]) for k in range(3)]
+    sylvester = [
+        [p[2], p[1], p[0], zero],
+        [zero, p[2], p[1], p[0]],
+        [q[2], q[1], q[0], zero],
+        [zero, q[2], q[1], q[0]],
+    ]
+    return _polynomial_determinant(sylvester)
+
+
+@dataclass(frozen=True)
+class ExchangeLocus:
+    """Where the mimic overtakes the exploiter, as a condition not a number.
+
+    ``exploiter_coeffs`` and ``mimic_coeffs`` are six-tuples in the order of
+    :data:`ADVANTAGE_BASIS`.  The brief for this object asked for five
+    coefficients, ``(1, r, sigma, r*sigma, sigma^2)``; the sixth is not
+    optional.  A conditional forger meets two forged badges only in its
+    assorted self-encounter, so its quadratic term is ``r * sigma^2`` and its
+    pure ``sigma^2`` coefficient is exactly zero -- the mirror image of the
+    five-term guess.  Fitting in the five-term basis reproduces every
+    well-mixed cross-section and misrepresents the whole ``r > 0`` plane,
+    which is the plane the exchange happens in.
+    """
+
+    r_star: float | None
+    """Assortment at which the two thresholds coincide, ``None`` if never."""
+
+    exploiter_coeffs: tuple[float, ...]
+    """Exploiter advantage in the :data:`ADVANTAGE_BASIS` monomials."""
+
+    mimic_coeffs: tuple[float, ...]
+    """Mimic advantage in the same basis."""
+
+    condition: str
+    """Plain-text statement of the general condition."""
+
+    mimic_first_below: bool
+    """Whether the mimic threshold is the lower one *below* ``r_star``."""
+
+    basis: tuple[str, ...] = ADVANTAGE_BASIS
+    """Monomial names of the two coefficient tuples."""
+
+
+def invader_exchange_locus(
+    tables: RaceTables,
+    params: IdentityParams,
+    liability: float = 0.0,
+    club: tuple[str, str, str] | None = None,
+    exploiter: tuple[str, str, str] | None = None,
+    mimic: tuple[str, str, str] | None = None,
+    r_hi: float = 0.5,
+    tol: float = 1e-9,
+) -> ExchangeLocus:
+    r"""The assortment at which the club stops failing visibly.
+
+    :func:`invader_ordering_flip` answers this by bisecting an ordering
+    predicate, which returns one number at one parameterisation and settles
+    nothing in general.  Both invasion advantages are polynomials of degree
+    at most two in ``sigma`` with coefficients affine in ``r``
+    (:func:`advantage_coefficients`), so both thresholds are explicit
+    functions of ``r`` and the exchange is an algebraic condition:
+
+        the exploiter threshold and the mimic threshold coincide exactly at
+        the assortments where the resultant in ``sigma`` of the two advantage
+        polynomials vanishes and the shared root is the threshold selected by
+        both, that is, the first up-crossing of each inside ``[0, 1]``.
+
+    Below the crossing the club fails visibly, by being exploited; above it
+    the club fails invisibly, by being impersonated.  The mechanism is the
+    asymmetry the resultant makes explicit: assortment multiplies the
+    exploiter's own aggressive conduct against itself and leaves the mimic
+    playing the club's conduct, so the exploiter's coefficient on ``r`` is
+    large and negative while the mimic's is small.
+
+    Parameters
+    ----------
+    tables, params, liability:
+        As elsewhere.  ``params.sigma`` and ``params.r`` are swept out by the
+        fit and only the remaining fields (dues, forgery cost, fine,
+        screening) enter the coefficients.
+    club, exploiter, mimic:
+        The three designs.  ``None`` selects the canonical trio of
+        :mod:`gbtag.config`.
+    r_hi:
+        Upper end of the assortment range searched for the locus.
+    tol:
+        Slack for accepting a resultant root as a genuine coincidence of the
+        two thresholds, and for the coefficient fit.
+    """
+    from .config import CLUB, FALSEBEARD, MIMIC
+
+    if liability < 0.0:
+        raise ValueError(f"liability must be non-negative, got {liability}")
+    if not 0.0 < r_hi <= 1.0:
+        raise ValueError(f"r_hi must lie in (0, 1], got {r_hi}")
+    if tol <= 0.0:
+        raise ValueError(f"tol must be positive, got {tol}")
+
+    club = CLUB if club is None else club
+    exploiter = FALSEBEARD if exploiter is None else exploiter
+    mimic = MIMIC if mimic is None else mimic
+
+    exploiter_coeffs = advantage_coefficients(
+        tables, params, liability, exploiter, club, r_hi=r_hi
+    )
+    mimic_coeffs = advantage_coefficients(
+        tables, params, liability, mimic, club, r_hi=r_hi
+    )
+
+    def thresholds(r: float) -> tuple[float | None, float | None]:
+        return (
+            _smallest_upcrossing(_advantage_in_sigma(exploiter_coeffs, r)),
+            _smallest_upcrossing(_advantage_in_sigma(mimic_coeffs, r)),
+        )
+
+    resultant = _sigma_resultant(exploiter_coeffs, mimic_coeffs)
+    candidates: list[float] = []
+    if np.abs(resultant).max() > 0.0:
+        for root in np.roots(resultant[::-1]):
+            if abs(root.imag) > tol:
+                continue
+            r = float(np.clip(root.real, 0.0, r_hi))
+            if not -tol <= root.real <= r_hi + tol:
+                continue
+            exploiter_threshold, mimic_threshold = thresholds(r)
+            if exploiter_threshold is None or mimic_threshold is None:
+                continue
+            if abs(exploiter_threshold - mimic_threshold) > tol:
+                continue
+            candidates.append(r)
+    r_star = min(candidates) if candidates else None
+
+    # "below" the locus means strictly below it; halving is enough because the
+    # thresholds are continuous and cross only at the roots just enumerated
+    probe = 0.5 * r_star if r_star else 0.0
+    exploiter_threshold, mimic_threshold = thresholds(probe)
+    mimic_first_below = mimic_threshold is not None and (
+        exploiter_threshold is None or mimic_threshold < exploiter_threshold
+    )
+
+    first, second = (
+        ("mimic", "exploiter") if mimic_first_below else ("exploiter", "mimic")
+    )
+    condition = (
+        "the two invasion advantages are quadratics in sigma whose three "
+        "coefficients are affine in r, so each threshold is the first "
+        "up-crossing of an explicit quadratic; the exploiter and the mimic "
+        "exchange places exactly at the assortments where the resultant in "
+        "sigma of the two advantage polynomials vanishes and the shared root "
+        "is the selected threshold of both. Below that locus the "
+        f"{first} threshold is the lower one, above it the {second} "
+        "threshold is, so the club fails visibly on one side of it and "
+        "invisibly on the other."
+    )
+
+    return ExchangeLocus(
+        r_star=r_star,
+        exploiter_coeffs=exploiter_coeffs,
+        mimic_coeffs=mimic_coeffs,
+        condition=condition,
+        mimic_first_below=bool(mimic_first_below),
+    )

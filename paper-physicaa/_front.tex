@@ -1,0 +1,149 @@
+%% Physica A front matter.
+%%
+%% Elsevier's own class for this journal is elsarticle (NOT the cas-sc class
+%% used for the Chaos, Solitons & Fractals package next door), and the
+%% recommended submission option set is [preprint,12pt]: single column, loose
+%% enough for a referee to write on.  Reference style is numeric, so
+%% elsarticle-num, and citations stay as the master's \citep/\citet because
+%% elsarticle loads natbib itself.
+%%
+%% AUTHOR LIST: taken from ../CITATION.cff, which carries five authors and
+%% clean family/given splits.  The venue-neutral master ../paper/main.tex still
+%% names only the first three; CITATION.cff and the submitted CSF package both
+%% name five, so five is what this package uses.  Printed order is
+%% given-then-family for all five, which the CSF package did not do
+%% consistently.  ORCIDs are deliberately absent: elsarticle has no ORCID field
+%% and Editorial Manager collects them on the submission form.
+
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage[section]{placeins}
+\usepackage{microtype}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,decorations.pathmorphing}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,allcolors=blue!55!black]{hyperref}
+
+%% Cross-references run both ways between the two documents: the supplement
+%% cites main-text equations, and the main text cites the four results that
+%% live in the supplement.  Numbering the supplement's sections by hand in the
+%% main text would drift the moment the supplement is reordered, so both
+%% directions go through \ref.  build.py interleaves the passes accordingly;
+%% a single-pass build leaves these as "??".
+\usepackage{xr}
+\externaldocument{supplementary}
+
+\graphicspath{{figures/}{./}}
+
+%% Keep floats near their callout; the master's settings, carried over because
+%% the layout audit in ../tests/test_figures.py was tuned against them.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.80}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\setlength{\emergencystretch}{2em}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+%% Two numbered statements are computations over sampled initial conditions
+%% rather than proofs, so they do not claim an appendix entry that does not
+%% exist.
+\newtheorem{observation}[theorem]{Observation}
+
+\definecolor{cAS}{HTML}{0072B2}
+\definecolor{cCS}{HTML}{009E73}
+\definecolor{cCAS}{HTML}{E69F00}
+\definecolor{cAU}{HTML}{D55E00}
+\definecolor{cGrey}{HTML}{4D4D4D}
+
+\newcommand{\AS}{\textsf{AS}}
+\newcommand{\CS}{\textsf{CS}}
+\newcommand{\CAS}{\textsf{CAS}}
+\newcommand{\AU}{\textsf{AU}}
+\newcommand{\piP}{\pi_{P}}
+\newcommand{\piS}{\pi_{S}}
+\newcommand{\R}{\mathbb{R}}
+
+\journal{Physica A: Statistical Mechanics and its Applications}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Certification without a safety dividend: forgeable credentials in
+populations of autonomous agents}
+
+\author[hcmus]{Trung-Kiet Huynh\corref{cor}\fnref{eq}}
+\ead{23122039@student.hcmus.edu.vn}
+
+\author[hcmus]{Duy-Minh Dao-Sy\fnref{eq}}
+\ead{23122041@student.hcmus.edu.vn}
+
+\author[hcmus]{Chi-Nguyen Tran\fnref{eq}}
+\ead{23122044@student.hcmus.edu.vn}
+
+\author[hcmus]{Phu-Hoa Pham}
+\ead{23122030@student.hcmus.edu.vn}
+
+\author[hcmus]{Phu-Quy Nguyen-Lam}
+\ead{23122048@student.hcmus.edu.vn}
+
+%% Single affiliation with the postal address, copied from the CSF submission
+%% package rather than from the two-affiliation form in the memoised author
+%% block: Editorial Manager asks for a full address for the corresponding
+%% author and this is the version that was actually submitted.
+\affiliation[hcmus]{organization={Faculty of Information Technology, University
+  of Science, Vietnam National University Ho Chi Minh City},
+  addressline={Room I53, Building I, 227 Nguyen Van Cu Street, Cho Quan Ward},
+  city={Ho Chi Minh City},
+  country={Vietnam}}
+
+\cortext[cor]{Corresponding author.}
+\fntext[eq]{These authors contributed equally to this work.}
+
+\begin{abstract}
+Machine agents increasingly carry identity credentials, and a credential that
+changes how its bearers are treated is a greenbeard whose classical weakness is
+that an impostor can wear it. For software the marker separates from the
+behaviour at a rate the verification technology sets, so forgery is continuous,
+adversarial and one-sided rather than symmetric noise. We attach genuine,
+forged or absent badges and badge-contingent conduct to an unmodified
+four-strategy development race, giving 48 designs on a 47-dimensional simplex
+under replicator dynamics. The central result is a reduction rather than a
+measurement: the fully badged and fully unbadged faces of the simplex carry the
+same four-conduct replicator flow, differing only by the constant certification
+cost. Their rest points, stability and attractors coincide, so a settled
+certified market carries exactly the harm of an uncertified one and is poorer
+by its dues, at every verification quality, fine, liability and assortment.
+Neither the forgery rate nor the fine appears in the reduced payoff, so the
+entire verification layer is invisible from inside a settled regime. What
+forgeability determines is composition rather than conduct: a behavioural mimic
+invades before an outright exploiter, so the credential empties while conduct
+still looks sound. The exclusion that sustains a credential is a dial and not a
+switch, an entry toll of $2.0$ already delivering $72\%$ of the forgery
+tolerance that a toll of $30.4$ buys.
+\end{abstract}
+
+\begin{keyword}
+evolutionary game theory \sep replicator dynamics \sep tag-based cooperation
+\sep multistability \sep certification \sep multi-agent systems
+\end{keyword}
+
+\end{frontmatter}
+

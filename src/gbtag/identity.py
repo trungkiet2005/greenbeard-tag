@@ -286,6 +286,7 @@ def encounter_terms(
 def pairwise_expectation(
     matrix: np.ndarray,
     params: IdentityParams,
+    pass_rates: np.ndarray | None = None,
 ) -> np.ndarray:
     """Expectation of a race-layer matrix over the badge handshake.
 
@@ -293,6 +294,17 @@ def pairwise_expectation(
     (payoff, unsafe count, unsafe frequency); the result is the ``48 x 48``
     matrix of its expectations over the handshake outcomes of every ordered
     pair of identity designs.
+
+    ``pass_rates`` overrides the behavioural pass rate of each design, which
+    is otherwise read off its badge.  The rate is the only channel through
+    which the badge reaches conduct, so overriding it is what lets a caller
+    ask the counterfactual "what if the mark said nothing about the seat
+    that wears it": give every design the *same* rate and the handshake
+    stops being informative while every other part of the sum -- the four
+    terms, their independence, the executed-design bookkeeping -- is the
+    code path the badged model already uses.  The alternative, writing the
+    common-rate sum out again in the caller, would be a second
+    implementation of Equation (1) that could drift from this one.
     """
     matrix = np.asarray(matrix, dtype=float)
     designs = design_space()
@@ -302,7 +314,20 @@ def pairwise_expectation(
     # the focal executed design depends only on (own design, partner badge);
     # collect the two possible rows and mix them with the behavioural rates
     out = np.empty((n, n))
-    q = np.array([params.behavioural_pass_rate(b) for b, _, _ in designs])
+    if pass_rates is None:
+        q = np.array([params.behavioural_pass_rate(b) for b, _, _ in designs])
+    else:
+        q = np.asarray(pass_rates, dtype=float)
+        if q.shape != (n,):
+            raise ValueError(
+                f"pass_rates must hold one rate per design, got shape {q.shape} "
+                f"for {n} designs"
+            )
+        if q.min() < 0.0 or q.max() > 1.0:
+            raise ValueError(
+                "every pass rate must lie in [0, 1], got the range "
+                f"[{q.min()}, {q.max()}]"
+            )
     in_row = np.array([idx[si] for _, si, _ in designs])
     out_row = np.array([idx[so] for _, _, so in designs])
 

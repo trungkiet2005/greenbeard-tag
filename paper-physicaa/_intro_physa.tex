@@ -1,0 +1,139 @@
+%% Physica A introduction.
+%%
+%% The venue-neutral introduction previews all eight results at roughly 1970
+%% prose words, which duplicates the Results section and delays the population
+%% object a Physica A editor assesses at triage.  This version keeps the
+%% motivation, the gap, the construction and a compressed statement of the four
+%% contributions, and leaves the numbers to Section 3.
+
+\section{Introduction}
+\label{sec:intro}
+
+Machine agents are beginning to carry identity. Agent-to-agent protocols
+publish identity and capability metadata before agents exchange
+work~\citep{a2a2026spec}; regulatory technical-documentation duties require
+providers to identify an AI system or general-purpose model and its
+version~\citep{euaiact2024}; and proposals for agent attestation infrastructure
+are being drafted while the systems they would govern are being
+deployed~\citep{chan2024visibility,chan2025infrastructure,shavit2023practices}.
+Even where nothing is formally attested, model evaluators can recognise and
+favour their own generations, while language models in general favour
+machine-generated communications~\citep{panickssery2024llm,laurito2025aiai}.
+
+An identity signal that changes how its bearers treat one another is a
+\emph{greenbeard}, and evolutionary biology has known for fifty years both what
+greenbeards can do and how they
+fail~\citep{hamilton1964genetical1,dawkins1976selfish}. They can sustain
+cooperation among strangers with no repeated interaction and no kinship,
+because the tag substitutes for
+both~\citep{riolo2001evolution,traulsen2003minimal}. They fail when the tag
+comes apart from the behaviour it advertises, so that an impostor wears the
+beard and takes the benefit without paying the
+cost~\citep{roberts2002does,jansen2006altruism,gardner2010greenbeards}.
+
+The biological literature is largely concerned with tags that are hard to fake,
+because a gene cannot easily choose its own phenotype. An agent's badge is not
+like that. Whether a mark is forgeable is a property of the verification
+technology~\citep{jovanovic2024watermarkstealing,anbiaee2026threatmodeling}, and
+therefore a design choice, and therefore something a governance regime can spend
+money on. That distinction is the gap this paper addresses, and it is narrower
+than it first appears. Existing tag models do let the mark come apart from the
+behaviour, but in one of two ways: as recognition \emph{noise}, which is
+symmetric, accidental and costly to everyone, or as a discrete \emph{mutation}
+that creates an impostor lineage. A forged credential is neither. It is
+continuous, because the pass rate is a number an engineer sets; it is
+adversarial, because someone chose to forge; and it is one-sided, because only
+the impostor gains from a false pass. What that asymmetry does to the order in
+which a certification regime fails has not been asked. It turns out to invert
+it, and the inversion is the reason a regime can look healthy from the outside
+long after it has stopped working.
+
+Two forces pull against each other in the population that must live with the
+choice. Certification and third-party quality disclosure are established
+mechanisms for addressing information problems~\citep{dranove2010quality}. Here
+the certification mark is also a private cost, since it must be obtained,
+maintained and audited, and by assumption every unit of that cost burdens the
+compliant operator and never the impostor. It is also a private benefit, since
+it buys access to partners who will behave well towards whoever carries it.
+Which force wins is not a matter of taste, and neither is the policy question
+that follows, namely whether an authority does better to spend on harder
+attestation, on penalties for forgery, on cheaper compliance, or on the
+interaction structure that decides who meets whom.
+
+We answer both by making the badge a strategic variable in an evolutionary
+model, in the tradition of statistical-physics work on social
+dilemmas~\citep{perc2017statphys} in which cooperative regimes are studied as
+the stable states and basins of a nonlinear population flow. The interaction
+layer is the reduced four-strategy AI race of~\citet{domingos2026falling}, used
+without modification, so that every effect we report is attributable to the
+identity layer we build on top of it. A design is a triple
+$(b, s_{\mathrm{in}}, s_{\mathrm{out}})$: a badge that is genuine
+($\mathsf{G}$), forged ($\mathsf{F}$) or absent ($\mathsf{N}$), the reduced race
+design run against a partner whose badge passes the focal agent's check, and the
+design run against everyone else. This gives 48 designs on a 47-dimensional
+simplex. Operators do not optimise; designs that pay better are copied more, in
+the standard replicator and finite-population dynamics of evolutionary game
+theory~\citep{taylor1978ess,hofbauer1998evolutionary,traulsen2006stochastic}.
+Every pairwise payoff is evaluated exactly rather than sampled, and invasion
+boundaries are transversal eigenvalues of the replicator flow and are therefore
+available in closed form; numerical integration is used only for basin
+structure and for the global regime map.
+
+Our contribution is an explanation rather than a method or a benchmark. In one
+sentence: \emph{a costly identity mark cannot change how safely a settled market
+behaves, only who it is made of, and forgeability decides which,} so a regime
+that watches conduct cannot see its credential system fail. Four results make
+that precise.
+
+\begin{enumerate}
+\item \textbf{A settled market is no safer for being certified, and this is a
+theorem rather than a measurement.} The fully badged and fully unbadged faces
+of the state space carry the \emph{same} four-conduct replicator flow,
+differing by the constant $\kappa_g$ (Theorem~\ref{thm:face}). Their rest
+points, stability and conduct attractors coincide, so at any settled regime the
+unsafe frequency is identical and the certified market is poorer by exactly its
+dues, at every value of the verification quality, the dues, the fine, the
+liability and the assortment. Neither the forgery rate $\sigma$ nor the fine
+$\rho$ appears in the reduced payoff: the entire verification layer is
+invisible from inside a settled regime.
+
+\item \textbf{The credential empties before the conduct degrades, and better
+interaction structure makes that worse.} A behavioural mimic crosses its
+invasion boundary before an outright exploiter does
+(Section~\ref{sec:mimicry}), and the two boundaries exchange places on an
+explicit algebraic locus rather than at one fitted number. Above it the only
+remaining invader is one that behaves correctly, so conduct monitoring reports
+success exactly where the mark has stopped meaning anything. Resolved over the
+$(\sigma, r)$ plane, the safety boundary is set by assortment alone and the
+integrity boundary by verification alone, and the two cross at right angles.
+
+\item \textbf{The exclusion that sustains a credential is far cheaper than a
+four-row scan suggests.} Reading out-group conduct as a continuous severity
+rather than as four discrete rules turns Table~\ref{tab:outgroup} into a
+strictly convex frontier, on which a small fraction of the maximum entry toll
+buys most of the maximum forgery tolerance. Exclusion is a dial, not a switch,
+which makes it a design variable rather than a dilemma.
+
+\item \textbf{A basin share is a property of the start measure, and we report
+it as one.} Holding the model fixed and changing only the concentration of the
+start distribution moves the badged basin share across most of the unit
+interval. We therefore quote the range across measures rather than a confidence
+interval for one of them, and we resolve the global outcome in the two
+parameters that actually move it.
+\end{enumerate}
+
+Beyond the model, agent identity standards are being written
+now~\citep{a2a2026spec,xu2026agentdid,grogan2025agentfacts}, and the case for
+them is usually made in terms of
+accountability~\citep{south2025delegation}: if we know which agent did what, we
+can hold someone responsible. Our results say identity delivers something
+different from accountability. It delivers a club, and clubs are safe inside
+and hostile at the edge. The policy question is therefore not whether to build
+attestation but what to require of the conduct it gates, and the answer is
+uncomfortable, because the requirement that would remove the harm also removes
+the club. Managed mutual recognition and equitable interoperability are
+established institutional
+proposals~\citep{nicolaidis2005transnational,scottmorton2023equitable}; in our
+model such federation converts the boundary into an interior without asking any
+club to be gentle to strangers.
+

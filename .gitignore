@@ -37,6 +37,22 @@ paper-csf/*.synctex.gz
 paper-csf/*.spl
 paper-csf/*.run.xml
 
+# Physica A build artefacts (paper-physicaa/ is assembled by
+# paper-physicaa/assemble.py and driven by paper-physicaa/build.py)
+paper-physicaa/*.aux
+paper-physicaa/*.bbl
+paper-physicaa/*.blg
+paper-physicaa/*.log
+paper-physicaa/*.out
+paper-physicaa/*.toc
+paper-physicaa/*.abs
+paper-physicaa/*.fls
+paper-physicaa/*.fdb_latexmk
+paper-physicaa/*.synctex.gz
+paper-physicaa/*.spl
+paper-physicaa/*.run.xml
+paper-physicaa/_*.log
+
 # Publisher template packages, downloaded not authored
 els-cas-templates.zip
 
@@ -46,6 +62,10 @@ els-cas-templates.zip
 paper-csf/cover_letter.md
 paper-csf/cover_letter.docx
 paper-csf/SUBMISSION_CHECKLIST.md
+paper-physicaa/cover_letter.md
+paper-physicaa/SUBMISSION_CHECKLIST.md
+paper-physicaa/cover_letter.docx
+paper-physicaa/SUBMIT.md
 
 # The typeset manuscript is not published here.  The journals are told that no
 # part of the paper has appeared before, and a downloadable PDF in a public
